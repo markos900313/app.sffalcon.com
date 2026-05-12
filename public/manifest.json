@@ -1,0 +1,52 @@
+{
+  "name": "SF",
+  "short_name": "SF",
+  "description": "El Gestror de reservas y citas que nunca pudiste tener",
+  "start_url": "/panel-empleado",
+  "display": "standalone",
+  "background_color": "#080F1E",
+  "theme_color": "#1B4FD8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "SF Gestor Empresarial - Panel Empleado"
+    },
+    {
+      "src": "/images/screenshot-desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "SF Gestor Empresarial - Panel Principal"
+    }
+  ]
+}

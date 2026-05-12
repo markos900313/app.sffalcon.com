@@ -1,0 +1,16 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/cron/weekly-summary",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/reindex-embeddings",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

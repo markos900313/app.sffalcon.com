@@ -1,0 +1,352 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 30, 41, 59;
+  --background-rgb: 255, 255, 255;
+  --card-background: 248, 250, 252;
+  --border-color: 226, 232, 240;
+
+  /* PREMIUM VARIABLES - MODO CLARO — PALETA NAVY + VERDE */
+  --bg-page: #EFF2F7;
+  --bg-sidebar: #0B1D4F;
+  --bg-card: #FFFFFF;
+  --bg-header: #0B1D4F;
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-label: #1B4FD8;
+  --border-sidebar: rgba(255,255,255,0.08);
+  --border-card: #E2E8F0;
+  --border-header: rgba(255,255,255,0.08);
+
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark {
+  --foreground-rgb: 241, 245, 249;
+  --background-rgb: 13, 18, 41;
+  --card-background: 19, 27, 58;
+  --border-color: 255, 255, 255, 0.05;
+  color-scheme: dark;
+
+  /* PREMIUM VARIABLES - MODO OSCURO */
+  --bg-page: #080F1E;
+  --bg-sidebar: #0D1B3E;
+  --bg-card: #111F3A;
+  --bg-header: #0D1B3E;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-label: #64748B;
+  --border-sidebar: rgba(255,255,255,0.06);
+  --border-card: rgba(255,255,255,0.07);
+  --border-header: rgba(255,255,255,0.06);
+}
+
+body {
+  color: var(--text-primary);
+  background-color: var(--bg-page);
+  font-family: Arial, sans-serif !important;
+  font-weight: 400 !important;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Base weight override for all elements to ensure 'zero bold' */
+*, *::before, *::after {
+  font-weight: inherit !important;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #1E3A5F;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1B4FD8;
+}
+
+/* Dashboard Premium Design System */
+.card-premium {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 1px 3px rgba(11,29,79,0.04), 0 4px 12px rgba(11,29,79,0.03);
+}
+
+.dark .card-premium {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.30);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.card-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #1B4FD8, #818CF8);
+  z-index: 10;
+}
+
+/* Categories Accents MODO CLARO */
+html:not(.dark) .card-premium::before { background: linear-gradient(90deg, #0B1D4F, #10B981); }
+html:not(.dark) .card-clientes::before { background: linear-gradient(90deg, #1B4FD8, #10B981); }
+html:not(.dark) .card-agenda::before { background: linear-gradient(90deg, #059669, #1B4FD8); }
+html:not(.dark) .card-mensajes::before { background: linear-gradient(90deg, #0B1D4F, #10B981); }
+html:not(.dark) .card-finanzas::before,
+html:not(.dark) .card-facturas::before { background: linear-gradient(90deg, #10B981, #1B4FD8); }
+html:not(.dark) .card-trabajos::before,
+html:not(.dark) .card-proyectos::before { background: linear-gradient(90deg, #1B4FD8, #059669); }
+html:not(.dark) .card-ia::before,
+html:not(.dark) .card-asistente::before { background: linear-gradient(90deg, #0B1D4F, #22C55E); }
+html:not(.dark) .card-resumen::before,
+html:not(.dark) .card-stats::before { background: linear-gradient(90deg, #059669, #3B82F6); }
+
+/* Categories Accents MODO OSCURO */
+.dark .card-clientes::before { background: linear-gradient(90deg, #1B4FD8, #3B82F6); }
+.dark .card-agenda::before { background: linear-gradient(90deg, #059669, #22C55E); }
+.dark .card-mensajes::before { background: linear-gradient(90deg, #4F46E5, #818CF8); }
+.dark .card-finanzas::before, .dark .card-facturas::before { background: linear-gradient(90deg, #D97706, #F59E0B); }
+.dark .card-trabajos::before, .dark .card-proyectos::before { background: linear-gradient(90deg, #EA580C, #FB923C); }
+.dark .card-ia::before, .dark .card-asistente::before { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+.dark .card-resumen::before, .dark .card-stats::before { background: linear-gradient(90deg, #0891B2, #22D3EE); }
+
+/* TITULOS DE FICHAS */
+.card-titulo {
+  color: var(--text-label);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* KPI Typography */
+.kpi-numero {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.kpi-label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* COLORES SEMÁNTICOS */
+.color-positivo { color: #059669 !important; }
+.color-negativo { color: #EF4444 !important; }
+.color-neutro { color: #3B82F6 !important; }
+.color-pendiente { color: #F59E0B !important; }
+.color-inactivo { color: #64748B !important; }
+
+/* ESTADOS POR ENTIDAD */
+.status-lead { color: #3B82F6; }
+.status-potencial { color: #F59E0B; }
+.status-activo { color: #22C55E; }
+.status-inactivo { color: #64748B; }
+
+.status-pendiente { color: #F59E0B; }
+.status-pagada { color: #22C55E; }
+.status-vencida { color: #EF4444; }
+.status-cancelada { color: #64748B; }
+
+.status-confirmada { color: #22C55E; }
+
+/* Pipeline Specifics */
+.pipeline-lead::before { background: #3B82F6; }
+.pipeline-potencial::before { background: #F59E0B; }
+.pipeline-activo::before { background: #22C55E; }
+.pipeline-inactivo::before { background: #64748B; }
+
+.pipeline-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+/* === SIDEBAR MODO CLARO — NAVY DEGRADADO === */
+html:not(.dark) .sidebar-container {
+  background: linear-gradient(180deg, #071640 0%, #0B1D4F 40%, #0A2A4A 100%) !important;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+html:not(.dark) .sidebar-container div,
+html:not(.dark) .sidebar-container nav,
+html:not(.dark) .sidebar-container aside {
+  background: transparent !important;
+}
+
+/* Texto base — Blanco puro para máxima legibilidad */
+html:not(.dark) .sidebar-container,
+html:not(.dark) .sidebar-container a,
+html:not(.dark) .sidebar-container span,
+html:not(.dark) .sidebar-container p,
+html:not(.dark) .sidebar-container label,
+html:not(.dark) .sidebar-container div {
+  color: #FFFFFF !important;
+}
+
+/* Iconos Lucide — Más brillantes */
+html:not(.dark) .sidebar-container svg {
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* Títulos de grupo — Subimos a 0.8 para máxima claridad */
+html:not(.dark) .sidebar-container .sidebar-group-label,
+html:not(.dark) .sidebar-container [class*="uppercase"]:not(.sidebar-logo-text) {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+html:not(.dark) .sidebar-container .sidebar-item:hover {
+  background: rgba(255,255,255,0.08) !important;
+}
+
+html:not(.dark) .sidebar-container .active, 
+html:not(.dark) .sidebar-container .sidebar-item.active {
+  background: linear-gradient(135deg, rgba(27,79,216,0.35), rgba(16,185,129,0.2)) !important;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #FFFFFF !important;
+}
+
+html:not(.dark) .sidebar-container .active svg,
+html:not(.dark) .sidebar-container .sidebar-item.active svg {
+  color: #FFFFFF !important;
+}
+
+/* Nombre del sector — Blanco traslúcido para legibilidad premium */
+html:not(.dark) .sidebar-container .sidebar-logo-text + span,
+html:not(.dark) .sidebar-container [class*="sector"] {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Badge plan */
+html:not(.dark) .sidebar-container .sidebar-plan-badge {
+  background: linear-gradient(135deg, rgba(27,79,216,0.2), rgba(16,185,129,0.15)) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Nombre usuario */
+html:not(.dark) .sidebar-container .sidebar-username {
+  color: #FFFFFF !important;
+}
+
+/* === TOPBAR MODO CLARO — NAVY === */
+html:not(.dark) .topbar-container {
+  background: linear-gradient(90deg, #0B1D4F, #0F2854) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+html:not(.dark) .topbar-container span,
+html:not(.dark) .topbar-container p,
+html:not(.dark) .topbar-container .topbar-username {
+  color: #FFFFFF !important;
+}
+
+html:not(.dark) .topbar-container .topbar-icon svg,
+html:not(.dark) .topbar-container svg {
+  color: rgba(255,255,255,0.6) !important;
+}
+
+html:not(.dark) .topbar-container .search-bar,
+html:not(.dark) .topbar-container input {
+  background: rgba(255,255,255,0.08) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: #FFFFFF !important;
+  border-radius: 10px;
+}
+
+html:not(.dark) .topbar-container input::placeholder {
+  color: rgba(255,255,255,0.35) !important;
+}
+
+/* === CABECERA CENTRO DE CONTROL (UltraAIHeader) === */
+html:not(.dark) .card-premium.p-0,
+html:not(.dark) [class*="control-card"] {
+  background: linear-gradient(135deg, #0B1D4F 0%, #1B4FD8 45%, #0D9668 100%) !important;
+  border: none !important;
+}
+
+html:not(.dark) .card-premium.p-0 h2,
+html:not(.dark) .card-premium.p-0 h3,
+html:not(.dark) .card-premium.p-0 p,
+html:not(.dark) .card-premium.p-0 span {
+  color: #FFFFFF !important;
+}
+
+/* Badge IA ACTIVA — verde */
+html:not(.dark) .card-premium.p-0 [class*="badge"] {
+  background: rgba(16,185,129,0.2) !important;
+  color: #10B981 !important;
+  border: 1px solid rgba(16,185,129,0.3) !important;
+}
+
+/* Estado OPTIMIZADO — verde */
+html:not(.dark) .card-premium.p-0 .text-emerald-500 {
+  color: #10B981 !important;
+}
+
+/* === DETALLES COMPLEMENTARIOS CONTENIDO === */
+html:not(.dark) body {
+  background: #EFF2F7 !important;
+}
+
+html:not(.dark) .card-premium:hover {
+  box-shadow: 0 2px 8px rgba(11,29,79,0.06), 0 8px 24px rgba(11,29,79,0.05);
+  border-color: rgba(16,185,129,0.25) !important;
+}
+
+html:not(.dark) .kpi-numero { color: #0F172A !important; }
+html:not(.dark) .kpi-label { color: #64748B !important; }
+
+/* Tablas */
+html:not(.dark) table th {
+  background: #F1F5F9 !important;
+  color: #475569 !important;
+  border-bottom: 2px solid #E2E8F0 !important;
+}
+html:not(.dark) table tr:hover td {
+  background: #F8FAFC !important;
+}
+
+/* Ajuste botones primarios degradado */
+html:not(.dark) [class*="btn-primary"], 
+html:not(.dark) .btn-gradient {
+  background: linear-gradient(135deg, #1B4FD8, #059669) !important;
+  border: none !important;
+}
