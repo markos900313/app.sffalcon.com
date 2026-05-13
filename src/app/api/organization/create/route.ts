@@ -8,7 +8,7 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, businessName, country, currency, currencySymbol, plan } = await request.json()
+    const { userId, email, phone, businessName, country, currency, currencySymbol, plan } = await request.json()
 
     if (!userId || !businessName) {
       return NextResponse.json({ error: 'Faltan datos requeridos' }, { status: 400 })
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       .upsert({
         id: userId,
         full_name: '',
-        email: '',
+        email: email || '',
         onboarding_completed: false
       }, { onConflict: 'id' })
 
@@ -89,7 +89,11 @@ export async function POST(request: NextRequest) {
         working_hours_end: 1080, // 18:00
         working_days: [1,2,3,4,5],
         auto_reply_enabled: false,
-        plan: isFree ? 'free' : 'pro'
+        plan: isFree ? 'free' : 'pro',
+        email: email || null,
+        phone: phone || null,
+        whatsapp_number: phone || null,
+        allowed_subdomain: 'app'
       })
       .select()
       .single()

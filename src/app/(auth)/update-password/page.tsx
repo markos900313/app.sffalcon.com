@@ -168,6 +168,15 @@ function UpdatePasswordContent() {
             <span className="auth-marketing-badge">Listo en 5 min</span>
             <span className="auth-marketing-badge">Hecho en España</span>
           </div>
+
+          <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '8px', opacity: 0.7 }}>
+            <p style={{ color: 'white', fontSize: '0.85rem' }}>
+              <span style={{ color: '#818CF8', fontWeight: 600 }}>Email:</span> soporte@sffalcon.com
+            </p>
+            <p style={{ color: 'white', fontSize: '0.85rem' }}>
+              <span style={{ color: '#818CF8', fontWeight: 600 }}>Telf:</span> +34 604 989 742
+            </p>
+          </div>
         </div>
       </div>
 
