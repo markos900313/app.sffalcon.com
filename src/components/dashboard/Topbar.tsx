@@ -165,8 +165,8 @@ export default function Topbar() {
                       >
                         <div className="flex gap-3">
                           <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${n.type === 'error' ? 'bg-red-500' :
-                              n.type === 'warning' ? 'bg-yellow-500' :
-                                n.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
+                            n.type === 'warning' ? 'bg-yellow-500' :
+                              n.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
                             }`}></div>
                           <div className="flex-1 min-w-0">
                             <p className="text-white text-xs font-bold truncate">{n.title}</p>
@@ -234,7 +234,7 @@ export default function Topbar() {
                 >
                   <Mail className="w-5 h-5 text-blue-500" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-bold truncate">admin@sffalcon.com</p>
+                    <p className="text-white text-xs font-bold truncate">soporte@sffalcon.com</p>
                     <p className="text-blue-500/60 text-[10px]">Correo Electrónico</p>
                   </div>
                 </a>
