@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { MailCheck, Check, X, Loader2 } from "lucide-react";
+import { MailCheck, Check, X, Loader2, Home } from "lucide-react";
 import "./register.css";
 
 const COUNTRIES = [
@@ -165,15 +165,15 @@ export default function RegisterPage() {
   return (
     <div className="reg-root">
       <div className="reg-left">
-        <Link href="/" className="reg-brand" style={{ gap: '6px' }}>
-          <Image src="/icon.svg" alt="SF" width={28} height={28} style={{ borderRadius: 6 }} />
-          <span className="reg-brand-name italic" style={{ letterSpacing: '0.05em' }}>SF</span>
-          <span className="reg-brand-name" style={{ textTransform: 'none', fontWeight: 500, color: '#A3B3D9', letterSpacing: '0' }}>Gestor Empresarial</span>
+        <Link href="/" className="reg-brand" style={{ gap: '12px' }}>
+          <Image src="/icon.svg" alt="SF" width={56} height={56} style={{ borderRadius: 12 }} />
+          <span className="reg-brand-name italic" style={{ letterSpacing: '0.05em', fontSize: '1.2rem' }}>SF</span>
+          <span className="reg-brand-name" style={{ textTransform: 'none', fontWeight: 500, color: '#A3B3D9', letterSpacing: '0', fontSize: '1.2rem' }}>Gestor Empresarial</span>
         </Link>
 
         <div className="reg-left-content">
           <h2 className="reg-headline">
-            El asistente <span className="reg-headline-accent">de reservas y citas</span> que<br />
+            El asistente <span className="reg-headline-accent">de reservas y citas que</span><br />
             nunca pudiste<br />
             <span className="reg-headline-accent">tener</span>
           </h2>
@@ -205,6 +205,9 @@ export default function RegisterPage() {
       </div>
 
       <div className="reg-right">
+        <Link href="https://www.sffalcon.com" className="auth-home-link" title="Ir a la web principal">
+          <Home size={18} />
+        </Link>
         <div style={{ width: '100%', maxWidth: '860px', margin: '0 auto' }}>
           {registered ? (
             <div className="reg-success">

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, CheckCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, ArrowLeft, Loader2, Home } from "lucide-react";
 import "../auth-pages.css";
 
 function UpdatePasswordContent() {
@@ -133,14 +133,14 @@ function UpdatePasswordContent() {
     <div className="auth-root wide-left">
       {/* ── LEFT PANEL ── */}
       <div className="auth-left">
-        <Link href="/" className="auth-brand" style={{ gap: '6px' }}>
-          <Image src="/icon.svg" alt="SF" width={28} height={28} style={{ borderRadius: 6 }} />
-          <span className="auth-brand-name italic" style={{ letterSpacing: '0.05em' }}>SF</span>
-          <span className="auth-brand-name" style={{ textTransform: 'none', fontWeight: 500, color: '#A3B3D9', letterSpacing: '0' }}>Gestor Empresarial</span>
+        <Link href="/" className="auth-brand" style={{ gap: '12px' }}>
+          <Image src="/icon.svg" alt="SF" width={56} height={56} style={{ borderRadius: 12 }} />
+          <span className="auth-brand-name italic" style={{ letterSpacing: '0.05em', fontSize: '1.2rem' }}>SF</span>
+          <span className="auth-brand-name" style={{ textTransform: 'none', fontWeight: 500, color: '#A3B3D9', letterSpacing: '0', fontSize: '1.2rem' }}>Gestor Empresarial</span>
         </Link>
         <div className="auth-left-content">
           <h2 className="auth-headline">
-            El asistente <span className="auth-headline-accent">de reservas y citas</span> que<br />
+            El asistente <span className="auth-headline-accent">de reservas y citas que</span><br />
             nunca pudiste<br />
             <span className="auth-headline-accent">tener</span>
           </h2>
@@ -173,6 +173,9 @@ function UpdatePasswordContent() {
 
       {/* ── RIGHT PANEL ── */}
       <div className="auth-right">
+        <Link href="https://www.sffalcon.com" className="auth-home-link" title="Ir a la web principal">
+          <Home size={18} />
+        </Link>
         <div className="auth-card auth-card--compact">
           {isChecking ? (
             <div style={{ textAlign: 'center', padding: '20px' }}>

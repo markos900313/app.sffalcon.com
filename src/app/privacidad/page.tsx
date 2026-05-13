@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { Home } from "lucide-react";
 import "../(auth)/auth-pages.css";
 
 export default function PrivacidadPage() {
@@ -9,15 +10,15 @@ export default function PrivacidadPage() {
     <div className="auth-root wide-left">
       {/* ── LEFT PANEL ── */}
       <div className="auth-left">
-        <Link href="/" className="auth-brand" style={{ gap: '6px' }}>
-          <img src="/icon.svg" alt="SFFALCON" style={{ width: 28, height: 28, borderRadius: 6 }} />
-          <span className="auth-brand-name italic" style={{ letterSpacing: '0.05em' }}>SF</span>
-          <span className="auth-brand-name" style={{ textTransform: 'none', fontWeight: 500, color: '#A3B3D9', letterSpacing: '0' }}>Gestor Empresarial</span>
+        <Link href="/" className="auth-brand" style={{ gap: '12px' }}>
+          <img src="/icon.svg" alt="SFFALCON" style={{ width: 56, height: 56, borderRadius: 12 }} />
+          <span className="auth-brand-name italic" style={{ letterSpacing: '0.05em', fontSize: '1.2rem' }}>SF</span>
+          <span className="auth-brand-name" style={{ textTransform: 'none', fontWeight: 500, color: '#A3B3D9', letterSpacing: '0', fontSize: '1.2rem' }}>Gestor Empresarial</span>
         </Link>
 
         <div className="auth-left-content">
           <h2 className="auth-headline">
-            El asistente <span className="auth-headline-accent">de reservas</span> que<br />
+            El asistente <span className="auth-headline-accent">de reservas y citas que </span><br />
             nunca pudiste<br />
             <span className="auth-headline-accent">tener</span>
           </h2>
@@ -50,6 +51,9 @@ export default function PrivacidadPage() {
 
       {/* ── RIGHT PANEL ── */}
       <div className="auth-right">
+        <Link href="https://www.sffalcon.com" className="auth-home-link" title="Ir a la web principal">
+          <Home size={18} />
+        </Link>
         <div className="auth-card" style={{ maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '40px 40px 20px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
