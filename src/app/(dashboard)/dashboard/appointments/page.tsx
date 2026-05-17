@@ -370,48 +370,50 @@ interface MonthViewProps {
 
 function MonthView({ days, appointments, onSelectDay }: MonthViewProps) {
   return (
-    <div className="card-premium bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] overflow-hidden shadow-sm overflow-x-auto">
-      <div className="min-w-[700px]">
-        <div className="grid grid-cols-7 bg-slate-50 dark:bg-[#0D1B35] border-b border-slate-200 dark:border-[#1E3A5F]">
-          {daysOfWeek.map(day => (
-            <div key={day} className="py-5 text-center text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{day}</div>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 border-collapse">
-          {days.map((item, idx) => {
-            const dateStr = format(item.date, 'yyyy-MM-dd');
-            const dayAppts = appointments.filter((a) => a.date === dateStr);
-            const isToday = new Date().toDateString() === item.date.toDateString();
+    <div className="card-premium bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] shadow-sm">
+      <div className="overflow-x-auto w-full">
+        <div className="min-w-[700px]">
+          <div className="grid grid-cols-7 bg-slate-50 dark:bg-[#0D1B35] border-b border-slate-200 dark:border-[#1E3A5F]">
+            {daysOfWeek.map(day => (
+              <div key={day} className="py-5 text-center text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{day}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 border-collapse">
+            {days.map((item, idx) => {
+              const dateStr = format(item.date, 'yyyy-MM-dd');
+              const dayAppts = appointments.filter((a) => a.date === dateStr);
+              const isToday = new Date().toDateString() === item.date.toDateString();
 
-            return (
-              <div 
-                key={idx}
-                onClick={() => onSelectDay(item.date)}
-                className={cn(
-                  "min-h-[130px] p-4 md:px-8 md:py-6 border-r border-b border-slate-100 dark:border-[#1E3A5F] cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-blue-600/5",
-                  !item.currentMonth && "opacity-20 pointer-events-none"
-                )}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <span className={cn(
-                    "w-8 h-8 flex items-center justify-center rounded-xl text-[11px] font-black",
-                    isToday ? "bg-[#1B4FD8] text-white shadow-lg shadow-blue-500/25" : "text-slate-500 dark:text-slate-400"
-                  )}>
-                    {item.date.getDate()}
-                  </span>
-                  {dayAppts.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />}
+              return (
+                <div 
+                  key={idx}
+                  onClick={() => onSelectDay(item.date)}
+                  className={cn(
+                    "min-h-[130px] p-4 md:px-8 md:py-6 border-r border-b border-slate-100 dark:border-[#1E3A5F] cursor-pointer transition-all hover:bg-slate-50 dark:hover:bg-blue-600/5",
+                    !item.currentMonth && "opacity-20 pointer-events-none"
+                  )}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span className={cn(
+                      "w-8 h-8 flex items-center justify-center rounded-xl text-[11px] font-black",
+                      isToday ? "bg-[#1B4FD8] text-white shadow-lg shadow-blue-500/25" : "text-slate-500 dark:text-slate-400"
+                    )}>
+                      {item.date.getDate()}
+                    </span>
+                    {dayAppts.length > 0 && <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />}
+                  </div>
+                  <div className="space-y-1">
+                    {dayAppts.slice(0, 2).map((a) => (
+                      <div key={a.id} className="px-2 py-1.5 bg-blue-50 dark:bg-[#0D1B35] border border-blue-100 dark:border-[#1E3A5F] rounded-lg truncate text-[9px] font-bold text-blue-600 dark:text-blue-400">
+                        {a.time} - {a.title}
+                      </div>
+                    ))}
+                    {dayAppts.length > 2 && <p className="text-[8px] font-bold text-slate-400 uppercase text-center">+{dayAppts.length - 2} más</p>}
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  {dayAppts.slice(0, 2).map((a) => (
-                    <div key={a.id} className="px-2 py-1.5 bg-blue-50 dark:bg-[#0D1B35] border border-blue-100 dark:border-[#1E3A5F] rounded-lg truncate text-[9px] font-bold text-blue-600 dark:text-blue-400">
-                      {a.time} - {a.title}
-                    </div>
-                  ))}
-                  {dayAppts.length > 2 && <p className="text-[8px] font-bold text-slate-400 uppercase text-center">+{dayAppts.length - 2} más</p>}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
