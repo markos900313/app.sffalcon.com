@@ -20,12 +20,14 @@ import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import { toast } from "react-hot-toast";
 import { DashboardPageContainer } from "@/components/dashboard/DashboardPageContainer";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const DURATIONS = ["15 min", "30 min", "1h", "2h", "4h", "8h", "Personalizado"];
 
 export default function CatalogPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -96,28 +98,28 @@ export default function CatalogPage() {
 
       if (!res.ok) throw new Error('Error en la API');
       
-      toast.success(editingItem ? "Item actualizado" : "Item creado");
+      toast.success(editingItem ? t('inventory.toast.updated' as any) : t('inventory.toast.created' as any));
       setIsModalOpen(false);
       resetForm();
       fetchCatalog();
     } catch (err) {
-      toast.error("Error al guardar");
+      toast.error(t('inventory.toast.saveError' as any));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Seguro que quieres eliminar este item?")) return;
+    if (!confirm(t('inventory.deleteConfirm' as any))) return;
     try {
       const res = await fetch(`/api/inventory?table=catalogo_items&id=${id}`, {
         method: 'DELETE'
       });
       if (!res.ok) throw new Error('Error al eliminar');
-      toast.success("Item eliminado");
+      toast.success(t('inventory.toast.deleted' as any));
       fetchCatalog();
     } catch (err) {
-      toast.error("Error al eliminar");
+      toast.error(t('inventory.toast.deleteError' as any));
     }
   };
 
@@ -177,31 +179,31 @@ export default function CatalogPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 card-premium py-6 px-4 md:px-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Catálogo</h1>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{t('inventory.header.title' as any)}</h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] font-bold">
-              Gestiona los items que la IA usará para responder a tus clientes automáticamente.
+              {t('inventory.header.desc' as any)}
             </p>
           </div>
           <button
             onClick={() => { resetForm(); setEditingItem(null); setIsModalOpen(true); }}
             className="bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-xl px-6 py-2.5 font-semibold text-sm transition-all shadow-lg shadow-blue-500/20 active:scale-95"
           >
-            + NUEVO ITEM
+            {t('inventory.header.newItem' as any)}
           </button>
         </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="card-premium border-t-[#1B4FD8] border-t-2 p-6 md:p-8 shadow-sm">
-            <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-2">Total Items</p>
+            <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-2">{t('inventory.kpis.totalItems' as any)}</p>
             <p className="text-[28px] font-bold text-slate-900 dark:text-white">{stats.total}</p>
           </div>
           <div className="card-premium border-t-emerald-500 border-t-2 p-6 md:p-8 shadow-sm">
-            <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-2">Items Activos</p>
+            <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-2">{t('inventory.kpis.activeItems' as any)}</p>
             <p className="text-[28px] font-bold text-slate-900 dark:text-white">{stats.activos}</p>
           </div>
           <div className="card-premium border-t-amber-500 border-t-2 p-6 md:p-8 shadow-sm">
-            <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-2">Items Pausados</p>
+            <p className="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-bold mb-2">{t('inventory.kpis.pausedItems' as any)}</p>
             <p className="text-[28px] font-bold text-slate-900 dark:text-white">{stats.pausados}</p>
           </div>
         </div>
@@ -213,7 +215,7 @@ export default function CatalogPage() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input 
                   type="text"
-                  placeholder="Buscar..."
+                  placeholder={t('inventory.searchPlaceholder' as any)}
                   className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-sm font-medium outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -225,10 +227,10 @@ export default function CatalogPage() {
               <table className="w-full text-left">
                 <thead className="bg-slate-50 dark:bg-white/5 text-[11px] font-bold uppercase text-slate-400">
                   <tr>
-                    <th className="px-6 py-4">Item</th>
-                    <th className="px-6 py-4">Categoría</th>
-                    <th className="px-6 py-4 text-right">Precio</th>
-                    <th className="px-6 py-4 text-center">Estado</th>
+                    <th className="px-6 py-4">{t('inventory.table.item' as any)}</th>
+                    <th className="px-6 py-4">{t('inventory.table.category' as any)}</th>
+                    <th className="px-6 py-4 text-right">{t('inventory.table.price' as any)}</th>
+                    <th className="px-6 py-4 text-center">{t('inventory.table.status' as any)}</th>
                     <th className="px-6 py-4"></th>
                   </tr>
                 </thead>
@@ -241,7 +243,7 @@ export default function CatalogPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-[10px] uppercase font-bold text-slate-400">
-                          General
+                          {t('inventory.categoryGeneral' as any)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -252,7 +254,7 @@ export default function CatalogPage() {
                           "text-[9px] font-black uppercase px-2 py-1 rounded-full",
                           item.activo ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
                         )}>
-                          {item.activo ? 'Activo' : 'Pausado'}
+                          {item.activo ? t('inventory.status.active' as any) : t('inventory.status.paused' as any)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -272,7 +274,7 @@ export default function CatalogPage() {
                   {filteredItems.length === 0 && (
                     <tr>
                       <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
-                        No hay items registrados. Crea el primero.
+                        {t('inventory.noItems' as any)}
                       </td>
                     </tr>
                   )}
@@ -291,32 +293,32 @@ export default function CatalogPage() {
             className="bg-white dark:bg-[#111F3A] rounded-[24px] shadow-2xl border border-slate-200 dark:border-[#1E3A5F] w-full max-w-md overflow-hidden"
           >
             <div className="px-6 py-4 border-b border-slate-100 dark:border-[#1E3A5F] flex items-center justify-between">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Detalle del Item</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t('inventory.viewModal.title' as any)}</h3>
               <button onClick={() => setShowViewModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-8 space-y-6">
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nombre</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('inventory.viewModal.nameLabel' as any)}</p>
                 <p className="text-sm font-bold text-slate-900 dark:text-white">{viewItem.nombre}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Descripción</p>
-                <p className="text-xs text-slate-500 leading-relaxed">{viewItem.descripcion || 'Sin descripción'}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('inventory.viewModal.descLabel' as any)}</p>
+                <p className="text-xs text-slate-500 leading-relaxed">{viewItem.descripcion || t('inventory.viewModal.noDesc' as any)}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Precio</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('inventory.table.price' as any)}</p>
                   <p className="text-sm font-black text-[#1B4FD8]">{viewItem.precio} €</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Estado</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('inventory.table.status' as any)}</p>
                   <span className={cn(
                     "text-[9px] font-black uppercase px-2 py-1 rounded-full",
                     viewItem.activo ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-500"
                   )}>
-                    {viewItem.activo ? 'Activo' : 'Pausado'}
+                    {viewItem.activo ? t('inventory.status.active' as any) : t('inventory.status.paused' as any)}
                   </span>
                 </div>
               </div>
@@ -326,7 +328,7 @@ export default function CatalogPage() {
                 onClick={() => setShowViewModal(false)}
                 className="w-full py-3 bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] text-slate-600 dark:text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors"
               >
-                Cerrar
+                {t('inventory.viewModal.close' as any)}
               </button>
             </div>
           </motion.div>
@@ -346,7 +348,7 @@ export default function CatalogPage() {
                 <div>
                   <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
                     <Target className="w-5 h-5 text-[#1B4FD8]" /> 
-                    {editingItem ? 'Editar Item' : 'Nuevo Item'}
+                    {editingItem ? t('inventory.editModal.editTitle' as any) : t('inventory.editModal.newTitle' as any)}
                   </h2>
                 </div>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors">
@@ -357,11 +359,11 @@ export default function CatalogPage() {
               <form onSubmit={handleSubmit} id="catalog-form" className="flex-1 overflow-y-auto p-8 space-y-6 custom-scrollbar">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2 space-y-2">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Nombre del Item*</label>
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('inventory.editModal.nameLabel' as any)}</label>
                     <input 
                       type="text" 
                       required 
-                      placeholder="Ej: Item Premium"
+                      placeholder={t('inventory.editModal.namePlaceholder' as any)}
                       className="w-full p-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-900 dark:text-white font-bold" 
                       value={formData.nombre} 
                       onChange={e => setFormData({...formData, nombre: e.target.value})} 
@@ -369,10 +371,10 @@ export default function CatalogPage() {
                   </div>
                   
                   <div className="md:col-span-2 space-y-2">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Descripción</label>
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('inventory.viewModal.descLabel' as any)}</label>
                     <textarea 
                       rows={3}
-                      placeholder="Explica brevemente qué es..."
+                      placeholder={t('inventory.editModal.descPlaceholder' as any)}
                       className="w-full p-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 transition-all resize-none text-slate-900 dark:text-white font-bold" 
                       value={formData.descripcion} 
                       onChange={e => setFormData({...formData, descripcion: e.target.value})} 
@@ -380,7 +382,7 @@ export default function CatalogPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Precio (€)</label>
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('inventory.editModal.priceLabel' as any)}</label>
                     <div className="relative">
                       <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input 
@@ -395,14 +397,14 @@ export default function CatalogPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Estado</label>
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('inventory.table.status' as any)}</label>
                     <select 
                       className="w-full p-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-slate-900 dark:text-white font-bold cursor-pointer" 
                       value={formData.estado} 
                       onChange={e => setFormData({...formData, estado: e.target.value})}
                     >
-                      <option value="Activo" className="bg-[#111F3A] text-white">Activo</option>
-                      <option value="Pausado" className="bg-[#111F3A] text-white">Pausado</option>
+                      <option value="Activo" className="bg-[#111F3A] text-white">{t('inventory.status.active' as any)}</option>
+                      <option value="Pausado" className="bg-[#111F3A] text-white">{t('inventory.status.paused' as any)}</option>
                     </select>
                   </div>
                 </div>
@@ -414,14 +416,14 @@ export default function CatalogPage() {
                   onClick={() => setIsModalOpen(false)} 
                   className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-white transition-all"
                 >
-                  Cancelar
+                  {t('common.cancel' as any)}
                 </button>
                 <button 
                   onClick={handleSubmit} 
                   disabled={saving} 
                   className="w-full sm:w-auto px-10 py-3 bg-[#1B4FD8] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
                 >
-                  {saving ? 'Guardando...' : 'Guardar Item'}
+                  {saving ? t('inventory.editModal.saving' as any) : t('inventory.editModal.save' as any)}
                 </button>
               </div>
             </motion.div>

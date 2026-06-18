@@ -11,6 +11,7 @@ import AppointmentsAnalytics from "@/components/dashboard/appointments/Appointme
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrganization } from "@/context/OrganizationContext";
 import { getModuleLabel, getSectorGrupo } from "@/lib/sectorConfig";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const daysOfWeek = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const workingHours = Array.from({ length: 24 }, (_, i) => `${i}:00`);
@@ -42,6 +43,7 @@ function AppointmentsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { organization } = useOrganization();
+  const { language, t } = useLanguage();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'month' | 'week' | 'day' | 'analytics'>('month');
@@ -67,7 +69,7 @@ function AppointmentsContent() {
 
     } catch (e) {
       console.error(e);
-      toast.error("Error al cargar la agenda");
+      toast.error(t('appointments.loadError' as any));
     } finally {
       setLoading(false);
     }
@@ -91,15 +93,15 @@ function AppointmentsContent() {
   }, [organization?.id]);
 
   const deleteAppointment = async (id: string) => {
-    if (!confirm("¿Eliminar esta cita definitivamente?")) return;
+    if (!confirm(t('appointments.deleteConfirm' as any))) return;
     try {
       const { error } = await supabase.from('appointments').delete().eq('id', id);
       if (error) throw error;
-      toast.success("Cita eliminada");
+      toast.success(t('appointments.deleteSuccess' as any));
       fetchInitialData();
     } catch (e) {
       console.error(e);
-      toast.error("Error al eliminar");
+      toast.error(t('appointments.deleteError' as any));
     }
   };
 
@@ -156,10 +158,10 @@ function AppointmentsContent() {
           </div>
           <div>
               <h1 className="text-[20px] md:text-[24px] lg:text-[28px] font-black text-slate-900 dark:text-white tracking-tight leading-none truncate border-b-2 border-indigo-500/20 pb-1">
-                Agenda
+                {t('appointments.title' as any)}
               </h1>
               <p className="text-slate-500 dark:text-slate-400 font-medium text-[10px] md:text-[11px] mt-2 uppercase tracking-[0.15em]">
-                GESTIONA TU AGENDA
+                {t('appointments.subtitle' as any)}
               </p>
           </div>
         </div>
@@ -168,10 +170,10 @@ function AppointmentsContent() {
           <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 md:gap-4">
             <div className="grid grid-cols-2 sm:flex p-1 bg-slate-100 dark:bg-[#0D1B35] rounded-xl border border-slate-200 dark:border-[#1E3A5F] w-full md:w-auto">
               {[
-                { id: 'month', label: 'Mes' },
-                { id: 'week', label: 'Semana' },
-                { id: 'day', label: 'Día' },
-                { id: 'analytics', label: 'Análisis' }
+                { id: 'month', label: t('appointments.views.month' as any) },
+                { id: 'week', label: t('appointments.views.week' as any) },
+                { id: 'day', label: t('appointments.views.day' as any) },
+                { id: 'analytics', label: t('appointments.views.analytics' as any) }
               ].map(v => (
                 <button
                   key={v.id}
@@ -190,7 +192,7 @@ function AppointmentsContent() {
 
             <div className="flex items-center justify-between md:justify-start gap-2 bg-slate-100 dark:bg-[#0D1B35] p-1 rounded-xl border border-slate-200 dark:border-[#1E3A5F] w-full md:w-auto">
               <button onClick={() => navigate('prev')} className="p-2 hover:bg-white dark:hover:bg-blue-600/10 rounded-lg text-slate-500"><ChevronLeft size={16}/></button>
-              <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 text-[9px] font-black text-blue-600 dark:text-blue-400 hover:bg-white dark:hover:bg-blue-600/10 rounded-lg uppercase tracking-widest flex-1 md:flex-none">Hoy</button>
+              <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 text-[9px] font-black text-blue-600 dark:text-blue-400 hover:bg-white dark:hover:bg-blue-600/10 rounded-lg uppercase tracking-widest flex-1 md:flex-none">{t('appointments.today' as any)}</button>
               <button onClick={() => navigate('next')} className="p-2 hover:bg-white dark:hover:bg-blue-600/10 rounded-lg text-slate-500"><ChevronRight size={16}/></button>
             </div>
 
@@ -201,7 +203,7 @@ function AppointmentsContent() {
               >
                 <Plus className="w-4 h-4" />
                 <span className="whitespace-nowrap">
-                Nueva Cita / Reserva
+                {t('appointments.newAppointment' as any)}
                 </span>
               </button>
             </div>
@@ -232,6 +234,7 @@ function AppointmentsContent() {
 }
 
 function AppointmentDetailModal({ appointment, onClose }: { appointment: Appointment | null, onClose: () => void }) {
+  const { t } = useLanguage();
   if (!appointment) return null;
 
   return (
@@ -252,7 +255,7 @@ function AppointmentDetailModal({ appointment, onClose }: { appointment: Appoint
               {appointment.type === 'llamada' ? <Phone size={24} /> : appointment.type === 'videollamada' ? <Video size={24} /> : <MapPin size={24} />}
             </div>
             <div>
-              <h3 className="text-xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">Detalle de Cita</h3>
+              <h3 className="text-xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{t('appointments.detail.title' as any)}</h3>
               <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">{appointment.type}</p>
             </div>
           </div>
@@ -265,49 +268,49 @@ function AppointmentDetailModal({ appointment, onClose }: { appointment: Appoint
           {/* Main Info */}
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contacto</label>
-              <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.customer_name || appointment.clients?.name || 'Sin nombre'}</p>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.contact' as any)}</label>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.customer_name || appointment.clients?.name || t('appointments.detail.noName' as any)}</p>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Teléfono</label>
-              <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.customer_phone || 'No especificado'}</p>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.phone' as any)}</label>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.customer_phone || t('appointments.detail.unspecified' as any)}</p>
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Actividad / Título</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.activity' as any)}</label>
             <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.servicio || appointment.title}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fecha</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.date' as any)}</label>
               <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.date}</p>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Hora</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.time' as any)}</label>
               <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{appointment.time}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nº Personas</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.people' as any)}</label>
               <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.personas || '1'}</p>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Zona / Espacio</label>
-              <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.zona || 'No especificada'}</p>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.zone' as any)}</label>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.zona || t('appointments.detail.unspecifiedF' as any)}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Duración Estimada</label>
-              <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.duracion || '1 hora'}</p>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.duration' as any)}</label>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">{appointment.duracion || t('appointments.detail.defaultDuration' as any)}</p>
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.status' as any)}</label>
               <div>
                 <span className={cn(
                   "inline-block px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest",
@@ -321,7 +324,7 @@ function AppointmentDetailModal({ appointment, onClose }: { appointment: Appoint
 
           {appointment.notes && (
             <div className="space-y-1 pt-4 border-t border-slate-100 dark:border-[#1E3A5F]">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Notas Adicionales</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('appointments.detail.notes' as any)}</label>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-[#0D1B35] p-4 rounded-xl border border-slate-100 dark:border-[#1E3A5F]">
                 {appointment.notes}
               </p>
@@ -334,7 +337,7 @@ function AppointmentDetailModal({ appointment, onClose }: { appointment: Appoint
             onClick={onClose}
             className="w-full px-4 py-4 bg-slate-200 dark:bg-[#1E3A5F] hover:bg-slate-300 dark:hover:bg-[#254A7C] text-slate-800 dark:text-white text-sm font-bold rounded-2xl transition-all"
           >
-            Cerrar
+            {t('appointments.detail.close' as any)}
           </button>
         </div>
       </div>
@@ -369,13 +372,16 @@ interface MonthViewProps {
 }
 
 function MonthView({ days, appointments, onSelectDay }: MonthViewProps) {
+  const { t } = useLanguage();
   return (
     <div className="card-premium bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] shadow-sm">
       <div className="overflow-x-auto w-full">
         <div className="min-w-[700px]">
           <div className="grid grid-cols-7 bg-slate-50 dark:bg-[#0D1B35] border-b border-slate-200 dark:border-[#1E3A5F]">
-            {daysOfWeek.map(day => (
-              <div key={day} className="py-5 text-center text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{day}</div>
+            {daysOfWeek.map((day, idx) => (
+              <div key={day} className="py-5 text-center text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                {t(`appointments.days.${idx}` as any)}
+              </div>
             ))}
           </div>
           <div className="grid grid-cols-7 border-collapse">
@@ -408,7 +414,11 @@ function MonthView({ days, appointments, onSelectDay }: MonthViewProps) {
                         {a.time} - {a.title}
                       </div>
                     ))}
-                    {dayAppts.length > 2 && <p className="text-[8px] font-bold text-slate-400 uppercase text-center">+{dayAppts.length - 2} más</p>}
+                    {dayAppts.length > 2 && (
+                      <p className="text-[8px] font-bold text-slate-400 uppercase text-center">
+                        {t('appointments.moreAppts' as any).replace('{count}', String(dayAppts.length - 2))}
+                      </p>
+                    )}
                   </div>
                 </div>
               );
@@ -428,6 +438,7 @@ interface WeekViewProps {
 }
 
 function WeekView({ currentDate, appointments, onEdit, onDetail }: WeekViewProps) {
+  const { t } = useLanguage();
   const startOfWeekDate = new Date(currentDate);
   startOfWeekDate.setDate(currentDate.getDate() - (currentDate.getDay() === 0 ? 6 : currentDate.getDay() - 1));
   
@@ -452,7 +463,9 @@ function WeekView({ currentDate, appointments, onEdit, onDetail }: WeekViewProps
                 "py-5 text-center border-r border-slate-200 dark:border-[#1E3A5F] last:border-0",
                 new Date().toDateString() === d.toDateString() && "bg-blue-50/30 dark:bg-blue-600/10"
               )}>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{daysOfWeek[d.getDay() === 0 ? 6 : d.getDay() - 1]}</p>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                  {t(`appointments.days.${d.getDay() === 0 ? 6 : d.getDay() - 1}` as any)}
+                </p>
                 <p className={cn("text-sm font-black", new Date().toDateString() === d.toDateString() ? "text-[#1B4FD8]" : "text-slate-900 dark:text-white")}>{d.getDate()}</p>
               </div>
             ))}
@@ -506,6 +519,7 @@ interface DayViewProps {
 }
 
 function DayView({ date, appointments, onEdit, onDelete, onDetail, grupo }: DayViewProps) {
+  const { t } = useLanguage();
   const dateStr = format(date, 'yyyy-MM-dd');
   const dayAppts = appointments.filter((a) => a.date === dateStr).sort((a, b) => a.time.localeCompare(b.time));
 
@@ -557,7 +571,7 @@ function DayView({ date, appointments, onEdit, onDelete, onDetail, grupo }: DayV
                     ))}
                   </div>
                 ) : (
-                  <div className="text-[9px] font-black text-slate-200 dark:text-slate-800 uppercase tracking-[0.3em] flex items-center h-full pt-1 opacity-20">Disponible</div>
+                  <div className="text-[9px] font-black text-slate-200 dark:text-slate-800 uppercase tracking-[0.3em] flex items-center h-full pt-1 opacity-20">{t('appointments.available' as any)}</div>
                 )}
               </div>
             </div>
@@ -567,12 +581,12 @@ function DayView({ date, appointments, onEdit, onDelete, onDetail, grupo }: DayV
 
       <div className="lg:col-span-4 space-y-6">
         <div className="card-premium bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] p-8 shadow-sm">
-          <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8 border-b pb-5 border-slate-100 dark:border-[#1E3A5F]">Resumen de Agenda</h4>
+          <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8 border-b pb-5 border-slate-100 dark:border-[#1E3A5F]">{t('appointments.summaryTitle' as any)}</h4>
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-blue-600/10 flex items-center justify-center text-blue-600"><Check size={14}/></div>
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Agenda</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('appointments.totalAgenda' as any)}</span>
               </div>
               <span className="text-xl font-black text-slate-900 dark:text-white">{dayAppts.length}</span>
             </div>
@@ -580,7 +594,7 @@ function DayView({ date, appointments, onEdit, onDelete, onDetail, grupo }: DayV
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-green-600/10 flex items-center justify-center text-green-600"><Video size={14}/></div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Videollamadas</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('appointments.videoCalls' as any)}</span>
                 </div>
                 <span className="text-xl font-black text-slate-900 dark:text-white">{dayAppts.filter((a: Appointment)=>a.type==='videollamada').length}</span>
               </div>
@@ -590,9 +604,14 @@ function DayView({ date, appointments, onEdit, onDelete, onDetail, grupo }: DayV
         
         <div className="bg-[#111F3A] text-white p-8 rounded-[24px] shadow-lg border border-blue-500/20 space-y-4">
           <Bot size={24} className="text-blue-400 mb-2" />
-          <h4 className="text-lg font-bold tracking-tight">Análisis de Agenda</h4>
+          <h4 className="text-lg font-bold tracking-tight">{t('appointments.aiAnalysis' as any)}</h4>
           <p className="text-xs text-blue-200/70 leading-relaxed font-medium">
-            Hoy tienes {dayAppts.length} eventos. {grupo !== 1 ? `El ${Math.round((dayAppts.filter((a: Appointment)=>a.type==='videollamada').length / (dayAppts.length || 1)) * 100)}% son videollamadas. Recuerda enviar los enlaces de acceso 5 minutos antes.` : `Organiza tu jornada para ofrecer el mejor servicio.`}
+            {t('appointments.aiAnalysisText' as any)
+              .replace('{count}', String(dayAppts.length))
+              .replace('{info}', grupo !== 1 
+                ? t('appointments.aiAnalysisInfoVideo' as any).replace('{percent}', String(Math.round((dayAppts.filter((a: Appointment)=>a.type==='videollamada').length / (dayAppts.length || 1)) * 100)))
+                : t('appointments.aiAnalysisInfoDefault' as any)
+              )}
           </p>
         </div>
       </div>

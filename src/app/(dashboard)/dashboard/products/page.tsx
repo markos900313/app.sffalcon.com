@@ -24,6 +24,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useOrganization } from '@/context/OrganizationContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface Item {
   id: string;
@@ -39,6 +40,7 @@ interface Item {
 export default function ProductsPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,12 +107,12 @@ export default function ProductsPage() {
 
       if (!res.ok) throw new Error('Error al añadir');
       
-      toast.success("Item añadido correctamente");
+      toast.success(t('products.toast.added' as any));
       setShowAddModal(false);
       setFormData({ nombre: '', categoria: 'General', precio: '', stock: '', stock_minimo: '0', unidad: 'unidades' });
       fetchItems();
     } catch (err) {
-      toast.error("Error al añadir el item");
+      toast.error(t('products.toast.addError' as any));
     } finally {
       setSaving(false);
     }
@@ -139,27 +141,27 @@ export default function ProductsPage() {
 
       if (!res.ok) throw new Error('Error al actualizar');
       
-      toast.success("Item actualizado");
+      toast.success(t('products.toast.updated' as any));
       setShowEditModal(false);
       fetchItems();
     } catch (err) {
-      toast.error("Error al actualizar");
+      toast.error(t('products.toast.updateError' as any));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este item permanentemente?')) return;
+    if (!confirm(t('products.deleteConfirm' as any))) return;
     try {
       const res = await fetch(`/api/inventory?id=${id}&table=inventory_items`, {
         method: 'DELETE'
       });
       if (!res.ok) throw new Error('Error al eliminar');
-      toast.success('Item eliminado');
+      toast.success(t('products.toast.deleted' as any));
       fetchItems();
     } catch (err) {
-      toast.error('No se pudo eliminar el item');
+      toast.error(t('products.toast.deleteError' as any));
     }
   };
 
@@ -189,10 +191,10 @@ export default function ProductsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Package className="w-8 h-8 text-[#1B4FD8]" />
-            Inventario de Productos
+            {t('products.header.title' as any)}
           </h1>
           <p className="text-sm text-slate-400 mt-1 font-medium">
-            Control de stock y valoración de activos comerciales
+            {t('products.header.desc' as any)}
           </p>
         </div>
         <button 
@@ -200,15 +202,15 @@ export default function ProductsPage() {
           className="px-6 py-3 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 text-sm group"
         >
           <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-          Añadir Producto
+          {t('products.header.addProduct' as any)}
         </button>
       </div>
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <StatCard title="Total Productos" value={stats.total} icon={Boxes} color="blue" />
-        <StatCard title="Stock Crítico" value={stats.stockBajo} icon={AlertTriangle} color="red" />
-        <StatCard title="Valorización" value={`€${stats.valorTotal.toLocaleString()}`} icon={DollarSign} color="emerald" />
+        <StatCard title={t('products.stats.totalProducts' as any)} value={stats.total} icon={Boxes} color="blue" />
+        <StatCard title={t('products.stats.criticalStock' as any)} value={stats.stockBajo} icon={AlertTriangle} color="red" />
+        <StatCard title={t('products.stats.valuation' as any)} value={`€${stats.valorTotal.toLocaleString()}`} icon={DollarSign} color="emerald" />
       </div>
 
       {/* Controls */}
@@ -217,7 +219,7 @@ export default function ProductsPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <input 
             type="text"
-            placeholder="Buscar por nombre o categoría..."
+            placeholder={t('products.searchPlaceholder' as any)}
             className="w-full pl-12 pr-4 py-3 bg-[#080F1E] border border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-white"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -231,11 +233,11 @@ export default function ProductsPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#080F1E]/50 border-b border-white/5">
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Producto</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Categoría</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Precio</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Stock</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">Acciones</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.table.product' as any)}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.table.category' as any)}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">{t('products.table.price' as any)}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{t('products.table.stock' as any)}</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{t('products.table.actions' as any)}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -261,7 +263,7 @@ export default function ProductsPage() {
                       {item.stock}
                     </div>
                     {item.stock <= item.stock_minimo && (
-                      <div className="text-[9px] text-red-500/60 uppercase font-black tracking-tighter">Bajo Mínimo</div>
+                      <div className="text-[9px] text-red-500/60 uppercase font-black tracking-tighter">{t('products.table.lowStock' as any)}</div>
                     )}
                   </td>
                   <td className="px-6 py-4">
@@ -269,7 +271,7 @@ export default function ProductsPage() {
                       <button 
                         onClick={() => { setSelectedItem(item); setShowViewModal(true); }}
                         className="p-2 hover:bg-white/10 text-slate-400 rounded-lg transition-colors"
-                        title="Ver detalle"
+                        title={t('products.viewModal.title' as any)}
                       >
                         <Eye size={16} />
                       </button>
@@ -280,14 +282,14 @@ export default function ProductsPage() {
                           setShowEditModal(true); 
                         }}
                         className="p-2 hover:bg-blue-500/10 text-blue-500 rounded-lg transition-colors"
-                        title="Editar"
+                        title={t('common.edit' as any)}
                       >
                         <Pencil size={16} />
                       </button>
                       <button 
                         onClick={() => handleDelete(item.id)}
                         className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors"
-                        title="Eliminar"
+                        title={t('common.delete' as any)}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -299,7 +301,7 @@ export default function ProductsPage() {
           </table>
           {filteredItems.length === 0 && (
             <div className="p-12 text-center text-slate-500 text-sm italic">
-              No se encontraron productos en el inventario.
+              {t('products.noProductsFound' as any)}
             </div>
           )}
         </div>
@@ -316,7 +318,7 @@ export default function ProductsPage() {
             <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#080F1E]/50">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <Package className="w-5 h-5 text-blue-500" />
-                Detalle del Producto
+                {t('products.viewModal.title' as any)}
               </h3>
               <button onClick={() => setShowViewModal(false)} className="text-slate-500 hover:text-white transition-colors">
                 <X className="w-5 h-5" />
@@ -324,17 +326,17 @@ export default function ProductsPage() {
             </div>
             <div className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-6">
-                <DetailField label="Nombre" value={selectedItem.nombre} icon={Tag} />
-                <DetailField label="Categoría" value={selectedItem.categoria} icon={Hash} />
-                <DetailField label="Precio" value={`€${selectedItem.precio.toFixed(2)}`} icon={DollarSign} />
-                <DetailField label="Unidad" value={selectedItem.unidad} icon={Scale} />
-                <DetailField label="Stock Actual" value={selectedItem.stock} icon={Boxes} highlight={selectedItem.stock <= selectedItem.stock_minimo ? 'red' : 'green'} />
-                <DetailField label="Stock Mínimo" value={selectedItem.stock_minimo} icon={AlertTriangle} />
+                <DetailField label={t('products.viewModal.nameLabel' as any)} value={selectedItem.nombre} icon={Tag} />
+                <DetailField label={t('products.viewModal.categoryLabel' as any)} value={selectedItem.categoria} icon={Hash} />
+                <DetailField label={t('products.viewModal.priceLabel' as any)} value={`€${selectedItem.precio.toFixed(2)}`} icon={DollarSign} />
+                <DetailField label={t('products.viewModal.unitLabel' as any)} value={selectedItem.unidad} icon={Scale} />
+                <DetailField label={t('products.viewModal.stockLabel' as any)} value={selectedItem.stock} icon={Boxes} highlight={selectedItem.stock <= selectedItem.stock_minimo ? 'red' : 'green'} />
+                <DetailField label={t('products.viewModal.minStockLabel' as any)} value={selectedItem.stock_minimo} icon={AlertTriangle} />
               </div>
             </div>
             <div className="px-6 py-4 border-t border-white/5 bg-[#080F1E]/30">
               <button onClick={() => setShowViewModal(false)} className="w-full py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
-                Cerrar Vista
+                {t('products.viewModal.close' as any)}
               </button>
             </div>
           </motion.div>
@@ -352,42 +354,42 @@ export default function ProductsPage() {
               className="bg-[#111F3A] rounded-[24px] shadow-2xl border border-white/10 w-full max-w-lg overflow-hidden"
             >
               <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#080F1E]/50">
-                <h3 className="text-lg font-bold text-white">Nuevo Producto</h3>
+                <h3 className="text-lg font-bold text-white">{t('products.addModal.title' as any)}</h3>
                 <button onClick={() => setShowAddModal(false)} className="text-slate-500 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
               </div>
               <form onSubmit={handleAddItem} className="p-8 space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nombre del Producto</label>
-                  <input required type="text" className="form-input-premium" placeholder="Ej: Cable de Cobre 2mm" value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.addModal.nameLabel' as any)}</label>
+                  <input required type="text" className="form-input-premium" placeholder={t('products.addModal.namePlaceholder' as any)} value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Categoría</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.viewModal.categoryLabel' as any)}</label>
                     <input required type="text" className="form-input-premium" value={formData.categoria} onChange={e => setFormData({...formData, categoria: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Unidad (Kg, m, ud)</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.addModal.unitLabel' as any)}</label>
                     <input required type="text" className="form-input-premium" value={formData.unidad} onChange={e => setFormData({...formData, unidad: e.target.value})} />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Precio (€)</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.addModal.priceLabel' as any)}</label>
                     <input required type="number" step="0.01" className="form-input-premium" value={formData.precio} onChange={e => setFormData({...formData, precio: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Stock</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.table.stock' as any)}</label>
                     <input required type="number" className="form-input-premium" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mínimo</label>
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.addModal.minStockLabel' as any)}</label>
                     <input required type="number" className="form-input-premium" value={formData.stock_minimo} onChange={e => setFormData({...formData, stock_minimo: e.target.value})} />
                   </div>
                 </div>
                 <div className="pt-4 flex gap-3">
-                  <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 bg-white/5 text-slate-400 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all">Cancelar</button>
+                  <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-4 bg-white/5 text-slate-400 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all">{t('common.cancel' as any)}</button>
                   <button type="submit" disabled={saving} className="flex-1 py-4 bg-[#1B4FD8] text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar Producto"}
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : t('products.addModal.save' as any)}
                   </button>
                 </div>
               </form>
@@ -405,42 +407,42 @@ export default function ProductsPage() {
             className="bg-[#111F3A] rounded-[24px] shadow-2xl border border-white/10 w-full max-w-lg overflow-hidden"
           >
             <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#080F1E]/50">
-              <h3 className="text-lg font-bold text-white">Editar Producto</h3>
+              <h3 className="text-lg font-bold text-white">{t('products.editModal.title' as any)}</h3>
               <button onClick={() => setShowEditModal(false)} className="text-slate-500 hover:text-white transition-colors"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleEditItem} className="p-8 space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Nombre</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.viewModal.nameLabel' as any)}</label>
                 <input required type="text" className="form-input-premium" value={editFormData.nombre} onChange={e => setEditFormData({...editFormData, nombre: e.target.value})} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Categoría</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.viewModal.categoryLabel' as any)}</label>
                   <input required type="text" className="form-input-premium" value={editFormData.categoria} onChange={e => setEditFormData({...editFormData, categoria: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Unidad</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.viewModal.unitLabel' as any)}</label>
                   <input required type="text" className="form-input-premium" value={editFormData.unidad} onChange={e => setEditFormData({...editFormData, unidad: e.target.value})} />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Precio</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.viewModal.priceLabel' as any)}</label>
                   <input required type="number" step="0.01" className="form-input-premium" value={editFormData.precio} onChange={e => setEditFormData({...editFormData, precio: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Stock</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.table.stock' as any)}</label>
                   <input required type="number" className="form-input-premium" value={editFormData.stock} onChange={e => setEditFormData({...editFormData, stock: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mínimo</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.addModal.minStockLabel' as any)}</label>
                   <input required type="number" className="form-input-premium" value={editFormData.stock_minimo} onChange={e => setEditFormData({...editFormData, stock_minimo: e.target.value})} />
                 </div>
               </div>
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setShowEditModal(false)} className="flex-1 py-4 bg-white/5 text-slate-400 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all">Cancelar</button>
+                <button type="button" onClick={() => setShowEditModal(false)} className="flex-1 py-4 bg-white/5 text-slate-400 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all">{t('common.cancel' as any)}</button>
                 <button type="submit" disabled={saving} className="flex-1 py-4 bg-[#1B4FD8] text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all disabled:opacity-50">
-                  {saving ? "Guardando..." : "Actualizar Producto"}
+                  {saving ? t('products.editModal.saving' as any) : t('products.editModal.save' as any)}
                 </button>
               </div>
             </form>

@@ -26,8 +26,10 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function TeamPage() {
+  const { t } = useLanguage();
   const supabase = createClient();
   const { organization } = useOrganization();
   const [loading, setLoading] = useState(true);
@@ -102,20 +104,28 @@ export default function TeamPage() {
           .from('notifications')
           .insert({
             organization_id: organization!.id,
-            title: nuevoEstado === 'aprobada' ? '✅ Vacaciones aprobadas' : '❌ Vacaciones rechazadas',
+            title: nuevoEstado === 'aprobada' 
+              ? t('team.notifications.approvedTitle' as any) 
+              : t('team.notifications.rejectedTitle' as any),
             message: nuevoEstado === 'aprobada' 
-              ? `Tu solicitud de vacaciones del ${fechaInicio} al ${fechaFin} ha sido APROBADA por tu responsable.`
-              : `Tu solicitud de vacaciones del ${fechaInicio} al ${fechaFin} ha sido RECHAZADA. Contacta con tu responsable para más información.`,
+              ? t('team.notifications.approvedMessage' as any).replace('{start}', fechaInicio).replace('{end}', fechaFin)
+              : t('team.notifications.rejectedMessage' as any).replace('{start}', fechaInicio).replace('{end}', fechaFin),
             type: nuevoEstado === 'aprobada' ? 'success' : 'error',
             read: false,
             target_user_id: userId
           });
       }
 
-      toast.success(nuevoEstado === 'aprobada' ? "Vacaciones aprobadas" : nuevoEstado === 'cancelada' ? "Solicitud cancelada" : "Solicitud rechazada");
+      toast.success(
+        nuevoEstado === 'aprobada' 
+          ? t('team.toast.vacationsApproved' as any) 
+          : nuevoEstado === 'cancelada' 
+            ? t('team.toast.vacationsCancelled' as any) 
+            : t('team.toast.vacationsRejected' as any)
+      );
       fetchVacationRequests();
     } catch (err) {
-      toast.error("Error al procesar solicitud");
+      toast.error(t('team.toast.processRequestError' as any));
     }
   };
 
@@ -160,7 +170,7 @@ export default function TeamPage() {
           .update(updateData)
           .eq('id', editingStaff.id);
         if (error) throw error;
-        toast.success("Información actualizada");
+        toast.success(t('team.toast.infoUpdated' as any));
       } else {
         const res = await fetch('/api/admin/create-employee', {
           method: 'POST',
@@ -171,21 +181,21 @@ export default function TeamPage() {
           })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Error al crear empleado");
-        toast.success(`Empleado creado. Código de fichaje: ${data.fichar_code}`, { duration: 6000 });
+        if (!res.ok) throw new Error(data.error || t('team.toast.createEmployeeError' as any));
+        toast.success(t('team.toast.employeeCreated' as any).replace('{code}', data.fichar_code), { duration: 6000 });
       }
       setIsModalOpen(false);
       resetForm();
       fetchTeam();
     } catch (err: any) {
-      toast.error(err.message || "Error al guardar");
+      toast.error(err.message || t('team.toast.saveError' as any));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Seguro que quieres eliminar a este colaborador?")) return;
+    if (!confirm(t('team.deleteConfirm' as any))) return;
     try {
       const staffMember = team.find(m => m.id === id);
       const { error } = await supabase.from('staff').delete().eq('id', id);
@@ -199,10 +209,10 @@ export default function TeamPage() {
           body: JSON.stringify({ userId: userIdToDelete })
         });
       }
-      toast.success("Colaborador eliminado completamente");
+      toast.success(t('team.toast.employeeDeleted' as any));
       fetchTeam();
     } catch (err) {
-      toast.error("Error al eliminar");
+      toast.error(t('team.toast.deleteError' as any));
     }
   };
 
@@ -215,7 +225,7 @@ export default function TeamPage() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres");
+      toast.error(t('team.toast.passwordMinLength' as any));
       return;
     }
     setSavingPassword(true);
@@ -227,10 +237,10 @@ export default function TeamPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      toast.success("Contraseña actualizada");
+      toast.success(t('team.toast.passwordUpdated' as any));
       setIsPasswordModalOpen(false);
     } catch (err: any) {
-      toast.error(err.message || "Error al actualizar la contraseña");
+      toast.error(err.message || t('team.toast.passwordUpdateError' as any));
     } finally {
       setSavingPassword(false);
     }
@@ -280,18 +290,18 @@ export default function TeamPage() {
              <Users className="w-8 h-8 text-white" />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">Gestión de Personal</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">{t('team.header.management' as any)}</span>
             <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-               Equipo <span className="opacity-30">/</span> <span className="text-[#1B4FD8]">{activeTab === 'colaboradores' ? 'Personal' : 'Vacaciones'}</span>
+               {t('team.header.title' as any)} <span className="opacity-30">/</span> <span className="text-[#1B4FD8]">{activeTab === 'colaboradores' ? t('team.header.staff' as any) : t('team.header.vacations' as any)}</span>
             </h1>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-center xl:justify-end gap-4">
           <div className="flex bg-slate-100 dark:bg-white/5 p-1 rounded-2xl border border-slate-200 dark:border-white/5">
-             <button onClick={() => setActiveTab('colaboradores')} className={cn("px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", activeTab === 'colaboradores' ? "bg-white dark:bg-blue-600 text-[#1B4FD8] dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-600")}>Personal</button>
+             <button onClick={() => setActiveTab('colaboradores')} className={cn("px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", activeTab === 'colaboradores' ? "bg-white dark:bg-blue-600 text-[#1B4FD8] dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-600")}>{t('team.header.staff' as any)}</button>
              <button onClick={() => setActiveTab('vacaciones')} className={cn("px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative flex items-center gap-2", activeTab === 'vacaciones' ? "bg-white dark:bg-blue-600 text-[#1B4FD8] dark:text-white shadow-sm" : "text-slate-400 hover:text-slate-600")}>
-               <span>Vacaciones</span>
+               <span>{t('team.header.vacations' as any)}</span>
                {pendingCount > 0 && (
                  <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[8px] flex items-center justify-center border-2 border-white dark:border-[#111F3A]">
                    {pendingCount}
@@ -301,7 +311,7 @@ export default function TeamPage() {
           </div>
 
           <button onClick={() => { resetForm(); setEditingStaff(null); setIsModalOpen(true); }} className="px-8 py-3.5 bg-[#1B4FD8] text-white rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center gap-2.5 shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
-            <Plus size={14} /> Añadir Personal
+            <Plus size={14} /> {t('team.header.addStaff' as any)}
           </button>
         </div>
       </div>
@@ -325,7 +335,9 @@ export default function TeamPage() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">{member.role}</p>
                   </div>
                   <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
-                    <div className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase", member.status === 'active' ? "bg-emerald-500/20 text-emerald-600" : "bg-slate-500/20 text-slate-600")}>{member.status === 'active' ? 'Disponible' : 'Ausente'}</div>
+                    <div className={cn("px-3 py-1 rounded-full text-[9px] font-black uppercase", member.status === 'active' ? "bg-emerald-500/20 text-emerald-600" : "bg-slate-500/20 text-slate-600")}>
+                      {member.status === 'active' ? t('team.status.available' as any) : t('team.status.absent' as any)}
+                    </div>
                     <span className="text-[10px] font-bold text-slate-400">{new Date(member.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -339,11 +351,11 @@ export default function TeamPage() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5">
-                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Colaborador</th>
-                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Periodo</th>
-                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Días</th>
-                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Motivo</th>
-                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Estatus/Acciones</th>
+                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('team.table.colaborador' as any)}</th>
+                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('team.table.periodo' as any)}</th>
+                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('team.table.dias' as any)}</th>
+                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('team.table.motivo' as any)}</th>
+                      <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">{t('team.table.statusActions' as any)}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-white/5">
@@ -351,7 +363,7 @@ export default function TeamPage() {
                       <tr key={req.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                         <td className="px-8 py-6">
                            <p className="text-sm font-black text-slate-900 dark:text-white leading-none mb-1">{req.staff?.full_name}</p>
-                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Solicitante</span>
+                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">{t('team.table.applicant' as any)}</span>
                         </td>
                         <td className="px-8 py-6">
                           <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">
@@ -371,13 +383,13 @@ export default function TeamPage() {
                                  onClick={() => handleVacationAction(req.id, 'cancelada')}
                                  className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-xl bg-slate-500/20 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-all border border-slate-500/20"
                                >
-                                 Cancelar
+                                 {t('team.actions.cancel' as any)}
                                </button>
                              )}
                              {req.estado === 'pendiente' ? (
                                 <>
-                                  <button onClick={() => handleVacationAction(req.id, 'aprobada')} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-500/20 transition-all"> Aprobar </button>
-                                  <button onClick={() => handleVacationAction(req.id, 'rechazada')} className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-rose-500/20 transition-all"> Rechazar </button>
+                                  <button onClick={() => handleVacationAction(req.id, 'aprobada')} className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-500/20 transition-all"> {t('team.actions.approve' as any)} </button>
+                                  <button onClick={() => handleVacationAction(req.id, 'rechazada')} className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-rose-500/20 transition-all"> {t('team.actions.reject' as any)} </button>
                                 </>
                              ) : (
                                 <div className={cn(
@@ -389,7 +401,7 @@ export default function TeamPage() {
                                   {req.estado === 'aprobada' && <CheckCircle2 size={10} />}
                                   {req.estado === 'rechazada' && <XCircle size={10} />}
                                   {req.estado === 'cancelada' && <X size={10} />}
-                                  {req.estado}
+                                  {t(`team.vacations.status.${req.estado}` as any)}
                                 </div>
                              )}
                            </div>
@@ -409,7 +421,7 @@ export default function TeamPage() {
           <div className="bg-white dark:bg-[#111F3A] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col border border-slate-200 dark:border-[#1E3A5F]">
             <div className="px-6 py-5 md:px-8 border-b border-slate-100 dark:border-[#1E3A5F] flex items-center justify-between shrink-0">
               <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
-                <Users className="w-5 h-5 text-[#1B4FD8]" /> {editingStaff ? "Editar Colaborador" : "Nuevo Colaborador"}
+                <Users className="w-5 h-5 text-[#1B4FD8]" /> {editingStaff ? t('team.modal.editTitle' as any) : t('team.modal.newTitle' as any)}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-[#1E3A5F] rounded-full transition-colors">
                 <X size={20} className="text-slate-400" />
@@ -418,37 +430,37 @@ export default function TeamPage() {
             <form onSubmit={handleSubmit} id="team-form" className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nombre completo</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('team.modal.fullName' as any)}</label>
                   <input type="text" required className="w-full px-4 py-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/10 dark:text-white font-bold text-sm transition-all" value={formData.full_name} onChange={(e) => setFormData({...formData, full_name: e.target.value})} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email corporativo</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('team.modal.corporateEmail' as any)}</label>
                   <input type="email" required className="w-full px-4 py-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/10 dark:text-white font-bold text-sm transition-all" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
                 </div>
                 {!editingStaff && (
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Contraseña temporal</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('team.modal.tempPassword' as any)}</label>
                     <input type="password" required className="w-full px-4 py-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/10 dark:text-white font-bold text-sm transition-all" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} />
                   </div>
                 )}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Puesto / Rol</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('team.modal.positionRole' as any)}</label>
                   <input type="text" className="w-full px-4 py-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/10 dark:text-white font-bold text-sm transition-all" value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nivel de Acceso</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('team.modal.accessLevel' as any)}</label>
                   <select className="w-full px-4 py-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/10 dark:text-white font-bold text-sm appearance-none cursor-pointer" value={formData.access_level} onChange={(e) => setFormData({...formData, access_level: e.target.value})}>
-                    <option value="user" className="bg-[#111F3A] text-white">Usuario</option>
-                    <option value="manager" className="bg-[#111F3A] text-white">Manager</option>
-                    <option value="admin" className="bg-[#111F3A] text-white">Administrador</option>
+                    <option value="user" className="bg-[#111F3A] text-white">{t('team.modal.roleUser' as any)}</option>
+                    <option value="manager" className="bg-[#111F3A] text-white">{t('team.modal.roleManager' as any)}</option>
+                    <option value="admin" className="bg-[#111F3A] text-white">{t('team.modal.roleAdmin' as any)}</option>
                   </select>
                 </div>
               </div>
             </form>
             <div className="p-6 border-t border-slate-100 dark:border-[#1E3A5F] flex flex-col sm:flex-row items-center justify-end gap-3 shrink-0">
-              <button type="button" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors order-2 sm:order-1">Cancelar</button>
+              <button type="button" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors order-2 sm:order-1">{t('common.cancel' as any)}</button>
               <button type="submit" form="team-form" className="w-full sm:w-auto px-10 py-3.5 bg-[#1B4FD8] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-500/20 active:scale-95 transition-all order-1 sm:order-2 disabled:opacity-50" disabled={saving}>
-                {saving ? 'Guardando...' : editingStaff ? 'Actualizar Colaborador' : 'Crear Colaborador'}
+                {saving ? t('team.modal.saving' as any) : editingStaff ? t('team.modal.updateButton' as any) : t('team.modal.createButton' as any)}
               </button>
             </div>
           </div>
@@ -460,17 +472,17 @@ export default function TeamPage() {
           <div className="bg-white dark:bg-[#111F3A] w-full max-w-sm rounded-2xl shadow-2xl p-6 md:p-8 space-y-6 border border-slate-200 dark:border-[#1E3A5F]">
              <div className="space-y-2">
                <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
-                 <KeyRound className="w-5 h-5 text-amber-500" /> Seguridad
+                 <KeyRound className="w-5 h-5 text-amber-500" /> {t('team.passwordModal.title' as any)}
                </h2>
-               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Actualizar Contraseña</p>
+               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('team.passwordModal.subtitle' as any)}</p>
              </div>
              <div className="space-y-1.5">
-               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nueva contraseña</label>
-               <input type="password" required className="w-full px-4 py-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-amber-500/10 dark:text-white font-bold text-sm transition-all" placeholder="Mínimo 6 caracteres" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('team.passwordModal.newPasswordLabel' as any)}</label>
+               <input type="password" required className="w-full px-4 py-3 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-amber-500/10 dark:text-white font-bold text-sm transition-all" placeholder={t('team.passwordModal.placeholder' as any)} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
              </div>
              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
-               <button type="button" onClick={() => setIsPasswordModalOpen(false)} className="w-full sm:w-auto order-2 sm:order-1 px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">Cancelar</button>
-               <button type="submit" onClick={handlePasswordChange} className="w-full sm:w-auto order-1 sm:order-2 px-8 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all" disabled={savingPassword}>{savingPassword ? 'Procesando...' : 'Cambiar Clave'}</button>
+               <button type="button" onClick={() => setIsPasswordModalOpen(false)} className="w-full sm:w-auto order-2 sm:order-1 px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">{t('common.cancel' as any)}</button>
+               <button type="submit" onClick={handlePasswordChange} className="w-full sm:w-auto order-1 sm:order-2 px-8 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-amber-500/20 active:scale-95 transition-all" disabled={savingPassword}>{savingPassword ? t('team.passwordModal.processing' as any) : t('team.passwordModal.submitButton' as any)}</button>
              </div>
           </div>
         </div>

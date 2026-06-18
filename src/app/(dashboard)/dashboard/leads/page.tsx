@@ -19,35 +19,37 @@ import LoadingOverlay from '@/components/ui/LoadingOverlay';
 import LeadModal from './LeadModal';
 import ConvertModal from './ConvertModal';
 import DiscardModal from './DiscardModal';
+import { useLanguage } from '@/lib/LanguageContext';
 
 // --- CONFIGURACIÓN DE ESTILOS ---
 
-const temperaturaStyles: Record<string, { bg: string; text: string; label: string }> = {
-  frio: { bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400', label: 'Frío' },
-  tibio: { bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', label: 'Tibio' },
-  caliente: { bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', label: 'Caliente' },
+const temperaturaStyles: Record<string, { bg: string; text: string; labelKey: string }> = {
+  frio: { bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-600 dark:text-slate-400', labelKey: 'leads.temperatures.frio' },
+  tibio: { bg: 'bg-amber-50 dark:bg-amber-500/10', text: 'text-amber-600 dark:text-amber-400', labelKey: 'leads.temperatures.tibio' },
+  caliente: { bg: 'bg-red-50 dark:bg-red-500/10', text: 'text-red-600 dark:text-red-400', labelKey: 'leads.temperatures.caliente' },
 };
 
-const estadoStyles: Record<string, { bg: string; text: string; label: string }> = {
-  nuevo: { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', label: 'Nuevo' },
-  contactado: { bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', label: 'Contactado' },
-  cualificado: { bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', label: 'Cualificado' },
-  descartado: { bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500', label: 'Descartado' },
-  convertido: { bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', label: 'Convertido' },
+const estadoStyles: Record<string, { bg: string; text: string; labelKey: string }> = {
+  nuevo: { bg: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', labelKey: 'leads.status.nuevo' },
+  contactado: { bg: 'bg-cyan-50 dark:bg-cyan-500/10', text: 'text-cyan-600 dark:text-cyan-400', labelKey: 'leads.status.contactado' },
+  cualificado: { bg: 'bg-emerald-50 dark:bg-emerald-500/10', text: 'text-emerald-600 dark:text-emerald-400', labelKey: 'leads.status.cualificado' },
+  descartado: { bg: 'bg-slate-100 dark:bg-slate-500/10', text: 'text-slate-500', labelKey: 'leads.status.descartado' },
+  convertido: { bg: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', labelKey: 'leads.status.convertido' },
 };
 
 const origenConfig: Record<string, any> = {
-  web: { icon: Globe, label: 'Web' },
-  whatsapp: { icon: MessageCircle, label: 'WhatsApp' },
-  email: { icon: Mail, label: 'Email' },
-  manual: { icon: PenLine, label: 'Manual' },
-  referido: { icon: Handshake, label: 'Referido' },
-  redes_sociales: { icon: Share2, label: 'Redes' },
+  web: { icon: Globe, labelKey: 'leads.origins.web' },
+  whatsapp: { icon: MessageCircle, labelKey: 'leads.origins.whatsapp' },
+  email: { icon: Mail, labelKey: 'leads.origins.email' },
+  manual: { icon: PenLine, labelKey: 'leads.origins.manual' },
+  referido: { icon: Handshake, labelKey: 'leads.origins.referido' },
+  redes_sociales: { icon: Share2, labelKey: 'leads.origins.socialNetworksShort' },
 };
 
 export default function LeadsPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,7 +83,7 @@ export default function LeadsPage() {
       setLeads(data || []);
     } catch (error) {
       console.error('Error fetching leads:', error);
-      toast.error('Error al cargar contactos');
+      toast.error(t('leads.toast.loadError' as any));
     } finally {
       setLoading(false);
     }
@@ -94,22 +96,22 @@ export default function LeadsPage() {
         .update({ estado: 'nuevo', motivo_descarte: null })
         .eq('id', id);
       if (error) throw error;
-      toast.success('Contacto comercial reactivado');
+      toast.success(t('leads.toast.reactivateSuccess' as any));
       fetchLeads();
     } catch (error) {
-      toast.error('Error al reactivar contacto comercial');
+      toast.error(t('leads.toast.reactivateError' as any));
     }
   };
 
   const deleteLead = async (id: string) => {
-    if (!confirm('¿Seguro que quieres eliminar este contacto comercial permanentemente?')) return;
+    if (!confirm(t('leads.deleteConfirm' as any))) return;
     try {
       const { error } = await supabase.from('leads').delete().eq('id', id);
       if (error) throw error;
-      toast.success('Contacto comercial eliminado');
+      toast.success(t('leads.toast.deleteSuccess' as any));
       fetchLeads();
     } catch (error) {
-      toast.error('Error al eliminar contacto comercial');
+      toast.error(t('leads.toast.deleteError' as any));
     }
   };
 
@@ -176,15 +178,15 @@ export default function LeadsPage() {
             <Lock size={64} className="text-amber-500 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4">Módulo de Captación - Solo Empresa</h2>
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4">{t('leads.locked.title' as any)}</h2>
             <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-8 font-medium">
-              La gestión avanzada de captación y cualificación está disponible exclusivamente para organizaciones de tipo empresa.
+              {t('leads.locked.desc' as any)}
             </p>
             <Link 
               href="/dashboard/settings/plan"
               className="inline-flex items-center gap-2 px-8 py-4 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20"
             >
-              Mejorar Plan Actual <ArrowRight size={18} />
+              {t('leads.locked.upgradePlan' as any)} <ArrowRight size={18} />
             </Link>
           </div>
         </div>
@@ -209,15 +211,15 @@ export default function LeadsPage() {
                 <div className="p-3 bg-[#1B4FD8]/10 rounded-2xl">
                   <UserPlus className="text-[#1B4FD8]" size={28} />
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Gestión de Captación</h1>
+                <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">{t('leads.header.title' as any)}</h1>
               </div>
-              <p className="text-slate-500 dark:text-slate-400 font-bold ml-1 text-sm sm:text-base">Captura, cualifica y convierte tus prospectos en negocios reales.</p>
+              <p className="text-slate-500 dark:text-slate-400 font-bold ml-1 text-sm sm:text-base">{t('leads.header.desc' as any)}</p>
             </div>
             <button 
               onClick={() => { setSelectedLead(null); setIsLeadModalOpen(true); }}
               className="flex items-center justify-center gap-3 px-8 py-4 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20"
             >
-              <UserPlus size={18} /> Nuevo Contacto
+              <UserPlus size={18} /> {t('leads.header.newContact' as any)}
             </button>
           </div>
 
@@ -226,22 +228,22 @@ export default function LeadsPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <div className="card-premium p-4 md:p-8 border-l-4 border-l-blue-500">
                 <Activity size={20} className="text-blue-500 mb-4" />
-                <p className="kpi-label mb-1">Captación Activa</p>
+                <p className="kpi-label mb-1">{t('leads.kpis.active' as any)}</p>
                 <h3 className="kpi-numero">{stats.activos}</h3>
               </div>
               <div className="card-premium p-4 md:p-8 border-l-4 border-l-red-500">
                 <div className="h-5 mb-4" /> {/* Espaciador para mantener alineación */}
-                <p className="kpi-label mb-1">Calientes</p>
+                <p className="kpi-label mb-1">{t('leads.kpis.hot' as any)}</p>
                 <h3 className="kpi-numero">{stats.calientes}</h3>
               </div>
               <div className="card-premium p-4 md:p-8 border-l-4 border-l-purple-500">
                 <TrendingUp size={20} className="text-purple-500 mb-4" />
-                <p className="kpi-label mb-1">Tasa Conversión</p>
+                <p className="kpi-label mb-1">{t('leads.kpis.conversionRate' as any)}</p>
                 <h3 className="kpi-numero">{stats.tasaConversion.toFixed(1)}%</h3>
               </div>
               <div className="card-premium p-4 md:p-8 border-l-4 border-l-emerald-500">
                 <Calendar size={20} className="text-emerald-500 mb-4" />
-                <p className="kpi-label mb-1">Seguimientos Hoy</p>
+                <p className="kpi-label mb-1">{t('leads.kpis.followupsToday' as any)}</p>
                 <h3 className="kpi-numero">{stats.pendientesHoy}</h3>
               </div>
             </div>
@@ -254,7 +256,7 @@ export default function LeadsPage() {
                   <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
                     type="text" 
-                    placeholder="Buscar por nombre, empresa o email..."
+                    placeholder={t('leads.searchPlaceholder' as any)}
                     className="w-full bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-3.5 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-bold text-sm"
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
@@ -267,12 +269,12 @@ export default function LeadsPage() {
                   value={filterEstado}
                   onChange={e => setFilterEstado(e.target.value)}
                 >
-                  <option value="todos" className="bg-[#111F3A] text-white">Estados: Todos</option>
-                  <option value="nuevo" className="bg-[#111F3A] text-white">Nuevo</option>
-                  <option value="contactado" className="bg-[#111F3A] text-white">Contactado</option>
-                  <option value="cualificado" className="bg-[#111F3A] text-white">Cualificado</option>
-                  <option value="convertido" className="bg-[#111F3A] text-white">Convertido</option>
-                  <option value="descartado" className="bg-[#111F3A] text-white">Descartado</option>
+                  <option value="todos" className="bg-[#111F3A] text-white">{t('leads.filters.allStates' as any)}</option>
+                  <option value="nuevo" className="bg-[#111F3A] text-white">{t('leads.status.nuevo' as any)}</option>
+                  <option value="contactado" className="bg-[#111F3A] text-white">{t('leads.status.contactado' as any)}</option>
+                  <option value="cualificado" className="bg-[#111F3A] text-white">{t('leads.status.cualificado' as any)}</option>
+                  <option value="convertido" className="bg-[#111F3A] text-white">{t('leads.status.convertido' as any)}</option>
+                  <option value="descartado" className="bg-[#111F3A] text-white">{t('leads.status.descartado' as any)}</option>
                 </select>
 
                 {/* Filtro Temp */}
@@ -281,10 +283,10 @@ export default function LeadsPage() {
                   value={filterTemp}
                   onChange={e => setFilterTemp(e.target.value)}
                 >
-                  <option value="todos" className="bg-[#111F3A] text-white">Temperatura: Todas</option>
-                  <option value="frio" className="bg-[#111F3A] text-white">Frío</option>
-                  <option value="tibio" className="bg-[#111F3A] text-white">Tibio</option>
-                  <option value="caliente" className="bg-[#111F3A] text-white">Caliente</option>
+                  <option value="todos" className="bg-[#111F3A] text-white">{t('leads.filters.allTemps' as any)}</option>
+                  <option value="frio" className="bg-[#111F3A] text-white">{t('leads.temperatures.frio' as any)}</option>
+                  <option value="tibio" className="bg-[#111F3A] text-white">{t('leads.temperatures.tibio' as any)}</option>
+                  <option value="caliente" className="bg-[#111F3A] text-white">{t('leads.temperatures.caliente' as any)}</option>
                 </select>
 
                 {/* Filtro Origen */}
@@ -293,13 +295,13 @@ export default function LeadsPage() {
                   value={filterOrigen}
                   onChange={e => setFilterOrigen(e.target.value)}
                 >
-                  <option value="todos" className="bg-[#111F3A] text-white">Origen: Todos</option>
-                  <option value="web" className="bg-[#111F3A] text-white">Web</option>
-                  <option value="whatsapp" className="bg-[#111F3A] text-white">WhatsApp</option>
-                  <option value="email" className="bg-[#111F3A] text-white">Email</option>
-                  <option value="manual" className="bg-[#111F3A] text-white">Manual</option>
-                  <option value="referido" className="bg-[#111F3A] text-white">Referido</option>
-                  <option value="redes_sociales" className="bg-[#111F3A] text-white">Redes Sociales</option>
+                  <option value="todos" className="bg-[#111F3A] text-white">{t('leads.filters.allOrigins' as any)}</option>
+                  <option value="web" className="bg-[#111F3A] text-white">{t('leads.origins.web' as any)}</option>
+                  <option value="whatsapp" className="bg-[#111F3A] text-white">{t('leads.origins.whatsapp' as any)}</option>
+                  <option value="email" className="bg-[#111F3A] text-white">{t('leads.origins.email' as any)}</option>
+                  <option value="manual" className="bg-[#111F3A] text-white">{t('leads.origins.manual' as any)}</option>
+                  <option value="referido" className="bg-[#111F3A] text-white">{t('leads.origins.referido' as any)}</option>
+                  <option value="redes_sociales" className="bg-[#111F3A] text-white">{t('leads.origins.socialNetworks' as any)}</option>
                 </select>
               </div>
             </div>
@@ -308,7 +310,7 @@ export default function LeadsPage() {
             <div className="card-premium overflow-hidden">
               {sortedLeads.length === 0 ? (
                 <div className="p-20 text-center text-slate-400">
-                  <p className="text-sm font-bold">No se encontraron contactos con los filtros actuales.</p>
+                  <p className="text-sm font-bold">{t('leads.noLeadsFound' as any)}</p>
                 </div>
               ) : (
                 <>
@@ -317,13 +319,13 @@ export default function LeadsPage() {
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-white/[0.02] border-b border-slate-100 dark:border-white/5">
-                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Contacto / Empresa</th>
-                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Contacto</th>
-                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Temperatura</th>
-                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Estado</th>
-                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Valor / Origen</th>
-                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Métricas</th>
-                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Acciones</th>
+                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">{t('leads.table.contactCompany' as any)}</th>
+                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">{t('leads.table.contactInfo' as any)}</th>
+                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">{t('leads.table.temperature' as any)}</th>
+                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">{t('leads.table.status' as any)}</th>
+                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">{t('leads.table.valueOrigin' as any)}</th>
+                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">{t('leads.table.metrics' as any)}</th>
+                          <th className="px-4 md:px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">{t('leads.table.actions' as any)}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-white/5">
@@ -341,7 +343,7 @@ export default function LeadsPage() {
                                   </div>
                                   <div>
                                     <p className="text-sm font-black text-slate-900 dark:text-white leading-tight">{lead.nombre}</p>
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mt-1">{lead.empresa || 'Particular'}</p>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tight mt-1">{lead.empresa || t('leads.particular' as any)}</p>
                                   </div>
                                 </div>
                               </td>
@@ -361,26 +363,26 @@ export default function LeadsPage() {
                               </td>
                               <td className="px-4 md:px-8 py-4 text-center">
                                 <span className={`inline-flex px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${temp.bg} ${temp.text}`}>
-                                  {temp.label}
+                                  {t(temp.labelKey as any)}
                                 </span>
                               </td>
                               <td className="px-4 md:px-8 py-4 text-center">
                                 <span className={`inline-flex px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest ${est.bg} ${est.text}`}>
-                                  {est.label}
+                                  {t(est.labelKey as any)}
                                 </span>
                               </td>
                               <td className="px-4 md:px-8 py-4">
                                 <div>
                                   <p className="text-xs font-black text-slate-900 dark:text-white tracking-tight">{lead.valor_estimado.toLocaleString()} {lead.moneda}</p>
                                   <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">
-                                    {org && <org.icon size={10} />} {org?.label}
+                                    {org && <org.icon size={10} />} {org ? t(org.labelKey as any) : ''}
                                   </div>
                                 </div>
                               </td>
                               <td className="px-4 md:px-8 py-4">
                                 {lead.proximo_seguimiento ? (
                                   <div className="text-center">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Próximo</p>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('leads.next' as any)}</p>
                                     <div className={`inline-flex px-2 py-1 rounded-md text-[9px] font-black ${
                                       new Date(lead.proximo_seguimiento) < new Date() && lead.estado !== 'convertido'
                                         ? 'bg-red-500/10 text-red-500' 
@@ -390,7 +392,7 @@ export default function LeadsPage() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <div className="text-center text-[10px] font-bold text-slate-300 italic">Sin fecha</div>
+                                  <div className="text-center text-[10px] font-bold text-slate-300 italic">{t('leads.noDate' as any)}</div>
                                 )}
                               </td>
                               <td className="px-4 md:px-8 py-4">
@@ -399,7 +401,7 @@ export default function LeadsPage() {
                                     <button 
                                       onClick={() => reactivateLead(lead.id)}
                                       className="p-2 hover:bg-blue-500/10 text-blue-500 rounded-xl transition-all"
-                                      title="Reactivar Contacto"
+                                      title={t('leads.actions.reactivate' as any)}
                                     >
                                       <RefreshCcw size={18} />
                                     </button>
@@ -408,28 +410,28 @@ export default function LeadsPage() {
                                       <button 
                                         onClick={() => { setSelectedLead(lead); setIsConvertModalOpen(true); }}
                                         className="p-2 hover:bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-xl transition-all"
-                                        title="Convertir a Contacto/Oportunidad"
+                                        title={t('leads.actions.convert' as any)}
                                       >
                                         <ArrowRightCircle size={18} />
                                       </button>
                                       <button 
                                         onClick={() => { setSelectedLead(lead); setIsDiscardModalOpen(true); }}
                                         className="p-2 hover:bg-red-500/10 text-red-500 rounded-xl transition-all"
-                                        title="Descartar Contacto"
+                                        title={t('leads.actions.discard' as any)}
                                       >
                                         <XCircle size={18} />
                                       </button>
                                       <button 
                                         onClick={() => { setSelectedLead(lead); setIsLeadModalOpen(true); }}
                                         className="p-2 hover:bg-slate-500/10 text-slate-400 rounded-xl transition-all"
-                                        title="Editar Contacto"
+                                        title={t('leads.actions.edit' as any)}
                                       >
                                         <Edit size={18} />
                                       </button>
                                     </>
                                   ) : (
                                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 text-purple-600 rounded-xl text-[9px] font-black uppercase tracking-widest">
-                                      <Zap size={12} /> Convertido
+                                      <Zap size={12} /> {t('leads.status.convertido' as any)}
                                     </div>
                                   )}
                                   <button 
@@ -464,17 +466,17 @@ export default function LeadsPage() {
                               <h4 className="font-black text-slate-800 dark:text-white text-base leading-tight">{lead.nombre}</h4>
                               <div className="flex items-center gap-2 mt-1">
                                 <Building size={14} className="text-slate-400" />
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lead.empresa || 'Particular'}</p>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lead.empresa || t('leads.particular' as any)}</p>
                               </div>
                             </div>
                             <span className={`px-2.5 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest leading-none ${temp.bg} ${temp.text}`}>
-                              {temp.label}
+                              {t(temp.labelKey as any)}
                             </span>
                           </div>
 
                           <div className="flex flex-wrap items-center gap-2">
                             <span className={`px-2 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest leading-none ${est.bg} ${est.text}`}>
-                              {est.label}
+                              {t(est.labelKey as any)}
                             </span>
                             <div className="flex items-center gap-1.5 px-2 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-lg text-[8px] font-black uppercase tracking-widest text-slate-500">
                               {lead.valor_estimado.toLocaleString()} {lead.moneda}
@@ -511,7 +513,7 @@ export default function LeadsPage() {
                                 </>
                               ) : (
                                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 text-purple-600 rounded-xl text-[9px] font-black uppercase tracking-widest">
-                                  <Zap size={12} /> Convertido
+                                  <Zap size={12} /> {t('leads.status.convertido' as any)}
                                 </div>
                               )}
                             </div>
@@ -524,7 +526,7 @@ export default function LeadsPage() {
                   {/* Paginación */}
                   <div className="p-4 sm:p-6 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                      Mostrando {Math.min(paginatedLeads.length, leadsPerPage)} de {sortedLeads.length} contactos
+                      {t('leads.showingPrefix' as any)} {Math.min(paginatedLeads.length, leadsPerPage)} {t('leads.showingOf' as any)} {sortedLeads.length} {t('leads.showingSuffix' as any)}
                     </p>
                     <div className="flex gap-2">
                       <button 
@@ -532,14 +534,14 @@ export default function LeadsPage() {
                         onClick={() => setCurrentPage(prev => prev - 1)}
                         className="px-6 py-2.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 transition-all"
                       >
-                        Anterior
+                        {t('leads.prev' as any)}
                       </button>
                       <button 
                         disabled={currentPage * leadsPerPage >= sortedLeads.length}
                         onClick={() => setCurrentPage(prev => prev + 1)}
                         className="px-6 py-2.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50 transition-all"
                       >
-                        Siguiente
+                        {t('leads.nextPage' as any)}
                       </button>
                     </div>
                   </div>

@@ -12,6 +12,7 @@ import { DashboardPageContainer } from "@/components/dashboard/DashboardPageCont
 import { createClient } from '@/lib/supabase/client';
 import { useOrganization } from '@/context/OrganizationContext';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/lib/LanguageContext';
 
 import dynamic from 'next/dynamic';
 
@@ -38,6 +39,7 @@ interface Invoice {
 }
 
 export default function InvoicesPage() {
+  const { t } = useLanguage();
   const supabase = createClient();
   const { organization } = useOrganization();
   const symbol = organization?.currency_symbol || '€';
@@ -72,7 +74,7 @@ export default function InvoicesPage() {
       if (error) throw error;
       setInvoices(data || []);
     } catch (err: any) {
-      toast.error('Error al cargar facturas');
+      toast.error(t('invoices.toast.loadError' as any));
     } finally {
       setLoading(false);
     }
@@ -131,10 +133,10 @@ export default function InvoicesPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'pagada': return <span className="px-2.5 py-1 bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium rounded-full flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> Pagada</span>;
-      case 'pendiente': return <span className="px-2.5 py-1 bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 text-xs font-medium rounded-full flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> Pendiente</span>;
-      case 'cancelada': return <span className="px-2.5 py-1 bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 text-xs font-medium rounded-full">Cancelada</span>;
-      case 'borrador': return <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 text-xs font-medium rounded-full">Borrador</span>;
+      case 'pagada': return <span className="px-2.5 py-1 bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium rounded-full flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5" /> {t('invoices.status.paid' as any)}</span>;
+      case 'pendiente': return <span className="px-2.5 py-1 bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 text-xs font-medium rounded-full flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> {t('invoices.status.pending' as any)}</span>;
+      case 'cancelada': return <span className="px-2.5 py-1 bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 text-xs font-medium rounded-full">{t('invoices.status.cancelled' as any)}</span>;
+      case 'borrador': return <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 text-xs font-medium rounded-full">{t('invoices.status.draft' as any)}</span>;
       default: return null;
     }
   };
@@ -154,23 +156,23 @@ export default function InvoicesPage() {
       setActionLoading(`paid-${id}`);
       const { error } = await supabase.from('invoices').update({ status: 'pagada', paid_date: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
-      toast.success("Marcado como pagado");
+      toast.success(t('invoices.toast.markedPaid' as any));
     } catch (err) {
-      toast.error("Error al actualizar");
+      toast.error(t('invoices.toast.updateError' as any));
     } finally {
       setActionLoading(null);
     }
   };
 
   const handleDelete = async (id: string, num: string) => {
-    if (!confirm(`¿Seguro que quieres eliminar el registro ${num}?`)) return;
+    if (!confirm(t('invoices.deleteConfirm' as any).replace('{num}', num))) return;
     try {
       setActionLoading(`del-${id}`);
       const { error } = await supabase.from('invoices').delete().eq('id', id);
       if (error) throw error;
-      toast.success("Eliminado correctamente");
+      toast.success(t('invoices.toast.deleted' as any));
     } catch (err) {
-      toast.error("Error al eliminar");
+      toast.error(t('invoices.toast.deleteError' as any));
     } finally {
       setActionLoading(null);
     }
@@ -187,9 +189,9 @@ export default function InvoicesPage() {
         email: organization?.email,
         phone: organization?.phone
       });
-      toast.success("PDF generado");
+      toast.success(t('invoices.toast.pdfGenerated' as any));
     } catch (e) {
-      toast.error("Error al generar PDF");
+      toast.error(t('invoices.toast.pdfError' as any));
     } finally {
       setActionLoading(null);
     }
@@ -197,7 +199,7 @@ export default function InvoicesPage() {
 
   const handleSendEmail = async (inv: any) => {
     if (!inv.clients?.email) {
-      toast.error("El cliente no tiene un email válido registrado");
+      toast.error(t('invoices.toast.noEmail' as any));
       return;
     }
 
@@ -225,9 +227,9 @@ export default function InvoicesPage() {
       });
 
       if (!res.ok) throw new Error();
-      toast.success("Factura enviada al cliente");
+      toast.success(t('invoices.toast.sent' as any));
     } catch (e) {
-      toast.error("Error al enviar email");
+      toast.error(t('invoices.toast.sendError' as any));
     } finally {
       setActionLoading(null);
     }
@@ -254,11 +256,11 @@ export default function InvoicesPage() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">Gestión de Facturación</span>
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Auditado</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">{t('invoices.header.management' as any)}</span>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">{t('invoices.header.audited' as any)}</span>
                 </div>
                 <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-                  Control de <span className="text-[#1B4FD8]">Comprobantes</span>
+                  {t('invoices.header.controlOf' as any)} <span className="text-[#1B4FD8]">{t('invoices.header.invoices' as any)}</span>
                 </h1>
               </div>
             </div>
@@ -268,7 +270,7 @@ export default function InvoicesPage() {
               className="flex items-center justify-center gap-2 bg-[#1B4FD8] hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-lg shadow-blue-500/20 active:scale-95 w-full md:w-auto shrink-0"
             >
               <Plus className="w-4 h-4" />
-              NUEVO COMPROBANTE / FACTURA
+              {t('invoices.header.newInvoice' as any)}
             </button>
           </div>
         </div>
@@ -286,7 +288,7 @@ export default function InvoicesPage() {
               )}
             >
               <List className="w-4 h-4" />
-              VISTA LISTADO
+              {t('invoices.tabs.list' as any)}
             </button>
             <button
               onClick={() => setView('analytics')}
@@ -298,7 +300,7 @@ export default function InvoicesPage() {
               )}
             >
               <BarChart2 className="w-4 h-4" />
-              ANÁLISIS
+              {t('invoices.tabs.analytics' as any)}
             </button>
           </div>
 
@@ -311,7 +313,7 @@ export default function InvoicesPage() {
                     <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="space-y-1">
-                    <p className="kpi-label">TOTAL FACTURADO</p>
+                    <p className="kpi-label">{t('invoices.kpis.totalBilled' as any)}</p>
                     <p className="kpi-numero">
                       {totalFacturado.toLocaleString('es-ES', { minimumFractionDigits: 2 })} {symbol}
                     </p>
@@ -323,7 +325,7 @@ export default function InvoicesPage() {
                     <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div className="space-y-1">
-                    <p className="kpi-label">PENDIENTE COBRO</p>
+                    <p className="kpi-label">{t('invoices.kpis.pendingPayment' as any)}</p>
                     <p className="kpi-numero">
                       {totalPendiente.toLocaleString('es-ES', { minimumFractionDigits: 2 })} {symbol}
                     </p>
@@ -335,7 +337,7 @@ export default function InvoicesPage() {
                     <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div className="space-y-1">
-                    <p className="kpi-label">PAGADO MES</p>
+                    <p className="kpi-label">{t('invoices.kpis.paidMonth' as any)}</p>
                     <p className="kpi-numero">
                       {pagadoEsteMes.toLocaleString('es-ES', { minimumFractionDigits: 2 })} {symbol}
                     </p>
@@ -350,7 +352,7 @@ export default function InvoicesPage() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
                     <input
                       type="text"
-                      placeholder="Buscar registros..."
+                      placeholder={t('invoices.table.searchPlaceholder' as any)}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full bg-[#F8FAFC] dark:bg-[#0A1628] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-lg pl-9 pr-4 py-2 text-sm text-[#0F172A] dark:text-[#F1F5F9] placeholder:text-[#64748B] dark:placeholder:text-[#475569] outline-none focus:ring-2 focus:ring-[#1B4FD8]/20 transition-all"
@@ -365,11 +367,11 @@ export default function InvoicesPage() {
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="bg-transparent text-[13px] font-bold text-slate-500 uppercase tracking-tight outline-none"
                       >
-                        <option value="todos">FILTRAR POR ESTADO</option>
-                        <option value="borrador">BORRADORES</option>
-                        <option value="pendiente">PENDIENTES</option>
-                        <option value="pagada">PAGADAS</option>
-                        <option value="cancelada">CANCELADAS</option>
+                        <option value="todos">{t('invoices.filters.filterByStatus' as any)}</option>
+                        <option value="borrador">{t('invoices.filters.drafts' as any)}</option>
+                        <option value="pendiente">{t('invoices.filters.pending' as any)}</option>
+                        <option value="pagada">{t('invoices.filters.paid' as any)}</option>
+                        <option value="cancelada">{t('invoices.filters.cancelled' as any)}</option>
                       </select>
                     </div>
                   </div>
@@ -380,20 +382,20 @@ export default function InvoicesPage() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-[#F8FAFC] dark:bg-[#0A1628]/50 text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider border-b border-[#E2E8F0] dark:border-[#1E3A5F]">
-                        <th className="px-4 md:px-8 py-4">ID / Ref</th>
-                        <th className="px-4 md:px-8 py-4">Contacto</th>
-                        <th className="px-6 py-4 hidden lg:table-cell">Concepto</th>
-                        <th className="px-4 md:px-8 py-4 text-right">Total</th>
-                        <th className="px-4 md:px-8 py-4">Estado</th>
-                        <th className="px-6 py-4 hidden md:table-cell">Emisión</th>
-                        <th className="px-4 md:px-8 py-4 text-center">Acciones</th>
+                        <th className="px-4 md:px-8 py-4">{t('invoices.table.idRef' as any)}</th>
+                        <th className="px-4 md:px-8 py-4">{t('invoices.table.contact' as any)}</th>
+                        <th className="px-6 py-4 hidden lg:table-cell">{t('invoices.table.concept' as any)}</th>
+                        <th className="px-4 md:px-8 py-4 text-right">{t('invoices.table.total' as any)}</th>
+                        <th className="px-4 md:px-8 py-4">{t('invoices.table.status' as any)}</th>
+                        <th className="px-6 py-4 hidden md:table-cell">{t('invoices.table.issueDate' as any)}</th>
+                        <th className="px-4 md:px-8 py-4 text-center">{t('invoices.table.actions' as any)}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#1E3A5F]">
                       {filteredInvoices.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="px-6 py-12 text-center text-[#64748B] dark:text-[#94A3B8]">
-                            No se encontraron registros
+                            {t('invoices.table.noRecords' as any)}
                           </td>
                         </tr>
                       ) : (

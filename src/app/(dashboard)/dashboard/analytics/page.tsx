@@ -15,7 +15,8 @@ import { useTheme } from '@/lib/ThemeContext';
 import { getModuleLabel } from '@/lib/sectorConfig';
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
 import { format, subMonths, startOfMonth, endOfMonth, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
+import { useLanguage } from '@/lib/LanguageContext';
 import { 
   BarChart, Bar, AreaChart, Area, 
   XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -49,6 +50,8 @@ const CustomTooltip = ({ active, payload, label, prefix = '' }: CustomTooltipPro
 };
 
 export default function AnalyticsPage() {
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'es' ? es : enUS;
   const supabase = createClient();
   const { organization } = useOrganization();
   const { theme } = useTheme();
@@ -96,16 +99,16 @@ export default function AnalyticsPage() {
       const newClientsRate = totalClients && totalClients > 0 ? ((newClientsMonth || 0) / totalClients * 100).toFixed(1) : '0';
 
       const kpis = [
-        { label: 'ACTIVIDAD TOTAL', value: apptsMonth || 0, icon: Calendar, color: 'text-blue-500', cat: 'agenda' },
-        { label: 'TASA OCUPACIÓN', value: '78%', icon: Zap, color: 'text-amber-500', cat: 'stats' },
-        { label: 'INGR. MEDIO / ITEM', value: `${avgRevenue}€`, icon: BarChart2, color: 'text-indigo-500', cat: 'finanzas' },
-        { label: '% CONTACTOS NUEVOS', value: `${newClientsRate}%`, icon: TrendingUp, color: 'text-emerald-500', cat: 'clientes' },
+        { label: t('analytics.kpis.totalActivity' as any), value: apptsMonth || 0, icon: Calendar, color: 'text-blue-500', cat: 'agenda' },
+        { label: t('analytics.kpis.occupancyRate' as any), value: '78%', icon: Zap, color: 'text-amber-500', cat: 'stats' },
+        { label: t('analytics.kpis.avgRevenueItem' as any), value: `${avgRevenue}€`, icon: BarChart2, color: 'text-indigo-500', cat: 'finanzas' },
+        { label: t('analytics.kpis.newContactsRate' as any), value: `${newClientsRate}%`, icon: TrendingUp, color: 'text-emerald-500', cat: 'clientes' },
       ];
       setStats(kpis);
 
       const last6Months = Array.from({ length: 6 }).map((_, i) => {
         const d = subMonths(new Date(), 5 - i);
-        return { month: format(d, 'MMM', { locale: es }), monthNum: format(d, 'MM'), year: format(d, 'yyyy'), citas: 0, clientes: 0, label: format(d, 'MMMM', { locale: es }) };
+        return { month: format(d, 'MMM', { locale: dateLocale }), monthNum: format(d, 'MM'), year: format(d, 'yyyy'), citas: 0, clientes: 0, label: format(d, 'MMMM', { locale: dateLocale }) };
       });
 
       const sixMonthsAgo = startOfMonth(subMonths(new Date(), 5));
@@ -128,20 +131,20 @@ export default function AnalyticsPage() {
   useEffect(() => {
     setIsMounted(true);
     fetchAnalytics();
-  }, [organization?.id]);
+  }, [organization?.id, language]);
 
   const finalChartData = useMemo(() => {
     if (isDemo) {
       const months = chartData.length > 0 ? chartData : Array.from({ length: 6 }).map((_, i) => {
         const d = subMonths(new Date(), 5 - i);
-        return { month: format(d, 'MMM', { locale: es }), label: format(d, 'MMMM', { locale: es }) };
+        return { month: format(d, 'MMM', { locale: dateLocale }), label: format(d, 'MMMM', { locale: dateLocale }) };
       });
       const exampleValues = [12, 19, 15, 25, 32, 28];
       const clientValues = [4, 6, 5, 8, 12, 10];
       return months.map((m, i) => ({ ...m, citas: exampleValues[i] || 0, clientes: clientValues[i] || 0 }));
     }
     return chartData;
-  }, [chartData, isDemo]);
+  }, [chartData, isDemo, dateLocale]);
 
   const monthsWithData = useMemo(() => chartData.filter(d => d.citas > 0 || d.clientes > 0).length, [chartData]);
   const showIndicator = isDemo || monthsWithData >= 2;
@@ -150,14 +153,14 @@ export default function AnalyticsPage() {
     if (isDemo) {
       const labelCitas = getModuleLabel(modules, 'appointments', 'CITAS');
       return [
-        { label: 'CONTACTOS REGISTRADOS', value: 124, icon: Users, color: 'text-blue-500', cat: 'clientes' },
-        { label: 'CONTACTOS NUEVOS MES', value: 12, icon: TrendingUp, color: 'text-emerald-500', cat: 'stats' },
-        { label: 'ACTIVIDAD / CITES', value: 48, icon: Calendar, color: 'text-amber-500', cat: 'agenda' },
-        { label: 'INGRESOS TOTALES', value: '3.420€', icon: BarChart2, color: 'text-indigo-500', cat: 'finanzas' },
+        { label: t('analytics.kpis.registeredContacts' as any), value: 124, icon: Users, color: 'text-blue-500', cat: 'clientes' },
+        { label: t('analytics.kpis.newContactsMonth' as any), value: 12, icon: TrendingUp, color: 'text-emerald-500', cat: 'stats' },
+        { label: t('analytics.kpis.activityAppointments' as any), value: 48, icon: Calendar, color: 'text-amber-500', cat: 'agenda' },
+        { label: t('analytics.kpis.totalRevenue' as any), value: '3.420€', icon: BarChart2, color: 'text-indigo-500', cat: 'finanzas' },
       ];
     }
     return stats;
-  }, [stats, isDemo, modules, isSalud]);
+  }, [stats, isDemo, modules, isSalud, language]);
 
   if (loading && stats.length === 0) return null;
 
@@ -178,10 +181,10 @@ export default function AnalyticsPage() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
                 <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">Business Intelligence</span>
-                <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Real Time</span>
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">{t('analytics.realTime' as any)}</span>
               </div>
               <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-                 Analíticas
+                 {t('analytics.title' as any)}
               </h1>
             </div>
           </div>
@@ -193,7 +196,7 @@ export default function AnalyticsPage() {
                 onClick={() => setIsDemo(true)} 
                 className="px-4 py-2 bg-amber-500/10 text-[9px] font-black uppercase text-amber-600 rounded-xl transition-all hover:bg-amber-500/20"
               >
-                Ver Demo
+                {t('analytics.viewDemo' as any)}
               </button>
             )}
             <button 
@@ -203,7 +206,7 @@ export default function AnalyticsPage() {
                 !isDemo ? "bg-white dark:bg-blue-600 dark:text-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
               )}
             >
-              {isDemo ? 'Datos Reales' : 'Actualizar'}
+              {isDemo ? t('analytics.realData' as any) : t('analytics.update' as any)}
             </button>
             <div className="w-px h-6 bg-slate-200 dark:bg-white/10 mx-1" />
             <button 
@@ -212,21 +215,21 @@ export default function AnalyticsPage() {
                 doc.setFontSize(20);
                 doc.setFont("helvetica", "bold");
                 doc.setTextColor(27, 79, 216);
-                doc.text("Analíticas del Negocio", 14, 20);
+                doc.text(t('analytics.pdf.title' as any), 14, 20);
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
                 doc.setTextColor(100, 116, 139);
-                doc.text(`Generado: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 14, 28);
+                doc.text(`${t('analytics.pdf.generated' as any)}: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 14, 28);
                 doc.setDrawColor(226, 232, 240);
                 doc.line(14, 33, 196, 33);
                 autoTable(doc, {
                   startY: 40,
-                  head: [['Métrica', 'Valor']],
+                  head: [[t('analytics.pdf.metric' as any), t('analytics.pdf.value' as any)]],
                   body: [
-                    ['Actividad Total', String(finalStats[0]?.value || 0)],
-                    ['Tasa Ocupación', String(finalStats[1]?.value || '—')],
-                    ['Ingreso Medio', String(finalStats[2]?.value || '—')],
-                    ['% Contactos Nuevos', String(finalStats[3]?.value || '—')],
+                    [finalStats[0]?.label || t('analytics.kpis.totalActivity' as any), String(finalStats[0]?.value || 0)],
+                    [finalStats[1]?.label || t('analytics.kpis.occupancyRate' as any), String(finalStats[1]?.value || '—')],
+                    [finalStats[2]?.label || t('analytics.kpis.avgRevenueItem' as any), String(finalStats[2]?.value || '—')],
+                    [finalStats[3]?.label || t('analytics.kpis.newContactsRate' as any), String(finalStats[3]?.value || '—')],
                   ],
                   headStyles: { fillColor: [27, 79, 216] },
                   styles: { fontSize: 10, cellPadding: 6 },
@@ -234,7 +237,7 @@ export default function AnalyticsPage() {
                 const y = (doc as any).lastAutoTable.finalY + 12;
                 autoTable(doc, {
                   startY: y,
-                  head: [['Mes', 'Actividad', 'Contactos']],
+                  head: [[t('analytics.pdf.month' as any), t('analytics.pdf.activity' as any), t('analytics.pdf.contacts' as any)]],
                   body: finalChartData.map(d => [d.month, String(d.citas), String(d.clientes)]),
                   headStyles: { fillColor: [27, 79, 216] },
                   styles: { fontSize: 10, cellPadding: 6 },
@@ -243,7 +246,7 @@ export default function AnalyticsPage() {
               }} 
               className="px-4 py-2 text-[9px] font-black uppercase text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all flex items-center gap-2"
             >
-              Exportar PDF
+              {t('analytics.exportPDF' as any)}
             </button>
           </div>
 
@@ -269,7 +272,7 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-12 xl:col-span-7 card-premium p-8 shadow-sm flex flex-col h-[450px]">
-          <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8">Volumen de Actividad</h4>
+          <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8">{t('analytics.activityVolume' as any)}</h4>
           <div className="flex-1 w-full relative">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
@@ -277,7 +280,7 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} stroke={theme === 'dark' ? "#fff" : "#64748b"} />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 800, fill: '#64748b'}} />
                   <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 800, fill: '#64748b'}} />
-                  <Tooltip cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }} content={<CustomTooltip prefix="Registros" />} />
+                  <Tooltip cursor={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }} content={<CustomTooltip prefix={t('analytics.records' as any)} />} />
                   <Bar dataKey="citas" fill="#1B4FD8" radius={[4, 4, 0, 0]} barSize={40} />
                 </BarChart>
               </ResponsiveContainer>
@@ -286,7 +289,7 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="lg:col-span-12 xl:col-span-5 card-premium p-8 shadow-sm flex flex-col h-[450px]">
-          <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8">Crecimiento</h4>
+          <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8">{t('analytics.growth' as any)}</h4>
           <div className="flex-1 w-full relative">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
@@ -294,7 +297,7 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} stroke={theme === 'dark' ? "#fff" : "#64748b"} />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 800, fill: '#64748b'}} />
                   <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 800, fill: '#64748b'}} />
-                  <Tooltip cursor={{ stroke: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)', strokeWidth: 2 }} content={<CustomTooltip prefix="Contactos" />} />
+                  <Tooltip cursor={{ stroke: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)', strokeWidth: 2 }} content={<CustomTooltip prefix={t('analytics.contacts' as any)} />} />
                   <Area type="monotone" dataKey="clientes" stroke="#10B981" strokeWidth={3} fillOpacity={0.3} fill="#10B981" />
                 </AreaChart>
               </ResponsiveContainer>

@@ -17,9 +17,10 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import { formatDistanceToNow, isSameMonth, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import Dynamic from "next/dynamic";
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
+import { useLanguage } from "@/lib/LanguageContext";
 
 import { PipelineDeal, PipelineEtapa, PipelineColumn, Prioridad, OrigenLead } from "./types";
 import DealModal from "./DealModal";
@@ -28,12 +29,12 @@ import DealModal from "./DealModal";
 const DragDropContextDynamic = Dynamic(() => Promise.resolve(DragDropContext), { ssr: false });
 
 const COLUMNS: any[] = [
-  { id: 'nuevo_lead', label: 'Nueva Captación', bgColor: 'bg-blue-500/15 dark:bg-blue-500/20', iconColor: 'text-blue-500', icon: UserPlus },
-  { id: 'contactado', label: 'Contactado', bgColor: 'bg-cyan-500/15 dark:bg-cyan-500/20', iconColor: 'text-cyan-500', icon: MessageSquare },
-  { id: 'propuesta', label: 'Propuesta', bgColor: 'bg-amber-500/15 dark:bg-amber-500/20', iconColor: 'text-amber-500', icon: FileText },
-  { id: 'negociacion', label: 'Negociación', bgColor: 'bg-purple-500/15 dark:bg-purple-500/20', iconColor: 'text-purple-500', icon: TrendingUp },
-  { id: 'cerrado_ganado', label: 'Cerrado ✓', bgColor: 'bg-emerald-500/15 dark:bg-emerald-500/20', iconColor: 'text-emerald-500', icon: CheckCircle2 },
-  { id: 'cerrado_perdido', label: 'Perdido ✗', bgColor: 'bg-red-500/15 dark:bg-red-500/20', iconColor: 'text-red-500', icon: XCircle },
+  { id: 'nuevo_lead', labelKey: 'pipeline.columns.nuevo_lead', bgColor: 'bg-blue-500/15 dark:bg-blue-500/20', iconColor: 'text-blue-500', icon: UserPlus },
+  { id: 'contactado', labelKey: 'pipeline.columns.contactado', bgColor: 'bg-cyan-500/15 dark:bg-cyan-500/20', iconColor: 'text-cyan-500', icon: MessageSquare },
+  { id: 'propuesta', labelKey: 'pipeline.columns.propuesta', bgColor: 'bg-amber-500/15 dark:bg-amber-500/20', iconColor: 'text-amber-500', icon: FileText },
+  { id: 'negociacion', labelKey: 'pipeline.columns.negociacion', bgColor: 'bg-purple-500/15 dark:bg-purple-500/20', iconColor: 'text-purple-500', icon: TrendingUp },
+  { id: 'cerrado_ganado', labelKey: 'pipeline.columns.cerrado_ganado', bgColor: 'bg-emerald-500/15 dark:bg-emerald-500/20', iconColor: 'text-emerald-500', icon: CheckCircle2 },
+  { id: 'cerrado_perdido', labelKey: 'pipeline.columns.cerrado_perdido', bgColor: 'bg-red-500/15 dark:bg-red-500/20', iconColor: 'text-red-500', icon: XCircle },
 ];
 
 const prioridadStyles: Record<string, string> = {
@@ -88,6 +89,7 @@ function PortalAwareItem({
 export default function PipelinePage() {
   const supabase = createClient();
   const { organization, loading: orgLoading } = useOrganization();
+  const { language, t } = useLanguage();
   const [deals, setDeals] = useState<PipelineDeal[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -190,10 +192,10 @@ export default function PipelinePage() {
       const { error } = await supabase.from('pipeline_deals').update(updates).eq('id', id);
       if (error) throw error;
 
-      toast.success(`Oportunidad movida a ${COLUMNS.find(c => c.id === stage)?.label}`);
+      toast.success(`${t('pipeline.toast.movedSuccess' as any)} ${t(COLUMNS.find(c => c.id === stage)?.labelKey as any)}`);
       loadDeals();
     } catch (err) {
-      toast.error("Error al mover el deal");
+      toast.error(t('pipeline.toast.moveError' as any));
     }
   };
 
@@ -206,10 +208,10 @@ export default function PipelinePage() {
   };
 
   const deleteDeal = async (id: string) => {
-    if (!confirm("¿Seguro que deseas eliminar esta oportunidad?")) return;
+    if (!confirm(t('pipeline.deleteConfirm' as any))) return;
     const { error } = await supabase.from('pipeline_deals').delete().eq('id', id);
     if (!error) {
-      toast.success("Oportunidad eliminada");
+      toast.success(t('pipeline.toast.deleteSuccess' as any));
       loadDeals();
     }
   };
@@ -231,15 +233,15 @@ export default function PipelinePage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
                   <Trello className="w-8 h-8 text-[#1B4FD8]" />
-                  <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Oportunidades</h1>
+                  <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">{t('pipeline.header.title' as any)}</h1>
                 </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Gestión de Oportunidades y Captación</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{t('pipeline.header.desc' as any)}</p>
               </div>
           <button 
             onClick={() => { setSelectedDeal(null); setIsDealModalOpen(true); }}
             className="px-6 py-3 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
           >
-            <Plus size={18} /> Nueva Oportunidad
+            <Plus size={18} /> {t('pipeline.header.newOpportunity' as any)}
           </button>
         </div>
 
@@ -247,10 +249,10 @@ export default function PipelinePage() {
           {/* KPI CARDS */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: 'CAPTACIÓN ACTIVA', value: stats.activeCount, icon: Users, color: 'text-blue-500', cat: 'clientes' },
-              { label: 'VALOR OPORTUNIDADES', value: formatCurrency(stats.pipelineValue), icon: BarChart, color: 'text-indigo-500', cat: 'finanzas' },
-              { label: 'TASA DE CIERRE', value: `${stats.closureRate}%`, icon: Target, color: 'text-emerald-500', cat: 'ia' },
-              { label: 'GANADO ESTE MES', value: formatCurrency(stats.wonValueMonth), icon: DollarSign, color: 'text-amber-500', cat: 'stats' },
+              { label: t('pipeline.kpis.activeLeads' as any), value: stats.activeCount, icon: Users, color: 'text-blue-500', cat: 'clientes' },
+              { label: t('pipeline.kpis.pipelineValue' as any), value: formatCurrency(stats.pipelineValue), icon: BarChart, color: 'text-indigo-500', cat: 'finanzas' },
+              { label: t('pipeline.kpis.closureRate' as any), value: `${stats.closureRate}%`, icon: Target, color: 'text-emerald-500', cat: 'ia' },
+              { label: t('pipeline.kpis.wonThisMonth' as any), value: formatCurrency(stats.wonValueMonth), icon: DollarSign, color: 'text-amber-500', cat: 'stats' },
             ].map((stat, i) => (
               <div key={i} className={cn("card-premium p-5 shadow-sm", stat.cat && `card-${stat.cat}`)}>
                 <p className="kpi-label mb-1">{stat.label}</p>
@@ -265,7 +267,7 @@ export default function PipelinePage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input 
                 type="text" 
-                placeholder="Buscar..."
+                placeholder={t('pipeline.searchPlaceholder' as any)}
                 className="w-full bg-slate-50 dark:bg-black/20 border-none rounded-xl pl-10 pr-4 py-2.5 text-sm font-medium outline-none"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -277,17 +279,17 @@ export default function PipelinePage() {
                 value={filterStage}
                 onChange={(e) => setFilterStage(e.target.value)}
               >
-                <option value="all" className="bg-[#111F3A] text-white">Todas las etapas</option>
-                {COLUMNS.map(c => <option key={c.id} value={c.id} className="bg-[#111F3A] text-white">{c.label}</option>)}
+                <option value="all" className="bg-[#111F3A] text-white">{t('pipeline.filters.allStages' as any)}</option>
+                {COLUMNS.map(c => <option key={c.id} value={c.id} className="bg-[#111F3A] text-white">{t(c.labelKey as any)}</option>)}
               </select>
               <select 
                 className="flex-1 md:flex-none px-4 py-2.5 bg-slate-50 dark:bg-[#111F3A] rounded-xl text-xs font-bold border-none outline-none cursor-pointer"
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
               >
-                <option value="all" className="bg-[#111F3A] text-white">Todo</option>
-                <option value="month" className="bg-[#111F3A] text-white">Este mes</option>
-                <option value="3months" className="bg-[#111F3A] text-white">3 meses</option>
+                <option value="all" className="bg-[#111F3A] text-white">{t('pipeline.filters.allTime' as any)}</option>
+                <option value="month" className="bg-[#111F3A] text-white">{t('pipeline.filters.thisMonth' as any)}</option>
+                <option value="3months" className="bg-[#111F3A] text-white">{t('pipeline.filters.threeMonths' as any)}</option>
               </select>
             </div>
           </div>
@@ -316,10 +318,10 @@ export default function PipelinePage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-700 dark:text-white truncate">
-                            {column.label}
+                            {t(column.labelKey as any)}
                           </h3>
                           <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                            {formatCurrency(columnTotal)} · {columnDeals.length} {columnDeals.length === 1 ? 'oportunidad' : 'oportunidades'}
+                            {formatCurrency(columnTotal)} · {columnDeals.length} {columnDeals.length === 1 ? t('pipeline.opportunity' as any) : t('pipeline.opportunities' as any)}
                           </p>
                         </div>
                       </div>
@@ -370,7 +372,7 @@ export default function PipelinePage() {
                                         "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full",
                                         prioridadStyles[deal.prioridad]
                                       )}>
-                                        {deal.prioridad}
+                                        {t(`pipeline.priorities.${deal.prioridad}` as any)}
                                       </span>
                                       <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 text-slate-500 text-[9px] font-bold uppercase tracking-wider">
                                          {deal.origen === 'web' && <Globe size={10} />}
@@ -378,12 +380,12 @@ export default function PipelinePage() {
                                          {deal.origen === 'email' && <Mail size={10} />}
                                          {deal.origen === 'manual' && <User size={10} />}
                                          {deal.origen === 'referido' && <Handshake size={10} />}
-                                         {deal.origen}
+                                         {t(`leads.origins.${deal.origen}` as any)}
                                       </div>
                                     </div>
 
                                     <p className="text-[10px] text-slate-400 mt-2">
-                                      hace {formatDistanceToNow(new Date(deal.created_at), { locale: es })}
+                                      {t('pipeline.agoPrefix' as any)} {formatDistanceToNow(new Date(deal.created_at), { locale: language === 'en' ? enUS : es })} {t('pipeline.agoSuffix' as any)}
                                     </p>
                                   </PortalAwareItem>
                                 )}
@@ -397,7 +399,7 @@ export default function PipelinePage() {
                                   <Plus size={16} className="text-slate-300 dark:text-slate-600" />
                                 </div>
                                 <p className="text-[10px] text-slate-400 dark:text-slate-600 font-medium">
-                                  Arrastra aquí o crea uno nuevo
+                                  {t('pipeline.emptyStateText' as any)}
                                 </p>
                               </div>
                             </div>
@@ -421,19 +423,19 @@ export default function PipelinePage() {
                 
                 {/* Header - Fixed */}
                 <div className="p-6 border-b border-slate-100 dark:border-[#1E3A5F] shrink-0">
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Oportunidad Perdida</h3>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Feedback de Calidad</p>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{t('pipeline.lostModal.title' as any)}</h3>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{t('pipeline.lostModal.subtitle' as any)}</p>
                 </div>
 
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-4 custom-scrollbar">
-                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">Es importante saber por qué perdimos este lead para mejorar nuestro proceso.</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{t('pipeline.lostModal.desc' as any)}</p>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Motivo de la pérdida</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('pipeline.lostModal.reasonLabel' as any)}</label>
                     <textarea 
                       className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:ring-2 focus:ring-red-500/20 transition-all resize-none"
                       rows={4}
-                      placeholder="Precio alto, falta de interés, eligió competencia..."
+                      placeholder={t('pipeline.lostModal.placeholder' as any)}
                       value={motivoPerdida}
                       onChange={(e) => setMotivoPerdida(e.target.value)}
                     />
@@ -446,13 +448,13 @@ export default function PipelinePage() {
                     onClick={handleLossReasonSubmit}
                     className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 transition-all order-1 active:scale-95"
                   >
-                    Guardar y Cerrar
+                    {t('pipeline.lostModal.saveAndClose' as any)}
                   </button>
                   <button 
                     onClick={() => setIsReasonModalOpen(false)}
                     className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors order-2 active:scale-95"
                   >
-                    Cancelar
+                    {t('common.cancel' as any)}
                   </button>
                 </div>
              </div>

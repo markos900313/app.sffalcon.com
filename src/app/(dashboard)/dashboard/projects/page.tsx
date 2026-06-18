@@ -22,8 +22,10 @@ import {
   LineChart, Line, CartesianGrid 
 } from 'recharts';
 import toast from 'react-hot-toast';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function ProjectsPage() {
+  const { t, language } = useLanguage();
   const { organization } = useOrganization();
   const symbol = organization?.currency_symbol || '€';
   const supabase = createClient();
@@ -49,7 +51,7 @@ export default function ProjectsPage() {
       if (error) throw error;
       setProjects(data || []);
     } catch (error: any) {
-      toast.error('Error al cargar proyectos');
+      toast.error(t('projects.toast.loadError' as any));
       console.error(error);
     } finally {
       setLoading(false);
@@ -73,8 +75,8 @@ export default function ProjectsPage() {
   const stats = {
     activos: projects.filter(p => p.status === 'activo').length,
     completados: projects.filter(p => p.status === 'completado').length,
-    facturacion: projects.reduce((s, p) => s + Number(p.budget || 0), 0).toLocaleString('es-ES'),
-    pendiente: projects.reduce((s, p) => s + (Number(p.budget || 0) - Number(p.paid || 0)), 0).toLocaleString('es-ES'),
+    facturacion: projects.reduce((s, p) => s + Number(p.budget || 0), 0).toLocaleString(language === 'es' ? 'es-ES' : 'en-US'),
+    pendiente: projects.reduce((s, p) => s + (Number(p.budget || 0) - Number(p.paid || 0)), 0).toLocaleString(language === 'es' ? 'es-ES' : 'en-US'),
   };
 
   const analyticsStats = useMemo(() => {
@@ -99,7 +101,7 @@ export default function ProjectsPage() {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
       return {
-        month: d.toLocaleString('es-ES', { month: 'short' }),
+        month: d.toLocaleString(language === 'es' ? 'es-ES' : 'en-US', { month: 'short' }),
         year: d.getFullYear(),
         monthNum: d.getMonth(),
         ingresos: 0
@@ -113,7 +115,7 @@ export default function ProjectsPage() {
     });
 
     return { propuestas, avgValue, completedProjects, evolution: last6Months };
-  }, [projects]);
+  }, [projects, language]);
 
   const pageTitle = organization?.sector_config?.['projects']?.label || 'Proyectos';
 
@@ -134,14 +136,14 @@ export default function ProjectsPage() {
               <Folder className="w-8 h-8 text-[#1B4FD8]" />
               {pageTitle}
             </h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">Control total de ejecución, facturación y plazos.</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-2">{t('projects.header.desc' as any)}</p>
           </div>
           <button 
             onClick={() => { setEditingProject(null); setIsModalOpen(true); }}
             className="flex items-center justify-center gap-2 px-6 py-3.5 bg-[#1B4FD8] text-white rounded-[18px] font-semibold text-sm shadow-xl shadow-blue-500/20 hover:bg-[#1642B5] transition-all active:scale-95 group shrink-0"
           >
             <Plus className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            NUEVO REGISTRO
+            {t('projects.header.newRecord' as any)}
           </button>
         </div>
 
@@ -157,7 +159,7 @@ export default function ProjectsPage() {
             )}
           >
             <List className="w-4 h-4" />
-            VISTA LISTADO
+            {t('projects.tabs.list' as any)}
           </button>
           <button
             onClick={() => setView('analytics')}
@@ -169,7 +171,7 @@ export default function ProjectsPage() {
             )}
           >
             <BarChart2 className="w-4 h-4" />
-            ANÁLISIS
+            {t('projects.tabs.analytics' as any)}
           </button>
         </div>
 
@@ -178,10 +180,10 @@ export default function ProjectsPage() {
           <>
             {/* Stats Cards (Solo en Lista) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard label="ACTIVOS" value={stats.activos} icon={<Briefcase className="w-5 h-5" />} color="blue" />
-              <StatCard label="COMPLETADOS" value={stats.completados} icon={<CheckCircle2 className="w-5 h-5" />} color="emerald" />
-              <StatCard label="FACTURACIÓN TOTAL" value={`${stats.facturacion}${symbol}`} icon={<Euro className="w-5 h-5" />} color="indigo" sub="Total Presupuesto" />
-              <StatCard label="PENDIENTE COBRO" value={`${stats.pendiente}${symbol}`} icon={<Clock className="w-5 h-5" />} color="orange" sub="Por Cobrar" />
+              <StatCard label={t('projects.stats.active' as any)} value={stats.activos} icon={<Briefcase className="w-5 h-5" />} color="blue" />
+              <StatCard label={t('projects.stats.completed' as any)} value={stats.completados} icon={<CheckCircle2 className="w-5 h-5" />} color="emerald" />
+              <StatCard label={t('projects.stats.totalBilling' as any)} value={`${stats.facturacion}${symbol}`} icon={<Euro className="w-5 h-5" />} color="indigo" sub={t('projects.stats.totalBudget' as any)} />
+              <StatCard label={t('projects.stats.pendingPayment' as any)} value={`${stats.pendiente}${symbol}`} icon={<Clock className="w-5 h-5" />} color="orange" sub={t('projects.stats.toCollect' as any)} />
             </div>
 
             <ProjectsList 
@@ -199,11 +201,11 @@ export default function ProjectsPage() {
                      <Briefcase className="w-6 h-6 text-[#1B4FD8]" />
                    </div>
                    <div>
-                     <p className="text-[13px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Estado General</p>
+                     <p className="text-[13px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">{t('projects.analytics.generalStatus' as any)}</p>
                      <div className="flex items-center gap-3 mt-1">
-                       <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]"><span className="text-blue-500">{stats.activos}</span> Act.</span>
-                       <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]"><span className="text-green-500">{stats.completados}</span> Comp.</span>
-                       <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]"><span className="text-yellow-500">{analyticsStats.propuestas}</span> Prop.</span>
+                       <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]"><span className="text-blue-500">{stats.activos}</span> {t('projects.analytics.active' as any)}</span>
+                       <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]"><span className="text-green-500">{stats.completados}</span> {t('projects.analytics.completed' as any)}</span>
+                       <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]"><span className="text-yellow-500">{analyticsStats.propuestas}</span> {t('projects.analytics.proposed' as any)}</span>
                      </div>
                    </div>
                 </div>
@@ -214,9 +216,9 @@ export default function ProjectsPage() {
                   <Euro className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">Valor Medio por Registro</p>
+                  <p className="text-[13px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">{t('projects.analytics.averageValuePerRecord' as any)}</p>
                   <p className="text-[24px] font-bold text-[#0F172A] dark:text-[#F1F5F9] mt-0.5">
-                    {analyticsStats.avgValue.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {symbol}
+                    {analyticsStats.avgValue.toLocaleString(language === 'es' ? 'es-ES' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {symbol}
                   </p>
                 </div>
               </div>
@@ -224,33 +226,33 @@ export default function ProjectsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white dark:bg-[#111F3A] p-6 rounded-[24px] border border-slate-200/60 shadow-sm flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Valor Medio</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('projects.analytics.averageValue' as any)}</span>
                 <span className="text-2xl font-bold text-indigo-600 tabular-nums">
-                  {analyticsStats.avgValue.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {symbol}
+                  {analyticsStats.avgValue.toLocaleString(language === 'es' ? 'es-ES' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {symbol}
                 </span>
-                <span className="text-[11px] font-medium text-slate-500 mt-1 uppercase tracking-tight">Valor por proyecto</span>
+                <span className="text-[11px] font-medium text-slate-500 mt-1 uppercase tracking-tight">{t('projects.analytics.valuePerProject' as any)}</span>
               </div>
               <div className="bg-white dark:bg-[#111F3A] p-6 rounded-[24px] border border-slate-200/60 shadow-sm flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('projects.analytics.statusLabel' as any)}</span>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold text-emerald-600 tabular-nums">{stats.activos}</span>
-                  <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]">Activos</span>
+                  <span className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]">{t('projects.analytics.activeText' as any)}</span>
                 </div>
-                <span className="text-[11px] font-medium text-slate-500 mt-1 uppercase tracking-tight"><span className="text-yellow-500">{analyticsStats.propuestas}</span> Propuestas</span>
+                <span className="text-[11px] font-medium text-slate-500 mt-1 uppercase tracking-tight"><span className="text-yellow-500">{analyticsStats.propuestas}</span> {t('projects.analytics.proposalsText' as any)}</span>
               </div>
               <div className="bg-white dark:bg-[#111F3A] p-6 rounded-[24px] border border-slate-200/60 shadow-sm flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Conversión</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('projects.analytics.conversion' as any)}</span>
                 <span className="text-2xl font-bold text-blue-600 tabular-nums">
                   {projects.length > 0 ? Math.round((stats.completados / projects.length) * 100) : 0}%
                 </span>
-                <span className="text-[11px] font-medium text-slate-500 mt-1 uppercase tracking-tight">De éxito</span>
+                <span className="text-[11px] font-medium text-slate-500 mt-1 uppercase tracking-tight">{t('projects.analytics.successText' as any)}</span>
               </div>
             </div>
 
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
               <div className="bg-white dark:bg-[#111F3A] p-6 rounded-[24px] border border-[#E2E8F0] dark:border-[#1E3A5F] shadow-sm w-full min-w-0">
-                <h3 className="text-base font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight mb-6">Ingresos por Proyecto (Completados)</h3>
+                <h3 className="text-base font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight mb-6">{t('projects.analytics.revenuePerProject' as any)}</h3>
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={analyticsStats.completedProjects} layout="vertical" margin={{ left: 20 }}>
@@ -260,7 +262,7 @@ export default function ProjectsPage() {
                       <Tooltip 
                         cursor={{ fill: 'transparent' }}
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                        formatter={(value: any) => [`${Number(value).toLocaleString('es-ES')} ${symbol}`, 'Ingresos']}
+                        formatter={(value: any) => [`${Number(value).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')} ${symbol}`, t('projects.analytics.revenue' as any)]}
                       />
                       <Bar dataKey="ingresos" fill="#1B4FD8" radius={[0, 4, 4, 0]} barSize={20} />
                     </BarChart>
@@ -269,7 +271,7 @@ export default function ProjectsPage() {
               </div>
 
               <div className="bg-white dark:bg-[#111F3A] p-6 rounded-[24px] border border-[#E2E8F0] dark:border-[#1E3A5F] shadow-sm w-full min-w-0">
-                <h3 className="text-base font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight mb-6">Evolución Ingresos por Mes</h3>
+                <h3 className="text-base font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight mb-6">{t('projects.analytics.monthlyRevenueEvolution' as any)}</h3>
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={analyticsStats.evolution}>
@@ -279,7 +281,7 @@ export default function ProjectsPage() {
                         tickFormatter={(val) => `${val/1000}k${symbol}`} />
                       <Tooltip 
                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                        formatter={(value: any) => [`${Number(value).toLocaleString('es-ES')} ${symbol}`, 'Ingresos']}
+                        formatter={(value: any) => [`${Number(value).toLocaleString(language === 'es' ? 'es-ES' : 'en-US')} ${symbol}`, t('projects.analytics.revenue' as any)]}
                       />
                       <Line type="monotone" dataKey="ingresos" stroke="#1B4FD8" strokeWidth={3} dot={{ r: 4, fill: '#1B4FD8' }} activeDot={{ r: 6 }} />
                     </LineChart>

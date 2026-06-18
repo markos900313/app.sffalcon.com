@@ -41,6 +41,7 @@ import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, end
 import { es } from "date-fns/locale";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const REVENUE_DATA: any[] = [];
 
@@ -49,9 +50,10 @@ const TOP_ITEMS: any[] = [];
 const COLORS = ['#1B4FD8', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE'];
 
 export default function PerformancePage() {
+  const { t, language } = useLanguage();
   const supabase = createClient();
   const { organization } = useOrganization();
-  const [period, setPeriod] = useState("Esta semana");
+  const [period, setPeriod] = useState("week"); // "today" | "week" | "month"
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState({
     totalRevenue: 0,
@@ -69,7 +71,7 @@ export default function PerformancePage() {
   }, [organization, period]);
 
   function buildChartData(invs: any[], period: string) {
-    if (period === "Hoy") {
+    if (period === "today") {
       const slots = Array.from({ length: 24 }, (_, h) => ({
         name: `${String(h).padStart(2, '0')}h`,
         revenue: 0,
@@ -83,8 +85,10 @@ export default function PerformancePage() {
       return slots;
     }
     
-    if (period === "Esta semana") {
-      const days = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    if (period === "week") {
+      const days = language === 'es'
+        ? ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
+        : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
       const slots = days.map(d => ({ name: d, revenue: 0, actividad: 0 }));
       invs?.forEach(inv => {
         const d = new Date(inv.issue_date).getDay();
@@ -96,10 +100,10 @@ export default function PerformancePage() {
     }
     
     const slots = [
-      { name: 'Sem 1', revenue: 0, actividad: 0 },
-      { name: 'Sem 2', revenue: 0, actividad: 0 },
-      { name: 'Sem 3', revenue: 0, actividad: 0 },
-      { name: 'Sem 4', revenue: 0, actividad: 0 },
+      { name: language === 'es' ? 'Sem 1' : 'Wk 1', revenue: 0, actividad: 0 },
+      { name: language === 'es' ? 'Sem 2' : 'Wk 2', revenue: 0, actividad: 0 },
+      { name: language === 'es' ? 'Sem 3' : 'Wk 3', revenue: 0, actividad: 0 },
+      { name: language === 'es' ? 'Sem 4' : 'Wk 4', revenue: 0, actividad: 0 },
     ];
     invs?.forEach(inv => {
       const day = new Date(inv.issue_date).getDate();
@@ -117,10 +121,10 @@ export default function PerformancePage() {
       let start, end;
       const now = new Date();
       
-      if (period === "Hoy") {
+      if (period === "today") {
         start = startOfDay(now).toISOString();
         end = endOfDay(now).toISOString();
-      } else if (period === "Esta semana") {
+      } else if (period === "week") {
         start = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
         end = endOfWeek(now, { weekStartsOn: 1 }).toISOString();
       } else {
@@ -153,7 +157,7 @@ export default function PerformancePage() {
 
     } catch (err) {
       console.error("Error fetching performance data:", err);
-      toast.error("Error al cargar datos reales");
+      toast.error(t('performance.toast.loadError' as any));
     } finally {
       setLoading(false);
     }
@@ -166,21 +170,21 @@ export default function PerformancePage() {
       // Header
       doc.setFontSize(22);
       doc.setTextColor(20, 30, 50);
-      doc.text("Reporte Operativo", 20, 20);
+      doc.text(t('performance.pdf.reportTitle' as any), 20, 20);
       
       doc.setFontSize(10);
       doc.setTextColor(100);
-      doc.text(`Empresa: ${organization?.name || 'Sistema'}`, 20, 30);
-      doc.text(`Periodo: ${period}`, 20, 35);
-      doc.text(`Fecha de exportación: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 20, 40);
+      doc.text(`${t('performance.pdf.company' as any)}: ${organization?.name || 'Sistema'}`, 20, 30);
+      doc.text(`${t('performance.pdf.period' as any)}: ${t(`performance.periods.${period}` as any)}`, 20, 35);
+      doc.text(`${t('performance.pdf.exportDate' as any)}: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`, 20, 40);
 
       // Table Data
       const tableData = [
-        ["Métrica principal", "Valor"],
-        ["Ingresos Totales", `${metrics.totalRevenue.toLocaleString('es-ES')} €`],
-        ["Ticket Medio", `${metrics.averageTicket.toLocaleString('es-ES', { maximumFractionDigits: 2 })} €`],
-        ["Total Registros", metrics.totalAppointments.toString()],
-        ["Capacidad de atención", `${metrics.occupancy}%`]
+        [t('performance.pdf.mainMetric' as any), t('performance.pdf.value' as any)],
+        [t('performance.pdf.totalRevenue' as any), `${metrics.totalRevenue.toLocaleString('es-ES')} €`],
+        [t('performance.pdf.avgTicket' as any), `${metrics.averageTicket.toLocaleString('es-ES', { maximumFractionDigits: 2 })} €`],
+        [t('performance.pdf.totalRecords' as any), metrics.totalAppointments.toString()],
+        [t('performance.pdf.serviceCapacity' as any), `${metrics.occupancy}%`]
       ];
 
       autoTable(doc, {
@@ -191,11 +195,11 @@ export default function PerformancePage() {
         headStyles: { fillColor: [27, 79, 216] } 
       });
 
-      doc.save(`rendimiento_${organization?.name || 'report'}_${period}.pdf`);
-      toast.success("PDF generado con éxito");
+      doc.save(`rendimiento_${organization?.name || 'report'}_${t(`performance.periods.${period}` as any)}.pdf`);
+      toast.success(t('performance.toast.pdfSuccess' as any));
     } catch (err) {
       console.error("PDF generation error:", err);
-      toast.error("Error al generar PDF");
+      toast.error(t('performance.toast.pdfError' as any));
     }
   };
 
@@ -217,18 +221,18 @@ export default function PerformancePage() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">Análisis de Crecimiento</span>
-                  <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest border border-blue-500/20">Avanzado</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">{t('performance.growthAnalysis' as any)}</span>
+                  <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest border border-blue-500/20">{t('performance.advanced' as any)}</span>
                 </div>
                 <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-                   Rendimiento <span className="text-[#1B4FD8]">Operativo</span>
+                   {t('performance.title' as any)} <span className="text-[#1B4FD8]">{t('performance.subtitle' as any)}</span>
                 </h1>
               </div>
             </div>
 
             {/* Center: Period Selector & Actions */}
             <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
-              {["Hoy", "Esta semana", "Mes"].map((v) => (
+              {["today", "week", "month"].map((v) => (
                 <button
                   key={v}
                   onClick={() => setPeriod(v)}
@@ -239,14 +243,14 @@ export default function PerformancePage() {
                       : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   )}
                 >
-                  {v}
+                  {t(`performance.periods.${v}` as any)}
                 </button>
               ))}
               <div className="w-px h-6 bg-slate-200 dark:bg-white/10 mx-1" />
               <button 
                 onClick={handleDownload}
                 className="p-2.5 hover:bg-white dark:hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-blue-500"
-                title="Exportar PDF"
+                title={t('performance.exportPDF' as any)}
               >
                 <Download size={18} />
               </button>
@@ -255,7 +259,7 @@ export default function PerformancePage() {
             {/* Right: Real-time Stats */}
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 bg-white/50 dark:bg-white/5 py-2.5 rounded-2xl border border-slate-100 dark:border-white/5">
               <div className="flex flex-col items-center">
-                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Ingresos</span>
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('performance.kpis.revenue' as any)}</span>
                 <div className="flex items-center gap-1.5 mt-1">
                   <span className="text-lg font-black text-slate-900 dark:text-white leading-none">
                     {loading ? "..." : `${metrics.totalRevenue.toLocaleString('es-ES')}€`}
@@ -265,14 +269,14 @@ export default function PerformancePage() {
               </div>
               <div className="h-6 w-px bg-slate-200 dark:bg-white/10" />
               <div className="flex flex-col items-center">
-                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Tkt Medio</span>
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('performance.kpis.avgTicket' as any)}</span>
                 <span className="text-lg font-black text-slate-900 dark:text-white leading-none mt-1">
                   {loading ? "..." : `${metrics.averageTicket.toLocaleString('es-ES', { maximumFractionDigits: 0 })}€`}
                 </span>
               </div>
               <div className="h-6 w-px bg-slate-200 dark:bg-white/10" />
               <div className="flex flex-col items-center">
-                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Total Facturas</span>
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('performance.kpis.totalInvoices' as any)}</span>
                 <span className="text-lg font-black text-slate-900 dark:text-white leading-none mt-1">
                   {loading ? "..." : metrics.totalAppointments}
                 </span>
@@ -286,17 +290,17 @@ export default function PerformancePage() {
         <div className="lg:col-span-8 card-premium p-8 h-[450px] flex flex-col">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Ventas vs Actividad</h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Distribución semanal de actividad</p>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{t('performance.charts.salesVsActivity' as any)}</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('performance.charts.weeklyDistribution' as any)}</p>
             </div>
             <div className="flex gap-4">
                <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-[#1B4FD8]" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ingresos</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('performance.charts.revenue' as any)}</span>
                </div>
                <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-blue-200 dark:bg-blue-500/20" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Actividad</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('performance.charts.activity' as any)}</span>
                </div>
             </div>
           </div>
@@ -355,8 +359,8 @@ export default function PerformancePage() {
 
         <div className="lg:col-span-4 card-premium p-8 h-[450px] flex flex-col">
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Top Items</h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Los más destacados del periodo</p>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{t('performance.charts.topItems' as any)}</h3>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('performance.charts.periodHighlights' as any)}</p>
           </div>
           <div className="flex-1 w-full flex flex-col items-center justify-center">
              {TOP_ITEMS.length > 0 ? (
@@ -386,7 +390,7 @@ export default function PerformancePage() {
                           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                           <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{item.name}</span>
                         </div>
-                        <span className="text-[11px] font-black text-slate-900 dark:text-white">{item.value} uts</span>
+                        <span className="text-[11px] font-black text-slate-900 dark:text-white">{item.value} {t('performance.charts.units' as any)}</span>
                       </div>
                     ))}
                  </div>
@@ -394,7 +398,7 @@ export default function PerformancePage() {
              ) : (
                <div className="flex flex-col items-center gap-2 text-slate-400">
                  <ShoppingBag size={32} opacity={0.2} />
-                 <p className="text-[10px] font-bold uppercase tracking-widest">Sin datos registrados</p>
+                 <p className="text-[10px] font-bold uppercase tracking-widest">{t('performance.charts.noData' as any)}</p>
                </div>
              )}
           </div>
@@ -404,30 +408,30 @@ export default function PerformancePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <EfficiencyCard 
           icon={<Clock className="text-blue-500" size={18}/>}
-          label="Tiempo de Respuesta"
+          label={t('performance.efficiency.responseTime' as any)}
           value="N/A"
-          trend="Pendiente"
+          trend={t('performance.efficiency.pending' as any)}
           trendColor="text-slate-400"
         />
         <EfficiencyCard 
           icon={<Users className="text-blue-500" size={18}/>}
-          label="Atención / Servicio"
+          label={t('performance.efficiency.serviceAttention' as any)}
           value="N/A"
-          trend="Pendiente"
+          trend={t('performance.efficiency.pending' as any)}
           trendColor="text-slate-400"
         />
         <EfficiencyCard 
           icon={<Star className="text-blue-500" size={18}/>}
-          label="Satisfacción Contacto"
+          label={t('performance.efficiency.contactSatisfaction' as any)}
           value="N/A"
-          trend="Sin votos"
+          trend={t('performance.efficiency.noVotes' as any)}
           trendColor="text-slate-400"
         />
         <EfficiencyCard 
           icon={<Activity className="text-blue-500" size={18}/>}
-          label="Incidencias / Reclamaciones"
+          label={t('performance.efficiency.incidentsClaims' as any)}
           value="0%"
-          trend="Excelente"
+          trend={t('performance.efficiency.excellent' as any)}
           trendColor="text-emerald-500"
         />
       </div>

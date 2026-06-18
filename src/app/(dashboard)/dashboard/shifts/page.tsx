@@ -26,17 +26,19 @@ import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, startOfWeek, addDays, subDays, startOfMonth, endOfMonth, isSameDay, addMonths, subMonths } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const SHIFT_TYPES = [
-  { id: "morning", label: "Mañana", icon: <Sun size={14} />, color: "text-amber-500 bg-amber-500/10" },
-  { id: "afternoon", label: "Tarde", icon: <Sun size={14} />, color: "text-orange-500 bg-orange-500/10" },
-  { id: "split", label: "Partido", icon: <Coffee size={14} />, color: "text-emerald-500 bg-emerald-500/10" },
-  { id: "finde", label: "Fin de semana", icon: <Star size={14} />, color: "text-violet-500 bg-violet-500/10" }
+  { id: "morning", labelKey: "shifts.types.morning", icon: <Sun size={14} />, color: "text-amber-500 bg-amber-500/10" },
+  { id: "afternoon", labelKey: "shifts.types.afternoon", icon: <Sun size={14} />, color: "text-orange-500 bg-orange-500/10" },
+  { id: "split", labelKey: "shifts.types.split", icon: <Coffee size={14} />, color: "text-emerald-500 bg-emerald-500/10" },
+  { id: "finde", labelKey: "shifts.types.finde", icon: <Star size={14} />, color: "text-violet-500 bg-violet-500/10" }
 ];
 
 export default function ShiftsPage() {
+  const { t, language } = useLanguage();
   const supabase = createClient();
   const { organization } = useOrganization();
   const [loading, setLoading] = useState(true);
@@ -61,6 +63,8 @@ export default function ShiftsPage() {
     hora_fin_2: "20:00",
     notas: ""
   });
+
+  const dateLocale = language === 'es' ? es : enUS;
 
   useEffect(() => {
     if (organization) {
@@ -95,7 +99,7 @@ export default function ShiftsPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.staff_id) return toast.error("Selecciona un empleado");
+    if (!formData.staff_id) return toast.error(t('shifts.toast.selectEmployee' as any));
 
     setSaving(true);
     try {
@@ -119,7 +123,7 @@ export default function ShiftsPage() {
         const turnosFinal = turnosACrear.map(({ fecha_fin, repetir, ...rest }) => rest);
         const { error } = await supabase.from('shifts').insert(turnosFinal);
         if (error) throw error;
-        toast.success(`${turnosACrear.length} turnos creados`);
+        toast.success(t('shifts.toast.shiftsCreated' as any).replace('{count}', String(turnosACrear.length)));
         setIsModalOpen(false);
         setEditingShiftId(null);
         fetchData();
@@ -142,37 +146,37 @@ export default function ShiftsPage() {
           .update(finalPayload)
           .eq('id', editingShiftId);
         if (error) throw error;
-        toast.success("Turno actualizado");
+        toast.success(t('shifts.toast.updated' as any));
       } else {
         const { error } = await supabase
           .from('shifts')
           .insert([finalPayload]);
         if (error) throw error;
-        toast.success("Turno asignado");
+        toast.success(t('shifts.toast.assigned' as any));
       }
       
       setIsModalOpen(false);
       setEditingShiftId(null);
       fetchData();
     } catch (err) {
-      toast.error("Error al guardar turno");
+      toast.error(t('shifts.toast.saveError' as any));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Seguro que quieres eliminar este turno?")) return;
+    if (!confirm(t('shifts.deleteConfirm' as any))) return;
     try {
       const { error } = await supabase
         .from('shifts')
         .delete()
         .eq('id', id);
       if (error) throw error;
-      toast.success("Turno eliminado");
+      toast.success(t('shifts.toast.deleted' as any));
       fetchData();
     } catch (err) {
-      toast.error("Error al eliminar");
+      toast.error(t('shifts.toast.deleteError' as any));
     }
   };
 
@@ -235,11 +239,11 @@ export default function ShiftsPage() {
             </div>
             <div className="flex-1 min-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.3em] text-emerald-500">Gestión de Horarios</span>
-                <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[6px] md:text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Activo</span>
+                <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.3em] text-emerald-500">{t('shifts.header.management' as any)}</span>
+                <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[6px] md:text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">{t('shifts.header.activeStatus' as any)}</span>
               </div>
               <h1 className="text-base md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none truncate border-b-2 border-emerald-500/20 pb-1">
-                 Planificación
+                 {t('shifts.header.title' as any)}
               </h1>
             </div>
             <motion.button
@@ -249,7 +253,7 @@ export default function ShiftsPage() {
               className="lg:hidden px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase tracking-widest text-[8px] flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 ml-auto shrink-0"
             >
               <Plus size={14} />
-              Añadir
+              {t('shifts.header.add' as any)}
             </motion.button>
           </div>
 
@@ -262,10 +266,10 @@ export default function ShiftsPage() {
               </button>
               <div className="flex flex-col items-center min-w-[120px]">
                 <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tighter">
-                   {format(selectedDate, view === "month" ? "MMMM yyyy" : "d MMMM", { locale: es })}
+                   {format(selectedDate, view === "month" ? "MMMM yyyy" : "d MMMM", { locale: dateLocale })}
                 </span>
                 <span className="text-[8px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">
-                   {view === "week" ? "Semanal" : view === "day" ? "Diaria" : "Mensual"}
+                   {view === "week" ? t('shifts.views.weekly' as any) : view === "day" ? t('shifts.views.daily' as any) : t('shifts.views.monthly' as any)}
                 </span>
               </div>
               <button onClick={handleNext} className="p-2 hover:bg-white dark:hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-blue-500">
@@ -288,7 +292,7 @@ export default function ShiftsPage() {
                       : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   )}
                 >
-                  {v === "day" ? "Día" : v === "week" ? "Sem" : "Mes"}
+                  {v === "day" ? t('shifts.views.dayShort' as any) : v === "week" ? t('shifts.views.weekShort' as any) : t('shifts.views.monthShort' as any)}
                 </button>
               ))}
             </div>
@@ -305,7 +309,7 @@ export default function ShiftsPage() {
                       type.id === 'split' ? 'bg-emerald-500' :
                       type.id === 'finde' ? 'bg-violet-500' : 'bg-slate-400'
                     )} />
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">{type.label}</span>
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">{t(type.labelKey as any)}</span>
                  </div>
                ))}
             </div>
@@ -317,7 +321,7 @@ export default function ShiftsPage() {
               className="hidden lg:flex px-6 xl:px-8 py-3.5 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-xl font-black uppercase tracking-widest text-[9px] items-center gap-2.5 transition-all shadow-lg shadow-blue-500/20 shrink-0"
             >
               <Plus size={14} />
-              Añadir Turno
+              {t('shifts.header.addShift' as any)}
             </motion.button>
           </div>
         </div>
@@ -336,7 +340,7 @@ export default function ShiftsPage() {
                     isSameDay(day, new Date()) && "bg-blue-500/5"
                   )}>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                      {format(day, "eee", { locale: es })}
+                      {format(day, "eee", { locale: dateLocale })}
                     </p>
                     <p className={cn(
                       "text-2xl font-black text-slate-900 dark:text-white tracking-tighter",
@@ -367,7 +371,7 @@ export default function ShiftsPage() {
                             <div className="flex justify-between items-start mb-3">
                               <div className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5", type?.color)}>
                                 {type?.icon}
-                                <span className="text-[9px] font-black uppercase tracking-wider">{type?.label}</span>
+                                <span className="text-[9px] font-black uppercase tracking-wider">{type ? t(type.labelKey as any) : ""}</span>
                               </div>
                               <div className="flex items-center gap-1">
                                 <button onClick={(e) => { e.stopPropagation(); openEditModal(shift); }} className="p-1.5 hover:bg-blue-500/10 rounded-lg text-slate-400 hover:text-blue-500"><Pencil size={12} /></button>
@@ -380,7 +384,7 @@ export default function ShiftsPage() {
                                  {staff.find(s => s.id === shift.staff_id)?.full_name?.substring(0, 2) || "??"}
                               </div>
                               <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
-                                 {staff.find(s => s.id === shift.staff_id)?.full_name || "Cargando..."}
+                                 {staff.find(s => s.id === shift.staff_id)?.full_name || t('common.loading' as any)}
                               </p>
                             </div>
 
@@ -412,8 +416,8 @@ export default function ShiftsPage() {
           <div className="flex-1 w-full overflow-x-auto scroll-smooth py-2">
             <div className="min-w-full inline-flex flex-col bg-slate-50/50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
               <div className="flex divide-x divide-slate-100 dark:divide-white/5 border-b border-slate-100 dark:divide-white/5 bg-slate-50/10">
-                {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => (
-                  <div key={d} className="w-[180px] shrink-0 p-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
+                {(t('shifts.daysShort' as any) as any as string[]).map((d, index) => (
+                  <div key={index} className="w-[180px] shrink-0 p-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
                     {d}
                   </div>
                 ))}
@@ -452,7 +456,7 @@ export default function ShiftsPage() {
                       )}
                       {dayShifts.length > 0 && (
                         <div className="mt-1 text-[8px] font-black text-slate-300 uppercase tracking-widest">
-                          {dayShifts.length} {dayShifts.length === 1 ? 'turno' : 'turnos'}
+                          {dayShifts.length} {dayShifts.length === 1 ? t('shifts.single' as any) : t('shifts.plural' as any)}
                         </div>
                       )}
                     </div>
@@ -465,8 +469,8 @@ export default function ShiftsPage() {
           <div className="flex-1 p-8">
             <div className="flex items-center justify-between mb-8">
                <div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Turnos para hoy</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{format(selectedDate, "PPPP", { locale: es })}</p>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">{t('shifts.dayView.title' as any)}</h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{format(selectedDate, "PPPP", { locale: dateLocale })}</p>
                </div>
             </div>
             
@@ -479,10 +483,10 @@ export default function ShiftsPage() {
                            {type?.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{type?.label}</p>
+                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{type ? t(type.labelKey as any) : ""}</p>
                            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{shift.hora_inicio} - {shift.hora_fin}</p>
                            <p className="text-[10px] text-blue-500 font-bold mt-1">
-                              {staff.find(s => s.id === shift.staff_id)?.full_name || "Colaborador asignado"}
+                              {staff.find(s => s.id === shift.staff_id)?.full_name || t('shifts.dayView.defaultStaff' as any)}
                            </p>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -492,7 +496,7 @@ export default function ShiftsPage() {
                                openEditModal(shift);
                              }}
                              className="p-2.5 hover:bg-blue-500/10 dark:hover:bg-blue-500/20 rounded-xl transition-all text-slate-400 hover:text-blue-500 shadow-sm"
-                             title="Editar"
+                             title={t('common.edit' as any)}
                            >
                               <Pencil size={18} />
                            </button>
@@ -502,7 +506,7 @@ export default function ShiftsPage() {
                                handleDelete(shift.id);
                              }}
                              className="p-2.5 hover:bg-red-500/10 dark:hover:bg-red-500/20 rounded-xl transition-all text-slate-400 hover:text-red-500 shadow-sm"
-                             title="Eliminar"
+                             title={t('common.delete' as any)}
                            >
                               <Trash2 size={18} />
                            </button>
@@ -515,7 +519,7 @@ export default function ShiftsPage() {
                     <div className="w-20 h-20 bg-slate-50 dark:bg-white/5 rounded-[40px] flex items-center justify-center mx-auto mb-4 grayscale opacity-50">
                        <CalendarIcon size={32} className="text-slate-400" />
                     </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No hay turnos asignados para este día</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('shifts.dayView.noShifts' as any)}</p>
                  </div>
                )}
             </div>
@@ -538,9 +542,9 @@ export default function ShiftsPage() {
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <CalendarDays className="w-5 h-5 text-[#1B4FD8]" />
-                    {editingShiftId ? 'Editar Turno' : 'Asignar Turno'}
+                    {editingShiftId ? t('shifts.modal.editTitle' as any) : t('shifts.modal.newTitle' as any)}
                   </h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Organiza los horarios y planificación de tu equipo.</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('shifts.modal.subtitle' as any)}</p>
                 </div>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors">
                   <X className="w-5 h-5 text-slate-400" />
@@ -552,7 +556,7 @@ export default function ShiftsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Empleado */}
                   <div className="md:col-span-2 space-y-2">
-                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">PERSONAL ASIGNADO*</label>
+                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('shifts.modal.staffLabel' as any)}</label>
                     <div className="relative">
                       <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <select 
@@ -561,7 +565,7 @@ export default function ShiftsPage() {
                         value={formData.staff_id}
                         onChange={(e) => setFormData({...formData, staff_id: e.target.value})}
                       >
-                        <option value="" className="bg-[#111F3A] text-white">Seleccionar personal...</option>
+                        <option value="" className="bg-[#111F3A] text-white">{t('shifts.modal.staffPlaceholder' as any)}</option>
                         {staff.map(m => <option key={m.id} value={m.id} className="bg-[#111F3A] text-white">{m.full_name}</option>)}
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -570,7 +574,7 @@ export default function ShiftsPage() {
 
                   {/* Fecha */}
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">FECHA DEL REGISTRO</label>
+                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('shifts.modal.dateLabel' as any)}</label>
                     <div className="relative">
                       <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input 
@@ -585,7 +589,7 @@ export default function ShiftsPage() {
 
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">
-                      HASTA (opcional)
+                      {t('shifts.modal.endDateLabel' as any)}
                     </label>
                     <div className="relative">
                       <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -601,7 +605,7 @@ export default function ShiftsPage() {
 
                   {/* Tipo de Turno */}
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">BLOQUE HORARIO</label>
+                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('shifts.modal.blockLabel' as any)}</label>
                     <div className="relative">
                       <Clock3 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <select 
@@ -609,7 +613,7 @@ export default function ShiftsPage() {
                         value={formData.tipo}
                         onChange={(e) => setFormData({...formData, tipo: e.target.value})}
                       >
-                        {SHIFT_TYPES.map(t => <option key={t.id} value={t.id} className="bg-[#111F3A] text-white">{t.label}</option>)}
+                        {SHIFT_TYPES.map(t_item => <option key={t_item.id} value={t_item.id} className="bg-[#111F3A] text-white">{t(t_item.labelKey as any)}</option>)}
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     </div>
@@ -617,7 +621,7 @@ export default function ShiftsPage() {
 
                   {/* Hora Inicio */}
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">HORA ENTRADA</label>
+                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('shifts.modal.startTimeLabel' as any)}</label>
                     <div className="relative">
                       <Sun className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input 
@@ -632,7 +636,7 @@ export default function ShiftsPage() {
 
                   {/* Hora Fin */}
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">HORA SALIDA</label>
+                    <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('shifts.modal.endTimeLabel' as any)}</label>
                     <div className="relative">
                       <Moon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input 
@@ -650,12 +654,12 @@ export default function ShiftsPage() {
                       <div className="md:col-span-2">
                         <div className="h-px bg-slate-100 dark:bg-white/5 my-2" />
                         <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-4">
-                          Segundo bloque (tarde)
+                          {t('shifts.modal.splitSubtitle' as any)}
                         </p>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">
-                          HORA ENTRADA 2
+                          {t('shifts.modal.startTime2Label' as any)}
                         </label>
                         <div className="relative">
                           <Sun className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -669,7 +673,7 @@ export default function ShiftsPage() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">
-                          HORA SALIDA 2
+                          {t('shifts.modal.endTime2Label' as any)}
                         </label>
                         <div className="relative">
                           <Moon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -693,7 +697,7 @@ export default function ShiftsPage() {
                   onClick={() => setIsModalOpen(false)}
                   className="w-full sm:w-auto px-6 py-3 md:py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-all border border-slate-200 dark:border-white/10"
                 >
-                  CANCELAR
+                  {t('common.cancel' as any)}
                 </button>
                 <button 
                   onClick={handleCreate}
@@ -707,10 +711,10 @@ export default function ShiftsPage() {
                   {saving ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      GUARDANDO...
+                      {t('shifts.modal.saving' as any)}
                     </>
                   ) : (
-                    editingShiftId ? 'ACTUALIZAR REGISTRO' : 'PLANIFICAR TURNO'
+                    editingShiftId ? t('shifts.modal.updateButton' as any) : t('shifts.modal.createButton' as any)
                   )}
                 </button>
               </div>

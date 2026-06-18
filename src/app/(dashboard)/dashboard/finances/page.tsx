@@ -23,6 +23,7 @@ import Link from "next/link";
 import { generateFinanceReport } from "@/lib/generatePDF";
 import { Bot } from "lucide-react";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
+import { useLanguage } from "@/lib/LanguageContext";
 
 
 const monthToNumber: Record<string, number> = {
@@ -35,6 +36,7 @@ const numberToMonth: Record<number, string> = Object.fromEntries(
 );
 
 export default function FinancesPage() {
+  const { t, language } = useLanguage();
   const router = useRouter();
   const { organization } = useOrganization();
   const now = new Date();
@@ -62,7 +64,7 @@ export default function FinancesPage() {
   const [auditorMessages, setAuditorMessages] = useState<{role: string, content: string}[]>([]);
   const [auditorLoading, setAuditorLoading] = useState(false);
   const [auditorTeaser, setAuditorTeaser] = useState<string>(
-    'Analizando tus datos financieros...'
+    t('finances.auditor.loading' as any)
   )
   const [teaserLoading, setTeaserLoading] = useState(false)
 
@@ -87,24 +89,24 @@ export default function FinancesPage() {
       a.download = `Finanzas_${selectedYear}_${new Date().toISOString().split("T")[0]}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
-      toast.success("Exportado correctamente");
+      toast.success(t('finances.toast.exported' as any));
     } catch (error) {
-      toast.error("Error al exportar");
+      toast.error(t('finances.toast.exportError' as any));
     } finally {
       setIsExporting(false);
     }
   };
 
   const handleGeneratePDF = async () => {
-    if (!allYearEntries.length) { toast.error("Sin datos para el informe"); return; }
+    if (!allYearEntries.length) { toast.error(t('finances.toast.noDataReport' as any)); return; }
     console.log('organization al generar PDF:', organization)
     setGeneratingPDF(true);
     try {
       await generateFinanceReport(allYearEntries, selectedMonthNumber, selectedYear, organization?.name ?? '');
-      toast.success("PDF generado");
+      toast.success(t('finances.toast.pdfGenerated' as any));
     } catch (error: any) { 
       console.error("Error generando PDF:", error);
-      toast.error(error?.message || "Error al generar el PDF"); 
+      toast.error(error?.message || t('finances.toast.pdfError' as any)); 
     }
     finally { setGeneratingPDF(false); }
   };
@@ -122,7 +124,7 @@ export default function FinancesPage() {
 
     if (yearError) {
       // Error silencioso en producción
-      toast.error("Error al refrescar datos");
+      toast.error(t('finances.toast.refreshError' as any));
     } else {
       const mappedYear = (yearData ?? []).map((r: any) => ({
         id: String(r.id),
@@ -159,7 +161,7 @@ export default function FinancesPage() {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        toast.error("Sesión expirada");
+        toast.error(t('finances.toast.sessionExpired' as any));
         router.push("/login");
         return;
       }
@@ -259,11 +261,14 @@ export default function FinancesPage() {
     if (entries.length === 0 || teaserLoading) return
     setTeaserLoading(true)
     try {
+      const promptText = t('finances.auditor.promptTeaser' as any)
+        .replace('{month}', selectedMonth)
+        .replace('{year}', String(selectedYear));
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: `Analiza mis finanzas de ${selectedMonth} ${selectedYear} y dime en UNA frase corta (máximo 12 palabras) algo concreto que observas. Sin signos de admiración. Sin asteriscos. Directo.`,
+          message: promptText,
           organizationId: organization?.id
         })
       })
@@ -273,7 +278,7 @@ export default function FinancesPage() {
       }
     } catch {
       setAuditorTeaser(
-        'Tengo el análisis de este mes listo cuando quieras.'
+        t('finances.auditor.teaserDefault' as any)
       )
     } finally {
       setTeaserLoading(false)
@@ -292,21 +297,24 @@ export default function FinancesPage() {
     if (auditorMessages.length === 0) {
       setAuditorLoading(true);
       try {
+        const promptText = t('finances.auditor.promptAnalysis' as any)
+          .replace('{month}', selectedMonth)
+          .replace('{year}', String(selectedYear));
         const response = await fetch('/api/ai/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            message: `Dame un análisis breve de mis finanzas de ${selectedMonth} ${selectedYear}. Máximo 3 líneas.`,
+            message: promptText,
             organizationId: organization?.id
           })
         });
         const data = await response.json();
         setAuditorMessages([
-          { role: 'assistant', content: data.reply || 'Error en la respuesta del servidor' }
+          { role: 'assistant', content: data.reply || 'Error' }
         ]);
       } catch (error) {
         console.error('Error iniciando auditor:', error);
-        toast.error('Error al inicializar el auditor');
+        toast.error(t('finances.auditor.initError' as any));
       } finally {
         setAuditorLoading(false);
       }
@@ -329,10 +337,10 @@ export default function FinancesPage() {
         })
       });
       const data = await response.json();
-      setAuditorMessages(prev => [...prev, { role: 'assistant', content: data.reply || 'Error en la respuesta' }]);
+      setAuditorMessages(prev => [...prev, { role: 'assistant', content: data.reply || 'Error' }]);
     } catch (error) {
       console.error('Error enviando mensaje:', error);
-      toast.error('Error al enviar mensaje');
+      toast.error(t('finances.auditor.sendError' as any));
     } finally {
       setAuditorLoading(false);
     }
@@ -353,20 +361,20 @@ export default function FinancesPage() {
           <div className="card-premium py-6 px-6 md:px-8 flex flex-col sm:flex-row items-baseline sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <h1 className="text-4xl tracking-tighter uppercase italic text-[var(--text-primary)]">
-                Gestión <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">Financiera</span>
+                {t('finances.header.management' as any)} <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">{t('finances.header.financial' as any)}</span>
                 <span className="text-emerald-500 text-xs not-italic ml-3 tracking-[0.3em] opacity-50">AUDIT MODE</span>
               </h1>
               <p className="text-[var(--text-secondary)] text-[10px] uppercase tracking-[0.4em]">
-                Ejercicio Fiscal {selectedMonth} {selectedYear}
+                {t('finances.header.fiscalYear' as any)} {selectedMonth} {selectedYear}
               </p>
             </div>
 
             <div className="flex items-center gap-3 bg-[var(--bg-page)] border border-[var(--border-card)] rounded-2xl px-5 py-3 shadow-xl">
-              <button onClick={() => setSelectedYear(y => y - 1)} className="p-1.5 hover:bg-[var(--bg-card)] rounded-xl transition-all" title="Año anterior">
+              <button onClick={() => setSelectedYear(y => y - 1)} className="p-1.5 hover:bg-[var(--bg-card)] rounded-xl transition-all" title={t('finances.header.prevYear' as any)}>
                 <svg className="w-5 h-5 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
               <span className="text-lg text-[var(--text-primary)] italic tracking-tighter min-w-[50px] text-center">{selectedYear}</span>
-              <button onClick={() => setSelectedYear(y => y + 1)} className="p-1.5 hover:bg-[var(--bg-card)] rounded-xl transition-all" title="Siguiente año">
+              <button onClick={() => setSelectedYear(y => y + 1)} className="p-1.5 hover:bg-[var(--bg-card)] rounded-xl transition-all" title={t('finances.header.nextYear' as any)}>
                 <svg className="w-5 h-5 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </button>
             </div>
@@ -451,13 +459,13 @@ export default function FinancesPage() {
           <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-[40px] p-8 text-white shadow-2xl shadow-emerald-500/20">
              <h4 className="uppercase tracking-[0.3em] text-[10px] mb-6 flex items-center gap-3">
                 <Bot className="w-5 h-5" />
-                Auditor Financiero IA
+                {t('finances.auditor.title' as any)}
              </h4>
              <p className="text-sm font-medium italic opacity-90 leading-relaxed mb-8">
-               "{teaserLoading ? 'Analizando tus finanzas...' : auditorTeaser}"
+               "{teaserLoading ? t('finances.auditor.loading' as any) : auditorTeaser}"
              </p>
              <button onClick={handleOpenAuditor} className="w-full py-4 bg-white text-emerald-700 rounded-2xl text-[10px] uppercase tracking-widest hover:shadow-2xl transition-all active:scale-95">
-                Iniciar Consultoría
+                {t('finances.auditor.startButton' as any)}
              </button>
           </div>
         </div>
@@ -501,7 +509,7 @@ export default function FinancesPage() {
             <div className="flex items-center justify-between p-4 md:p-6 border-b border-[var(--border-card)] shrink-0">
               <div className="flex items-center gap-3">
                 <Bot className="w-5 h-5 md:w-6 md:h-6 text-emerald-500" />
-                <h2 className="text-lg md:text-xl font-bold text-[var(--text-primary)]">Auditor Financiero IA</h2>
+                <h2 className="text-lg md:text-xl font-bold text-[var(--text-primary)]">{t('finances.auditor.title' as any)}</h2>
               </div>
               <button
                 onClick={() => {
@@ -520,7 +528,7 @@ export default function FinancesPage() {
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 min-h-[200px]">
               {auditorMessages.length === 0 && !auditorLoading && (
                 <div className="text-center text-[var(--text-secondary)] text-sm py-8">
-                  <p>Iniciando análisis financiero...</p>
+                  <p>{t('finances.auditor.initAnalysis' as any)}</p>
                 </div>
               )}
               {auditorMessages.map((msg, idx) => (
@@ -561,6 +569,7 @@ export default function FinancesPage() {
 
 // Componente auxiliar para el input del chat
 function AuditorChatInput({ onSend, disabled }: { onSend: (msg: string) => void; disabled: boolean }) {
+  const { t } = useLanguage();
   const [input, setInput] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -578,7 +587,7 @@ function AuditorChatInput({ onSend, disabled }: { onSend: (msg: string) => void;
         value={input}
         onChange={(e) => setInput(e.target.value)}
         disabled={disabled}
-        placeholder="Haz una pregunta sobre tus finanzas..."
+        placeholder={t('finances.auditor.inputPlaceholder' as any)}
         className="flex-1 bg-[var(--bg-page)] border border-[var(--border-card)] rounded-xl px-4 py-2 text-[var(--text-primary)] placeholder-[var(--text-secondary)] disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-emerald-500"
       />
       <button
@@ -586,7 +595,7 @@ function AuditorChatInput({ onSend, disabled }: { onSend: (msg: string) => void;
         disabled={disabled || !input.trim()}
         className="px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 transition-all active:scale-95 text-sm font-medium"
       >
-        Enviar
+        {t('finances.auditor.sendButton' as any)}
       </button>
     </form>
   );

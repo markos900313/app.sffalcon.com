@@ -23,7 +23,8 @@ import { usePlan, useTrialStats } from "@/hooks/usePlan";
 import { useTheme } from "@/lib/ThemeContext";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
+import { useLanguage } from "@/lib/LanguageContext";
 import {
   getModuleLabel,
   getModuleEnabled
@@ -50,6 +51,7 @@ export default function DashboardPage() {
   const supabase = createClient();
   const { organization, loading: orgLoading } = useOrganization();
   const { theme } = useTheme();
+  const { language, t } = useLanguage();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -234,7 +236,7 @@ export default function DashboardPage() {
       .reduce((s, f) => s + Number(f.amount), 0);
       const exp = data.financeHome.concat(data.financeBiz).filter(f => Number(f.month) === m && 
         new Date(f.created_at).getFullYear() === y && !(f.type === 'ingreso' || f.type === 'ingreso_cliente')).reduce((s, f) => s + Number(f.amount), 0);
-      return { name: format(d, 'MMM', { locale: es }).toUpperCase(), ingresos: inc, gastos: exp };
+      return { name: format(d, 'MMM', { locale: language === 'en' ? enUS : es }).toUpperCase(), ingresos: inc, gastos: exp };
     });
 
     const upcomingAppts = data.appointments
@@ -292,17 +294,15 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-4 md:px-8">
             <div>
               <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight leading-none mb-2">
-                {new Date().getHours() < 12 ? "Buenos días" : new Date().getHours() < 20 ? "Buenas tardes" : "Buenas noches"}, {(data.profile?.full_name || data.profile?.name || data.user?.user_metadata?.full_name || data.user?.user_metadata?.name || data.user?.email?.split('@')[0] || "Usuario").split(' ')[0]}
+                {new Date().getHours() < 12 ? t('dashboard.goodMorning' as any) : new Date().getHours() < 20 ? t('dashboard.goodAfternoon' as any) : t('dashboard.goodEvening' as any)}, {(data.profile?.full_name || data.profile?.name || data.user?.user_metadata?.full_name || data.user?.user_metadata?.name || data.user?.email?.split('@')[0] || t('dashboard.user' as any)).split(' ')[0]}
               </h1>
               <div className="flex items-center gap-3">
                 <p className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.2em]">
-                  {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>
             </div>
           </div>
-
-
 
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 relative w-full">
             {/* Bloqueo por Expiración */}
@@ -313,24 +313,24 @@ export default function DashboardPage() {
                     <Lock className="w-10 h-10 text-red-500" />
                   </div>
                   <h2 className="text-2xl font-black text-[var(--text-primary)] mb-3 tracking-tight lowercase">
-                    Prueba finalizada
+                    {t('dashboard.trialEndedTitle' as any)}
                   </h2>
                   <p className="text-[var(--text-secondary)] mb-10 leading-relaxed font-medium">
-                    Tu período de prueba de 90 días ha expirado. Activa tu suscripción para recuperar el acceso a todas tus herramientas.
+                    {t('dashboard.trialEndedDesc' as any)}
                   </p>
                   <div className="w-full flex flex-col gap-3">
                     <Link
                       href="/dashboard/settings/plan"
                       className="w-full bg-[#1B4FD8] hover:bg-blue-700 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-blue-500/30 flex items-center justify-center gap-2"
                     >
-                      Ver planes disponibles
+                      {t('dashboard.viewPlans' as any)}
                       <ArrowRight className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => window.location.href = 'mailto:soporte@soportefacil.com'}
                       className="w-full py-4 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                     >
-                      Contactar con soporte
+                      {t('dashboard.contactSupport' as any)}
                     </button>
                   </div>
                 </div>
@@ -342,59 +342,56 @@ export default function DashboardPage() {
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                 <CompactKPI
-                  title="CITAS ESTE MES"
+                  title={t('dashboard.kpis.appointments' as any)}
                   value={stats.apptsThisMonth}
                   icon={<CalendarCheck size={20} />}
                   category="agenda"
-                  label="Actividad registrada"
+                  label={t('dashboard.kpis.appointmentsLabel' as any)}
                   showGrowth={stats.showGrowth}
                 />
                 <CompactKPI
-                  title="CONTACTOS"
+                  title={t('dashboard.kpis.contacts' as any)}
                   value={stats.activeClientsTotal}
                   icon={<Users size={20} />}
                   category="clientes"
-                  label="Total base de datos"
+                  label={t('dashboard.kpis.contactsLabel' as any)}
                   percentage={stats.clientsPerc}
                   trend={stats.clientsTrend}
                   showGrowth={stats.showGrowth}
                 />
                 <CompactKPI
-                  title="MENSAJES"
+                  title={t('dashboard.kpis.messages' as any)}
                   value={data.comms.filter((c: any) => !c.is_read).length}
                   icon={<MessageSquare size={20} />}
                   category="mensajes"
-                  label="Sin leer"
+                  label={t('dashboard.kpis.messagesLabel' as any)}
                   showGrowth={stats.showGrowth}
                 />
                 <CompactKPI
-                  title="FACTURACIÓN"
+                  title={t('dashboard.kpis.billing' as any)}
                   value={formatCurrency(stats.billingCurrent, data.org?.currency)}
                   icon={<FileText size={20} />}
                   category="finanzas"
-                  label="Este mes"
+                  label={t('dashboard.kpis.billingLabel' as any)}
                   showGrowth={stats.showGrowth}
                 />
               </div>
-
-
-
               {/* Evolución Financiera (Bloqueado en gratuito) */}
               <div className="relative card-premium card-finanzas p-8 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 <div className="flex items-center justify-between mb-10">
                   <div className="flex items-center gap-3">
                     <TrendingUp className="w-5 h-5 text-blue-600" />
-                    <h3 className="card-titulo">Evolución Financiera</h3>
+                    <h3 className="card-titulo">{t('dashboard.financeEvolution' as any)}</h3>
                   </div>
                   {true && (
                     <div className="flex gap-6">
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full bg-[#1B4FD8]" />
-                        <span className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">Ingresos</span>
+                        <span className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{t('dashboard.income' as any)}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
-                        <span className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">Gastos</span>
+                        <span className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-widest">{t('dashboard.expenses' as any)}</span>
                       </div>
                     </div>
                   )}
@@ -427,7 +424,7 @@ export default function DashboardPage() {
               {/* Últimos Mensajes */}
               <div className="card-premium card-mensajes p-8 flex flex-col min-h-[400px] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="card-titulo">Últimos Mensajes</h3>
+                  <h3 className="card-titulo">{t('dashboard.latestMessages' as any)}</h3>
                   <Link href="/dashboard/communications" className="text-blue-600 hover:text-blue-700">
                     <ArrowRight className="w-5 h-5" />
                   </Link>
@@ -441,10 +438,10 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-[var(--text-primary)] truncate mb-1">
-                            {msg.contact_name || msg.contact || "Contacto"}
+                            {msg.contact_name || msg.contact || t('dashboard.contactFallback' as any)}
                           </p>
                           <p className="text-xs text-[var(--text-secondary)] truncate leading-relaxed">
-                            {msg.last_message_content || msg.content || msg.last_message || "Nueva conversación..."}
+                            {msg.last_message_content || msg.content || msg.last_message || t('dashboard.newConversation' as any)}
                           </p>
                         </div>
                         <ChevronRight size={16} className="text-[var(--text-secondary)]/30 group-hover:text-blue-500 transition-colors" />
@@ -454,7 +451,7 @@ export default function DashboardPage() {
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-[var(--border-card)] rounded-3xl">
                       <Mail className="w-10 h-10 text-[var(--text-secondary)]/20 mb-4" />
                       <p className="text-sm text-[var(--text-secondary)] max-w-[200px] leading-relaxed">
-                        Aún no tienes mensajes. Cuando tus clientes escriban aparecerán aquí.
+                        {t('dashboard.noMessages' as any)}
                       </p>
                     </div>
                   )}
@@ -465,12 +462,10 @@ export default function DashboardPage() {
             {/* COLUMNA DERECHA (30%) */}
             <div className="flex flex-col gap-6">
 
-
-
               {/* Próximas Citas */}
               <div className="card-premium card-agenda p-8 flex flex-col min-h-[350px] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 <div className="flex items-center justify-between mb-8">
-                  <h3 className="card-titulo">Próxima Actividad</h3>
+                  <h3 className="card-titulo">{t('dashboard.nextActivity' as any)}</h3>
                   <Link href="/dashboard/appointments" className="text-blue-600 hover:text-blue-700">
                     <ArrowRight className="w-5 h-5" />
                   </Link>
@@ -484,10 +479,10 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-[var(--text-primary)] truncate mb-1">
-                            {appt.customer_name || appt.title || appt.clients?.name || "Sin nombre"}
+                            {appt.customer_name || appt.title || appt.clients?.name || t('dashboard.noName' as any)}
                           </p>
                           <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest">
-                            {new Date(appt.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} • {appt.time}
+                            {new Date(appt.date).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'short' })} • {appt.time}
                           </p>
                         </div>
                         <ChevronRight size={16} className="text-[var(--text-secondary)]/30 group-hover:text-emerald-500 transition-colors" />
@@ -497,7 +492,7 @@ export default function DashboardPage() {
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-[var(--border-card)] rounded-3xl">
                       <CalendarCheck className="w-10 h-10 text-[var(--text-secondary)]/20 mb-4" />
                       <p className="text-sm text-[var(--text-secondary)] max-w-[200px] leading-relaxed">
-                        No tienes citas próximas. Ve a Agenda para crear una.
+                        {t('dashboard.noAppointments' as any)}
                       </p>
                     </div>
                   )}
@@ -508,14 +503,14 @@ export default function DashboardPage() {
               <div className="card-premium card-resumen p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 <h3 className="card-titulo mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#0891B2]" />
-                  Resumen del Mes
+                  {t('dashboard.monthSummary' as any)}
                 </h3>
                 <div className="space-y-4">
                   {[
-                    { label: `Contactos nuevos`, value: stats.activeClientsTotal || '0' },
-                    { label: `Actividad registrada`, value: stats.apptsThisMonth || '0' },
-                    { label: 'Mensajes recibidos', value: stats.totalComms || '0' },
-                    { label: 'Tasa respuesta', value: data.comms.length > 0 
+                    { label: t('dashboard.newContacts' as any), value: stats.activeClientsTotal || '0' },
+                    { label: t('dashboard.registeredActivity' as any), value: stats.apptsThisMonth || '0' },
+                    { label: t('dashboard.receivedMessages' as any), value: stats.totalComms || '0' },
+                    { label: t('dashboard.responseRate' as any), value: data.comms.length > 0 
                       ? Math.round((data.comms.filter((c:any) => 
                           c.responded_by === 'ai' || c.responded_by === 'human'
                         ).length / data.comms.length) * 100) + '%'
@@ -534,29 +529,29 @@ export default function DashboardPage() {
               <div className="card-premium p-6 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 <h3 className="card-titulo mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#1B4FD8]" />
-                  Acciones Rápidas Ultra
+                  {t('dashboard.quickActions' as any)}
                 </h3>
                 <div className="flex flex-col gap-3">
                   <Link href="/dashboard/invoices" className="flex items-center gap-3 p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs font-bold text-[var(--text-primary)]/80 hover:bg-blue-500/10 transition-colors group">
                     <FileText className="w-4 h-4 text-blue-500" />
-                    NUEVA FACTURA
+                    {t('dashboard.newInvoice' as any)}
                   </Link>
                   <Link href="/dashboard/clients" className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10 text-xs font-bold text-[var(--text-primary)]/80 hover:bg-emerald-500/10 transition-colors group">
                     <Users className="w-4 h-4 text-emerald-500" />
-                    VER CONTACTOS
+                    {t('dashboard.viewContacts' as any)}
                   </Link>
                   <Link href="/dashboard/inventory" className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 text-xs font-bold text-[var(--text-primary)]/80 hover:bg-amber-500/10 transition-colors group">
                     <Package className="w-4 h-4 text-amber-500" />
-                    GESTIONAR CATÁLOGO
+                    {t('dashboard.manageCatalog' as any)}
                   </Link>
                   <div className="h-px bg-[var(--border-card)] my-1" />
                   <Link href="/dashboard/clients" className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-page)] text-xs font-bold text-[var(--text-primary)]/80 hover:bg-blue-500/10 transition-colors group">
                     <Plus className="w-4 h-4 text-[#1B4FD8] group-hover:rotate-90 transition-transform" />
-                    + NUEVO CONTACTO
+                    {t('dashboard.addNewContact' as any)}
                   </Link>
                   <Link href="/dashboard/appointments" className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-page)] text-xs font-bold text-[var(--text-primary)]/80 hover:bg-emerald-500/10 transition-colors group">
                     <Plus className="w-4 h-4 text-emerald-500 group-hover:rotate-90 transition-transform" />
-                    + NUEVA CITA / RESERVA
+                    {t('dashboard.addNewAppointment' as any)}
                   </Link>
                 </div>
               </div>

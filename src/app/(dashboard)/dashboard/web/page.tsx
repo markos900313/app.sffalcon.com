@@ -17,10 +17,12 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function MiWebPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [syncWithAI, setSyncWithAI] = useState(false);
@@ -99,9 +101,9 @@ export default function MiWebPage() {
       }
 
       if (error) throw error;
-      toast.success("Configuración de la web guardada");
+      toast.success(t('web.toast.saved' as any));
     } catch (err: any) {
-      toast.error("Error al guardar: " + (err.message === "Forbidden" ? "Permiso denegado (¿Has ejecutado el SQL?)" : err.message));
+      toast.error(t('web.toast.saveError' as any) + ": " + (err.message === "Forbidden" ? t('web.toast.permissionDenied' as any) : err.message));
     } finally {
       setSaving(false);
     }
@@ -118,15 +120,15 @@ export default function MiWebPage() {
       {/* Header */}
       <div className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[16px] p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">Mi Web</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">{t('web.title' as any)}</h1>
           <p className="text-xs text-[var(--text-secondary)] uppercase tracking-[0.2em] font-bold">
-            Configura el enlace a tu página web o redes sociales. La IA lo compartirá con tus contactos.
+            {t('web.subtitle' as any)}
           </p>
         </div>
         <div className="flex items-center gap-3">
           <div className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span className="text-[10px] font-black uppercase text-emerald-500 tracking-wider">Conexión Segura</span>
+            <span className="text-[10px] font-black uppercase text-emerald-500 tracking-wider">{t('web.secureConnection' as any)}</span>
           </div>
         </div>
       </div>
@@ -141,17 +143,17 @@ export default function MiWebPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[var(--text-secondary)] flex items-center gap-2">
-                <Globe className="w-4 h-4" /> Presencia Online
+                <Globe className="w-4 h-4" /> {t('web.onlinePresence' as any)}
               </h3>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">URL WEB</label>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('web.urlWeb' as any)}</label>
                   <div className="relative group">
                     <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#1B4FD8] transition-colors" />
                     <input
                       type="url"
-                      placeholder="https://www.tuproyecto.com"
+                      placeholder={t('web.urlWebPlaceholder' as any)}
                       className="w-full pl-12 pr-4 py-3.5 bg-[var(--bg-page)] border border-[var(--border-card)] rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                       value={formData.web_url}
                       onChange={(e) => setFormData({ ...formData, web_url: e.target.value })}
@@ -160,12 +162,12 @@ export default function MiWebPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">INSTAGRAM</label>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('web.instagram' as any)}</label>
                   <div className="relative group">
                     <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-pink-500 transition-colors" />
                     <input
                       type="text"
-                      placeholder="@tuperfil"
+                      placeholder={t('web.instagramPlaceholder' as any)}
                       className="w-full pl-12 pr-4 py-3.5 bg-[var(--bg-page)] border border-[var(--border-card)] rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-pink-500 transition-all"
                       value={formData.instagram_url}
                       onChange={(e) => setFormData({ ...formData, instagram_url: e.target.value })}
@@ -174,12 +176,12 @@ export default function MiWebPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">FACEBOOK</label>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('web.facebook' as any)}</label>
                   <div className="relative group">
                     <Facebook className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                     <input
                       type="text"
-                      placeholder="facebook.com/tuperfil"
+                      placeholder={t('web.facebookPlaceholder' as any)}
                       className="w-full pl-12 pr-4 py-3.5 bg-[var(--bg-page)] border border-[var(--border-card)] rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-600 transition-all"
                       value={formData.facebook_url}
                       onChange={(e) => setFormData({ ...formData, facebook_url: e.target.value })}
@@ -191,17 +193,17 @@ export default function MiWebPage() {
 
             <div className="space-y-6">
               <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[var(--text-secondary)] flex items-center gap-2">
-                <MapPin className="w-4 h-4" /> Ubicación
+                <MapPin className="w-4 h-4" /> {t('web.location' as any)}
               </h3>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">GOOGLE MAPS</label>
+                  <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('web.googleMaps' as any)}</label>
                   <div className="relative group">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-red-500 transition-colors" />
                     <input
                       type="text"
-                      placeholder="Link de Google Maps"
+                      placeholder={t('web.googleMapsPlaceholder' as any)}
                       className="w-full pl-12 pr-4 py-3.5 bg-[var(--bg-page)] border border-[var(--border-card)] rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-red-500 transition-all"
                       value={formData.google_maps_url}
                       onChange={(e) => setFormData({ ...formData, google_maps_url: e.target.value })}
@@ -214,7 +216,7 @@ export default function MiWebPage() {
                     <ExternalLink className="w-6 h-6 text-blue-500" />
                   </div>
                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
-                    Asegúrate de que los enlaces sean públicos para que la IA pueda compartirlos con tus contactos.
+                    {t('web.linksPublicInfo' as any)}
                   </p>
                 </div>
               </div>
@@ -226,29 +228,29 @@ export default function MiWebPage() {
           {/* AI Info Section */}
           <div className="space-y-6">
             <h3 className="text-sm font-black uppercase tracking-[0.2em] text-[var(--text-secondary)] flex items-center gap-2">
-              <FileText className="w-4 h-4" /> Información para la IA
+              <FileText className="w-4 h-4" /> {t('web.aiInfo' as any)}
             </h3>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">DESCRIPCIÓN PÚBLICA / SEMÁNTICA</label>
+              <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('web.publicDesc' as any)}</label>
               <textarea
                 rows={6}
-                placeholder="Describe tu actividad, ambiente, especialidades... La IA usará este texto para informar a los contactos de forma natural."
+                placeholder={t('web.publicDescPlaceholder' as any)}
                 className="w-full p-6 bg-[var(--bg-page)] border border-[var(--border-card)] rounded-[24px] text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none shadow-inner"
                 value={formData.public_description}
                 onChange={(e) => setFormData({ ...formData, public_description: e.target.value })}
               />
-              <p className="text-[10px] text-slate-400 italic">Ej: "Somos una entidad de servicios profesionales con enfoque en calidad y atención personalizada."</p>
+              <p className="text-[10px] text-slate-400 italic">{t('web.publicDescExample' as any)}</p>
             </div>
           </div>
 
           <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-card)]">
             <div>
               <p className="text-sm font-bold text-[var(--text-primary)]">
-                Usar esta información para la IA
+                {t('web.useInfoForAI' as any)}
               </p>
               <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                La IA compartirá tu web, redes y descripción con tus clientes automáticamente
+                {t('web.useInfoForAIDesc' as any)}
               </p>
             </div>
             <button
@@ -273,7 +275,7 @@ export default function MiWebPage() {
               className="px-10 py-4 bg-[#1B4FD8] hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-blue-500/20 active:scale-95 flex items-center gap-3 disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              GUARDAR CONFIGURACIÓN
+              {t('web.saveConfig' as any)}
             </button>
           </div>
         </form>
