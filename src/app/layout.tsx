@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/ThemeContext";
 import { Toaster } from "react-hot-toast";
+import { LanguageProvider } from "@/lib/LanguageContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,8 +64,10 @@ export default function RootLayout({
       </head>
       <body className="h-full antialiased font-sans">
         <ThemeProvider>
-          <Toaster position="top-center" />
-          {children}
+          <LanguageProvider>
+            <Toaster position="top-center" />
+            {children}
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

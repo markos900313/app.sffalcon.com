@@ -30,7 +30,8 @@ import {
   LogOut,
   Check,
   Plus,
-  Minus
+  Minus,
+  Languages
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -38,6 +39,7 @@ import { useSidebar } from "@/contexts/SidebarContext";
 import { useOrganization } from "@/context/OrganizationContext";
 import { usePlan } from "@/hooks/usePlan";
 import { toast } from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
   Home, Mail, Users, CalendarCheck, Settings,
@@ -49,55 +51,55 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
 const NAV_SECTIONS = [
   {
     id: 'principal',
-    title: 'Principal',
+    titleKey: 'sections.principal',
     items: [
-      { key: 'dashboard', path: '/dashboard', label: 'Inicio', icon: 'Home' },
-      { key: 'communications', path: '/dashboard/communications', label: 'Mensajes', icon: 'Mail' },
-      { key: 'web', path: '/dashboard/web', label: 'Mi Web', icon: 'Globe' },
+      { key: 'dashboard', path: '/dashboard', labelKey: 'sidebar.home', icon: 'Home' },
+      { key: 'communications', path: '/dashboard/communications', labelKey: 'sidebar.communications', icon: 'Mail' },
+      { key: 'web', path: '/dashboard/web', labelKey: 'sidebar.web', icon: 'Globe' },
     ]
   },
   {
     id: 'crm',
-    title: 'CRM',
+    titleKey: 'sections.crm',
     items: [
-      { key: 'appointments', path: '/dashboard/appointments', label: 'Agenda', icon: 'CalendarCheck' },
-      { key: 'clients', path: '/dashboard/clients', label: 'Contactos', icon: 'Users' },
-      { key: 'leads', path: '/dashboard/leads', label: 'Captación', icon: 'UserPlus' },
-      { key: 'pipeline', path: '/dashboard/pipeline', label: 'Oportunidades', icon: 'Folder' },
+      { key: 'appointments', path: '/dashboard/appointments', labelKey: 'sidebar.appointments', icon: 'CalendarCheck' },
+      { key: 'clients', path: '/dashboard/clients', labelKey: 'sidebar.clients', icon: 'Users' },
+      { key: 'leads', path: '/dashboard/leads', labelKey: 'sidebar.leads', icon: 'UserPlus' },
+      { key: 'pipeline', path: '/dashboard/pipeline', labelKey: 'sidebar.pipeline', icon: 'Folder' },
     ]
   },
   {
     id: 'negocio',
-    title: 'Negocio',
+    titleKey: 'sections.negocio',
     items: [
-      { key: 'inventory', path: '/dashboard/inventory', label: 'Catálogo', icon: 'Package' },
-      { key: 'products', path: '/dashboard/products', label: 'Inventario', icon: 'Package' },
-      { key: 'projects', path: '/dashboard/projects', label: 'Proyectos', icon: 'Briefcase' },
+      { key: 'inventory', path: '/dashboard/inventory', labelKey: 'sidebar.inventory', icon: 'Package' },
+      { key: 'products', path: '/dashboard/products', labelKey: 'sidebar.products', icon: 'Package' },
+      { key: 'projects', path: '/dashboard/projects', labelKey: 'sidebar.projects', icon: 'Briefcase' },
     ]
   },
   {
     id: 'equipo',
-    title: 'Equipo',
+    titleKey: 'sections.equipo',
     items: [
-      { key: 'team', path: '/dashboard/team', label: 'Equipo', icon: 'Users' },
-      { key: 'fichaje', path: '/dashboard/fichaje', label: 'Fichaje', icon: 'UserCheck' },
-      { key: 'shifts', path: '/dashboard/shifts', label: 'Turnos', icon: 'Clock' },
+      { key: 'team', path: '/dashboard/team', labelKey: 'sidebar.team', icon: 'Users' },
+      { key: 'fichaje', path: '/dashboard/fichaje', labelKey: 'sidebar.fichaje', icon: 'UserCheck' },
+      { key: 'shifts', path: '/dashboard/shifts', labelKey: 'sidebar.shifts', icon: 'Clock' },
     ]
   },
   {
     id: 'economia',
-    title: 'Economía',
+    titleKey: 'sections.economia',
     items: [
-      { key: 'finances', path: '/dashboard/finances', label: 'Finanzas', icon: 'TrendingUp' },
-      { key: 'invoices', path: '/dashboard/invoices', label: 'Facturas', icon: 'FileText' },
+      { key: 'finances', path: '/dashboard/finances', labelKey: 'sidebar.finances', icon: 'TrendingUp' },
+      { key: 'invoices', path: '/dashboard/invoices', labelKey: 'sidebar.invoices', icon: 'FileText' },
     ]
   },
   {
     id: 'analisis',
-    title: 'Análisis',
+    titleKey: 'sections.analisis',
     items: [
-      { key: 'analytics', path: '/dashboard/analytics', label: 'Estadísticas', icon: 'LayoutDashboard' },
-      { key: 'performance', path: '/dashboard/performance', label: 'Rendimiento', icon: 'BarChart3' },
+      { key: 'analytics', path: '/dashboard/analytics', labelKey: 'sidebar.analytics', icon: 'LayoutDashboard' },
+      { key: 'performance', path: '/dashboard/performance', labelKey: 'sidebar.performance', icon: 'BarChart3' },
     ]
   },
   {
@@ -129,6 +131,7 @@ export default function Sidebar() {
   const supabase = createClient();
   const { isOpen, setIsOpen } = useSidebar();
   const { plan } = usePlan();
+  const { language, setLanguage, t } = useLanguage();
   const [profile, setProfile] = useState<any>(null);
   
   // Estado para las secciones colapsables
@@ -236,7 +239,7 @@ export default function Sidebar() {
                   onClick={() => toggleSection(section.id)}
                 >
                   <h3 className="block lg:block md:hidden text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-[0.15em] transition-colors group-hover/title:text-blue-500">
-                    {section.title}
+                    {section.titleKey ? t(section.titleKey as any) : section.title}
                   </h3>
                   <div className="block lg:block md:hidden text-slate-400/70 group-hover/title:text-blue-500 transition-colors">
                     {isExpanded ? <Minus size={10} /> : <Plus size={10} />}
@@ -268,7 +271,7 @@ export default function Sidebar() {
                               "lg:justify-start lg:px-4",
                               isActive ? activeItemClass : inactiveItemClass
                             )}
-                            title={item.label}
+                            title={item.labelKey ? t(item.labelKey as any) : item.label}
                           >
                             <IconComponent className={cn(
                               "w-5 h-5 transition-transform group-hover:scale-110 shrink-0",
@@ -278,7 +281,7 @@ export default function Sidebar() {
                               "block md:hidden lg:block text-[13px] font-medium tracking-tight truncate",
                               isActive ? "text-blue-600 dark:text-blue-400" : "text-[#64748B] dark:text-[#94A3B8]"
                             )}>
-                              {item.label}
+                              {item.labelKey ? t(item.labelKey as any) : item.label}
                             </span>
                           </Link>
                         );
@@ -293,6 +296,21 @@ export default function Sidebar() {
 
         {/* PIE DE PÁGINA FIJO - AJUSTES */}
         <div className="p-4 border-t border-[var(--border-sidebar)]">
+          <button
+            onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
+            className={cn(
+              "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11 w-full mb-1",
+              "md:justify-center md:px-2",
+              "lg:justify-start lg:px-4",
+              "text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5"
+            )}
+            title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+          >
+            <Languages className="w-5 h-5 transition-transform group-hover:scale-110 shrink-0" />
+            <span className="block md:hidden lg:block text-[13px] font-medium tracking-tight truncate">
+              {language === 'es' ? 'EN' : 'ES'}
+            </span>
+          </button>
           <Link
             href="/dashboard/settings"
             onClick={closeSidebar}
@@ -303,7 +321,7 @@ export default function Sidebar() {
               "lg:justify-start lg:px-4",
               pathname === '/dashboard/settings' ? activeItemClass : inactiveItemClass
             )}
-            title="Ajustes"
+            title={t('sidebar.settings' as any)}
           >
             <Settings className={cn(
               "w-5 h-5 transition-transform group-hover:scale-110 shrink-0",
@@ -313,7 +331,7 @@ export default function Sidebar() {
               "block md:hidden lg:block text-[13px] font-medium tracking-tight truncate",
               pathname === '/dashboard/settings' ? "text-blue-600 dark:text-blue-400" : "text-[#64748B] dark:text-[#94A3B8]"
             )}>
-              Ajustes
+              {t('sidebar.settings' as any)}
             </span>
           </Link>
         </div>
