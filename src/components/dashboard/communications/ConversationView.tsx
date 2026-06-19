@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { Conversation, SuggestedReply } from "@/app/(dashboard)/dashboard/communications/page";
+import { useLanguage } from "@/lib/LanguageContext";
 
 /**
  * ConversationView — Audit / Read-Only mode
@@ -33,6 +34,7 @@ export default function ConversationView({
   businessData?: any
 }) {
   const supabase = createClient();
+  const { t } = useLanguage();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isUpdatingStatus = useRef(false);
 
@@ -78,7 +80,7 @@ export default function ConversationView({
   const [displayName, setDisplayName] = useState(
     chat?.contact_name ||
     chat?.contact_identifier?.split('@')[0] ||
-    'Contacto'
+    t('communications.contactFallback')
   );
   const [clientInfo, setClientInfo] = useState<{ id?: string, phone?: string } | null>(null);
 
@@ -109,7 +111,7 @@ export default function ConversationView({
 
       const name = chat.contact_name
         || chat.contact_identifier?.split('@')[0]
-        || 'Contacto';
+        || t('communications.contactFallback');
       setDisplayName(name);
     };
 
@@ -172,10 +174,10 @@ export default function ConversationView({
 
       setReplyText('');
       await onRefresh();
-      toast.success('Mensaje enviado');
+      toast.success(t('communications.toast.sent'));
     } catch (e) {
       console.error(e);
-      toast.error('Error al enviar');
+      toast.error(t('communications.toast.sendError'));
     } finally {
       setSending(false);
     }
@@ -184,7 +186,7 @@ export default function ConversationView({
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !chat) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error('Máximo 10MB'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error(t('communications.toast.max10MB')); return; }
     setUploadingFile(true);
     try {
       const ext = file.name.split('.').pop();
@@ -205,10 +207,10 @@ export default function ConversationView({
         file_size: file.size
       });
       await onRefresh();
-      toast.success('Documento enviado');
+      toast.success(t('communications.toast.docSent'));
     } catch (e) {
       console.error(e);
-      toast.error('Error al subir archivo');
+      toast.error(t('communications.toast.uploadError'));
     } finally {
       setUploadingFile(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -232,10 +234,10 @@ export default function ConversationView({
 
       if (error) throw error;
       await onRefresh();
-      toast.success("Marcado como resuelto");
+      toast.success(t('communications.toast.markedResolved'));
     } catch (e) {
       console.error("Resolve Error:", e);
-      toast.error("Error al actualizar");
+      toast.error(t('communications.toast.updateError'));
     }
   };
 
@@ -283,10 +285,10 @@ export default function ConversationView({
           <MessageCircle className="w-8 h-8 md:w-10 md:h-10 text-blue-200 dark:text-[#1E3A5F]" />
         </div>
         <h3 className="text-lg md:text-xl lg:text-[24px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-[-0.02em] mb-2">
-          Visor de Conversación
+          {t('communications.view.title')}
         </h3>
         <p className="text-[11px] md:text-[13px] text-[#64748B] dark:text-[#64748B] font-normal max-w-md text-center">
-          Selecciona una conversación para ver cómo Asistente ha gestionado la comunicación con tu cliente.
+          {t('communications.view.desc')}
         </p>
       </div>
     );
@@ -319,7 +321,7 @@ export default function ConversationView({
                 </p>
               )}
               <p className="text-[9px] md:text-[10px] text-[#94A3B8] dark:text-[#475569] font-normal uppercase tracking-wider">
-                {chat?.channel === 'whatsapp' ? 'WhatsApp' : 'Vía Email'}
+                {chat?.channel === 'whatsapp' ? 'WhatsApp' : t('communications.viaEmail')}
               </p>
             </div>
           </div>
@@ -330,11 +332,11 @@ export default function ConversationView({
               if (clientInfo?.phone) {
                 window.location.href = `tel:${clientInfo.phone}`;
               } else {
-                toast.error("Sin teléfono registrado");
+                toast.error(t('communications.noPhone'));
               }
             }}
             className="p-2 rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F1F5F9] hover:bg-slate-50 dark:hover:bg-[#162040] transition-all"
-            title={clientInfo?.phone ? `Llamar a ${clientInfo.phone}` : "Sin teléfono registrado"}
+            title={clientInfo?.phone ? t('communications.call') + " " + clientInfo.phone : t('communications.noPhone')}
           >
             <Phone className="w-4 h-4" />
           </button>
@@ -348,7 +350,7 @@ export default function ConversationView({
               }
             }}
             className="p-2 rounded-lg text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F1F5F9] hover:bg-slate-50 dark:hover:bg-[#162040] transition-all"
-            title="Ver ficha de cliente"
+            title={t('communications.viewClientCard')}
           >
             <User className="w-4 h-4" />
           </button>
@@ -359,7 +361,7 @@ export default function ConversationView({
       <div className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6 bg-slate-50/10 dark:bg-[#0A1628] scrollbar-thin dark:scrollbar-thumb-[#1E3A5F] dark:scrollbar-track-transparent">
         <div className="max-w-4xl mx-auto w-full">
           <p className="text-center text-[9px] md:text-[11px] font-semibold text-[#94A3B8] dark:text-[#475569] uppercase tracking-[0.12em] py-4">
-            Historial gestionado por Asistente IA
+            {t('communications.historyManagedByAi')}
           </p>
 
           {chat.messages?.map((msg: any) => (
@@ -390,7 +392,7 @@ export default function ConversationView({
                     return '--:--';
                   }
                 })()}
-                {(msg.sender === 'admin' || msg.sender === 'ai') && " • Asistente IA"}
+                {(msg.sender === 'admin' || msg.sender === 'ai') && " • " + t('communications.aiAssistant')}
               </span>
             </div>
           ))}
@@ -406,7 +408,7 @@ export default function ConversationView({
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Escribe una respuesta... (Enter para enviar, Shift+Enter nueva línea)"
+              placeholder={t('communications.replyPlaceholder')}
               rows={2}
               className="flex-1 bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-xl px-4 py-3 text-[13px] text-[#0F172A] dark:text-[#F1F5F9] outline-none focus:border-[#1B4FD8] transition-all resize-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
             />
@@ -422,7 +424,7 @@ export default function ConversationView({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingFile}
                 className="w-10 h-10 bg-slate-100 dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-[#1B4FD8] hover:border-[#1B4FD8] transition-all disabled:opacity-50"
-                title="Adjuntar documento"
+                title={t('communications.attachDocument')}
               >
                 {uploadingFile ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Paperclip className="w-4 h-4" />}
               </button>
@@ -430,7 +432,7 @@ export default function ConversationView({
                 onClick={handleSendReply}
                 disabled={sending || !replyText.trim()}
                 className="w-10 h-10 bg-[#1B4FD8] rounded-xl flex items-center justify-center text-white hover:bg-blue-700 transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20"
-                title="Enviar"
+                title={t('communications.send')}
               >
                 {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
               </button>
@@ -438,7 +440,7 @@ export default function ConversationView({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-slate-400 dark:text-[#475569]">
-              La IA está {chat.status === 'requires_human' ? 'pausada — responde tú' : 'activa en esta conversación'}
+              {chat.status === 'requires_human' ? t('communications.aiPaused') : t('communications.aiActive')}
             </span>
             <button
               onClick={handleMarkResolved}
@@ -446,7 +448,7 @@ export default function ConversationView({
               className="h-7 px-3 bg-[#10B981] text-white rounded-lg flex items-center gap-1.5 font-semibold text-[11px] hover:bg-[#059669] transition-all disabled:opacity-50"
             >
               <CheckCircle className="w-3.5 h-3.5" />
-              {chat.status === 'resolved' ? 'Resuelto' : 'Marcar resuelto'}
+              {chat.status === 'resolved' ? t('communications.resolved') : t('communications.markResolved')}
             </button>
           </div>
         </div>

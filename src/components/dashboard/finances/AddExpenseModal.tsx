@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { useOrganization } from '@/context/OrganizationContext';
 import { OCIO_EXPENSE_CATEGORIES } from './categories';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface AddExpenseModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface AddExpenseModalProps {
 
 export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpenseModalProps) {
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -50,16 +52,16 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
     const newErrors: Record<string, string> = {};
 
     if (!category.trim()) {
-      newErrors.category = 'Selecciona o escribe una categoría';
+      newErrors.category = t('finances.addExpense.errors.categoryEmpty');
     }
 
     const amountNum = parseFloat(amount.replace(',', '.'));
     if (!amount.trim() || isNaN(amountNum) || amountNum <= 0) {
-      newErrors.amount = 'El importe debe ser mayor que 0';
+      newErrors.amount = t('finances.addExpense.errors.amountInvalid');
     }
 
     if (!selectedMonth) {
-      newErrors.month = 'Selecciona un mes';
+      newErrors.month = t('finances.addExpense.errors.selectMonth');
     }
 
     setErrors(newErrors);
@@ -106,13 +108,13 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        toast.error('Usuario no autenticado');
+        toast.error(t('finances.addExpense.errors.noUser'));
         setIsLoading(false);
         return;
       }
 
       if (!organization?.id) {
-        toast.error('Organización no encontrada');
+        toast.error(t('finances.addExpense.errors.noOrg'));
         setIsLoading(false);
         return;
       }
@@ -134,7 +136,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
         throw error;
       }
 
-      toast.success('Gasto añadido');
+      toast.success(t('finances.addExpense.toast.success'));
       setCategory('');
       setAmount('');
       setSelectedMonth(new Date().getMonth() + 1);
@@ -144,7 +146,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
       onSuccess?.();
     } catch (error: any) {
       console.error('Error:', error);
-      toast.error('Error al añadir gasto');
+      toast.error(t('finances.addExpense.toast.error'));
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +165,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[18px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight">
-            Nuevo Gasto
+            {t('finances.addExpense.title')}
           </h2>
           <button
             onClick={onClose}
@@ -176,7 +178,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
         <form onSubmit={handleSubmit} className="space-y-3 md:space-y-3.5 lg:space-y-4">
           <div>
             <label className="block text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider mb-2.5 ml-1">
-              Nombre / Categoría
+              {t('finances.addExpense.categoryLabel')}
             </label>
             <div className="relative" ref={suggestionsRef}>
               <input
@@ -184,7 +186,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
                 value={category}
                 onChange={(e) => handleCategoryChange(e.target.value)}
                 onFocus={() => setShowSuggestions(true)}
-                placeholder="Ej: Mantenimiento"
+                placeholder={t('finances.addExpense.categoryPlaceholder')}
                 className={`w-full px-4 py-2.5 border rounded-xl bg-[#F1F5F9] dark:bg-[#111F3A] text-[#0F172A] dark:text-[#F1F5F9] placeholder:text-[#64748B] dark:placeholder:text-[#475569] focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-[14px] font-normal min-h-[44px] ${
                   errors.category
                     ? 'border-[#EF4444] dark:border-[#EF4444]'
@@ -213,14 +215,14 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
 
           <div>
             <label className="block text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider mb-2.5 ml-1">
-              Tipo de Gasto (Rápido)
+              {t('finances.addExpense.quickTypeLabel')}
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full px-4 py-2.5 border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl bg-[#F1F5F9] dark:bg-[#111F3A] text-[#0F172A] dark:text-[#F1F5F9] focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-[14px] font-normal min-h-[44px] appearance-none"
             >
-              <option value="" className="bg-[#111F3A] text-white">Selecciona una opción...</option>
+              <option value="" className="bg-[#111F3A] text-white">{t('finances.addExpense.quickTypeSelect')}</option>
               {OCIO_EXPENSE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat} className="bg-[#111F3A] text-white">
                   {cat}
@@ -235,7 +237,7 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
               inputMode="decimal"
               value={amount}
               onChange={(e) => handleAmountChange(e.target.value)}
-              placeholder="0,00"
+              placeholder={t('finances.addExpense.amountPlaceholder')}
               className={`w-full px-4 py-2.5 border rounded-xl bg-[#F1F5F9] dark:bg-[#111F3A] text-[#0F172A] dark:text-[#F1F5F9] placeholder:text-[#64748B] dark:placeholder:text-[#475569] focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-[14px] font-semibold tabular-nums min-h-[44px] ${
                 errors.amount
                   ? 'border-[#EF4444] dark:border-[#EF4444]'
@@ -257,18 +259,18 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
                   : 'border-[#E2E8F0] dark:border-[#1E3A5F]'
               }`}
             >
-              <option value={1} className="bg-[#111F3A] text-white">Enero</option>
-              <option value={2} className="bg-[#111F3A] text-white">Febrero</option>
-              <option value={3} className="bg-[#111F3A] text-white">Marzo</option>
-              <option value={4} className="bg-[#111F3A] text-white">Abril</option>
-              <option value={5} className="bg-[#111F3A] text-white">Mayo</option>
-              <option value={6} className="bg-[#111F3A] text-white">Junio</option>
-              <option value={7} className="bg-[#111F3A] text-white">Julio</option>
-              <option value={8} className="bg-[#111F3A] text-white">Agosto</option>
-              <option value={9} className="bg-[#111F3A] text-white">Septiembre</option>
-              <option value={10} className="bg-[#111F3A] text-white">Octubre</option>
-              <option value={11} className="bg-[#111F3A] text-white">Noviembre</option>
-              <option value={12} className="bg-[#111F3A] text-white">Diciembre</option>
+              <option value={1} className="bg-[#111F3A] text-white">{t('common.months.january')}</option>
+              <option value={2} className="bg-[#111F3A] text-white">{t('common.months.february')}</option>
+              <option value={3} className="bg-[#111F3A] text-white">{t('common.months.march')}</option>
+              <option value={4} className="bg-[#111F3A] text-white">{t('common.months.april')}</option>
+              <option value={5} className="bg-[#111F3A] text-white">{t('common.months.may')}</option>
+              <option value={6} className="bg-[#111F3A] text-white">{t('common.months.june')}</option>
+              <option value={7} className="bg-[#111F3A] text-white">{t('common.months.july')}</option>
+              <option value={8} className="bg-[#111F3A] text-white">{t('common.months.august')}</option>
+              <option value={9} className="bg-[#111F3A] text-white">{t('common.months.september')}</option>
+              <option value={10} className="bg-[#111F3A] text-white">{t('common.months.october')}</option>
+              <option value={11} className="bg-[#111F3A] text-white">{t('common.months.november')}</option>
+              <option value={12} className="bg-[#111F3A] text-white">{t('common.months.december')}</option>
             </select>
             {errors.month && (
               <p className="text-[10px] md:text-[11px] lg:text-[12px] text-[#EF4444] mt-1">{errors.month}</p>
@@ -277,12 +279,12 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
 
           <div>
             <label className="block text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider mb-2.5 ml-1">
-              Concepto / Detalles
+              {t('finances.addExpense.detailsLabel')}
             </label>
             <textarea
               value={concept}
               onChange={(e) => setConcept(e.target.value)}
-              placeholder="Añade detalles del gasto..."
+              placeholder={t('finances.addExpense.detailsPlaceholder')}
               className="w-full px-4 py-2.5 border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl bg-[#F1F5F9] dark:bg-[#111F3A] text-[#0F172A] dark:text-[#F1F5F9] placeholder:text-[#64748B] dark:placeholder:text-[#475569] focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-[14px] font-normal resize-none h-20"
             />
           </div>
@@ -294,14 +296,14 @@ export default function AddExpenseModal({ isOpen, onClose, onSuccess }: AddExpen
               disabled={isLoading}
               className="flex-1 px-4 py-3 border border-[#E2E8F0] dark:border-[#1E3A5F] text-[#64748B] dark:text-[#94A3B8] rounded-xl hover:bg-slate-50 dark:hover:bg-[#162040] transition-all text-[13px] font-semibold uppercase tracking-wide disabled:opacity-50 min-h-[48px]"
             >
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={isLoading}
               className="flex-1 px-4 py-3 bg-[#1B4FD8] text-white rounded-xl hover:bg-blue-700 transition-all text-[13px] font-semibold uppercase tracking-wide shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-50 min-h-[48px]"
             >
-              {isLoading ? 'Guardando...' : 'Nuevo Gasto'}
+              {isLoading ? t('common.loading') : t('finances.addExpense.submitButton')}
             </button>
           </div>
         </form>

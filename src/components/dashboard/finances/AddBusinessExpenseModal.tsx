@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { createClient } from '@/lib/supabase/client';
 import { useOrganization } from '@/context/OrganizationContext';
+import { useLanguage } from '@/lib/LanguageContext';
 import { OCIO_EXPENSE_CATEGORIES } from './categories';
 
 interface Props {
@@ -13,12 +14,19 @@ interface Props {
   onSuccess?: () => void;
 }
 
-const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-
 const inputCls = "w-full px-4 py-2.5 border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl bg-[#F1F5F9] dark:bg-[#111F3A] text-[#0F172A] dark:text-[#F1F5F9] focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-[14px] min-h-[44px] appearance-none";
+
+const getCategoryKey = (cat: string) => {
+  return cat
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s*\/\s*/g, '_')
+    .replace(/\s+/g, '_');
+};
 
 export default function AddBusinessExpenseModal({ isOpen, onClose, onSuccess }: Props) {
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [concept, setConcept] = useState('');
   const [category, setCategory] = useState(OCIO_EXPENSE_CATEGORIES[0]);
   const [amount, setAmount] = useState('');
@@ -27,11 +35,26 @@ export default function AddBusinessExpenseModal({ isOpen, onClose, onSuccess }: 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const monthsList = [
+    { value: 1, label: t('common.months.january') },
+    { value: 2, label: t('common.months.february') },
+    { value: 3, label: t('common.months.march') },
+    { value: 4, label: t('common.months.april') },
+    { value: 5, label: t('common.months.may') },
+    { value: 6, label: t('common.months.june') },
+    { value: 7, label: t('common.months.july') },
+    { value: 8, label: t('common.months.august') },
+    { value: 9, label: t('common.months.september') },
+    { value: 10, label: t('common.months.october') },
+    { value: 11, label: t('common.months.november') },
+    { value: 12, label: t('common.months.december') },
+  ];
+
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!concept.trim()) e.concept = 'El concepto no puede estar vacío';
+    if (!concept.trim()) e.concept = t('finances.addBusinessExpense.errors.conceptEmpty');
     const n = parseFloat(amount.replace(',', '.'));
-    if (!amount.trim() || isNaN(n) || n <= 0) e.amount = 'El importe debe ser mayor que 0';
+    if (!amount.trim() || isNaN(n) || n <= 0) e.amount = t('finances.addBusinessExpense.errors.amountInvalid');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -43,8 +66,8 @@ export default function AddBusinessExpenseModal({ isOpen, onClose, onSuccess }: 
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { toast.error('No autenticado'); return; }
-      if (!organization?.id) { toast.error('Organización no encontrada'); return; }
+      if (!user) { toast.error(t('finances.addBusinessExpense.toast.noUser')); return; }
+      if (!organization?.id) { toast.error(t('finances.addBusinessExpense.toast.noOrg')); return; }
 
       const { error } = await supabase.from('business_entries').insert({
         user_id: user.id,
@@ -57,11 +80,11 @@ export default function AddBusinessExpenseModal({ isOpen, onClose, onSuccess }: 
         notes: notes.trim() || null,
       });
       if (error) throw error;
-      toast.success('Gasto añadido correctamente');
+      toast.success(t('finances.addBusinessExpense.toast.success'));
       setConcept(''); setAmount(''); setNotes('');
       setCategory(OCIO_EXPENSE_CATEGORIES[0]); setMonth(new Date().getMonth() + 1); setErrors({});
       onClose(); onSuccess?.();
-    } catch { toast.error('Error al añadir gasto'); }
+    } catch { toast.error(t('finances.addBusinessExpense.toast.error')); }
     finally { setIsLoading(false); }
   };
 
@@ -72,8 +95,8 @@ export default function AddBusinessExpenseModal({ isOpen, onClose, onSuccess }: 
       <div className="bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl p-6 w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-[18px] font-semibold text-[#0F172A] dark:text-[#F1F5F9]">Nuevo Gasto</h2>
-            <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8] mt-0.5 uppercase tracking-wide">Gasto del negocio</p>
+            <h2 className="text-[18px] font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{t('finances.addBusinessExpense.title')}</h2>
+            <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8] mt-0.5 uppercase tracking-wide">{t('finances.addBusinessExpense.subtitle')}</p>
           </div>
           <button onClick={onClose} className="text-[#64748B] hover:text-[#0F172A] dark:hover:text-white transition-colors p-1">
             <X className="w-5 h-5" />
@@ -81,41 +104,45 @@ export default function AddBusinessExpenseModal({ isOpen, onClose, onSuccess }: 
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-[11px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">Concepto *</label>
+            <label className="block text-[11px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">{t('finances.addBusinessExpense.conceptLabel')}</label>
             <input type="text" value={concept} onChange={e => { setConcept(e.target.value); setErrors(p => ({...p, concept: ''})); }}
-              placeholder="Ej: Mantenimiento" className={inputCls + (errors.concept ? ' border-red-400' : '')} />
+              placeholder={t('finances.addBusinessExpense.conceptPlaceholder')} className={inputCls + (errors.concept ? ' border-red-400' : '')} />
             {errors.concept && <p className="text-[11px] text-red-400 mt-1">{errors.concept}</p>}
           </div>
           <div>
-            <label className="block text-[11px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">Tipo de gasto</label>
+            <label className="block text-[11px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">{t('finances.addBusinessExpense.typeLabel')}</label>
             <select value={category} onChange={e => setCategory(e.target.value)} className={inputCls}>
-              {OCIO_EXPENSE_CATEGORIES.map(t => <option key={t} value={t} className="bg-[#111F3A] text-white">{t}</option>)}
+              {OCIO_EXPENSE_CATEGORIES.map(catOption => (
+                <option key={catOption} value={catOption} className="bg-[#111F3A] text-white">
+                  {t(`finances.categories.${getCategoryKey(catOption)}`, { defaultValue: catOption })}
+                </option>
+              ))}
             </select>
           </div>
           <div>
-            <label className="block text-[11px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">Importe (€) *</label>
+            <label className="block text-[11px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">{t('finances.addBusinessExpense.amountLabel')}</label>
             <input type="text" inputMode="decimal" value={amount} onChange={e => { setAmount(e.target.value); setErrors(p => ({...p, amount: ''})); }}
               placeholder="0,00" className={inputCls + ' font-semibold tabular-nums' + (errors.amount ? ' border-red-400' : '')} />
             {errors.amount && <p className="text-[11px] text-red-400 mt-1">{errors.amount}</p>}
           </div>
           <div>
-            <label className="block text-[11px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">Mes</label>
+            <label className="block text-[11px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">{t('finances.addBusinessExpense.monthLabel')}</label>
             <select value={month} onChange={e => setMonth(parseInt(e.target.value))} className={inputCls}>
-              {MESES.map((m, i) => <option key={m} value={i + 1} className="bg-[#111F3A] text-white">{m}</option>)}
+              {monthsList.map((m) => <option key={m.value} value={m.value} className="bg-[#111F3A] text-white">{m.label}</option>)}
             </select>
           </div>
           <div>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Notas opcionales..."
+            <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder={t('finances.addBusinessExpense.notesPlaceholder')}
               className={inputCls + ' resize-none h-16'} />
           </div>
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100 dark:border-[#1E3A5F]">
             <button type="button" onClick={onClose} disabled={isLoading}
               className="flex-1 px-4 py-3 border border-[#E2E8F0] dark:border-[#1E3A5F] text-[#64748B] rounded-xl hover:bg-slate-50 dark:hover:bg-[#162040] text-[13px] font-semibold uppercase tracking-wide disabled:opacity-50 min-h-[48px] transition-all">
-              Cancelar
+              {t('common.cancel')}
             </button>
             <button type="submit" disabled={isLoading}
               className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 text-[13px] font-semibold uppercase tracking-wide shadow-lg active:scale-[0.98] disabled:opacity-50 min-h-[48px] transition-all">
-              {isLoading ? 'Guardando...' : 'Nuevo Gasto'}
+              {isLoading ? t('common.loading') : t('finances.addBusinessExpense.submitButton')}
             </button>
           </div>
         </form>

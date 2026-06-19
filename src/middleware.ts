@@ -59,43 +59,59 @@ export async function middleware(request: NextRequest) {
   if (user && (pathname.startsWith('/dashboard') || pathname.startsWith('/panel-empleado'))) {
     const host = request.headers.get('host') || ''
     const slug = getSubdomainSlug(host)
-
-    // Si estamos en local, saltamos validación de subdominio
     const isLocal = host.includes('localhost') || host.includes('127.0.0.1')
+
+    let org: { id: string; slug: string; allowed_subdomain: string } | null = null
+
     if (!isLocal) {
-      const { data: org, error: orgError } = await supabase
+      const { data: orgData, error: orgError } = await supabase
         .from('organizations')
         .select('id, slug, allowed_subdomain')
         .eq('allowed_subdomain', slug)
         .single()
 
-      if (orgError || !org) {
+      if (orgError || !orgData) {
         return NextResponse.redirect(new URL('/unauthorized', request.url))
       }
-
-      const { data: membership } = await supabase
-        .from('organization_members')
-        .select('id, role')
-        .eq('user_id', user.id)
-        .eq('organization_id', org.id)
-        .eq('status', 'active')
-        .maybeSingle()
-
-      if (!membership) {
-        return NextResponse.redirect(new URL('/unauthorized', request.url))
-      }
+      org = orgData
     }
 
-    // ── Empleados: redirigir a su panel ─────────────────────
-    if (pathname.startsWith('/dashboard')) {
-      const { data: staffCheck } = await supabase
-        .from('staff')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle()
+    // ── Comprobar primero si es un empleado (tabla staff) ───
+    const { data: staffCheck } = await supabase
+      .from('staff')
+      .select('id, organization_id')
+      .eq('id', user.id)
+      .maybeSingle()
 
-      if (staffCheck) {
+    const isStaffOfThisOrg = !!staffCheck && (isLocal || staffCheck.organization_id === org?.id)
+
+    // ── Ruta de empleado: solo exige pertenencia a staff ────
+    if (pathname.startsWith('/panel-empleado')) {
+      if (!isStaffOfThisOrg) {
+        return NextResponse.redirect(new URL('/unauthorized', request.url))
+      }
+      return response
+    }
+
+    // ── Ruta de dueno (/dashboard) ───────────────────────────
+    if (pathname.startsWith('/dashboard')) {
+      // Si es empleado, redirigir a su panel sin pedir organization_members
+      if (isStaffOfThisOrg) {
         return NextResponse.redirect(new URL('/panel-empleado', request.url))
+      }
+
+      if (!isLocal) {
+        const { data: membership } = await supabase
+          .from('organization_members')
+          .select('id, role')
+          .eq('user_id', user.id)
+          .eq('organization_id', org!.id)
+          .eq('status', 'active')
+          .maybeSingle()
+
+        if (!membership) {
+          return NextResponse.redirect(new URL('/unauthorized', request.url))
+        }
       }
 
       // ── Onboarding pendiente ─────────────────────────────

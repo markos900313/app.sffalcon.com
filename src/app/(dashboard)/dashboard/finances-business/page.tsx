@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { generateFinanceReport } from "@/lib/generatePDF";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const monthToNumber: Record<string, number> = {
   ENE: 1, FEB: 2, MAR: 3, ABR: 4, MAY: 5, JUN: 6,
@@ -24,6 +25,7 @@ const numberToMonth: Record<number, string> = Object.fromEntries(
 export default function FinancesBusinessPage() {
   const { organization } = useOrganization();
   const router = useRouter();
+  const { t } = useLanguage();
   const now = new Date();
   const currentYear = now.getFullYear();
 
@@ -55,7 +57,7 @@ export default function FinancesBusinessPage() {
       .order("month");
 
     if (error) {
-      toast.error("Error al cargar datos del negocio");
+      toast.error(t("financesBusiness.toast.loadError"));
     } else {
       const mapped: BusinessEntry[] = (data ?? []).map((r: any) => ({
         id: String(r.id),
@@ -85,7 +87,7 @@ export default function FinancesBusinessPage() {
       setLoading(true);
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { toast.error("Sesión expirada"); router.push("/login"); return; }
+      if (!user) { toast.error(t("finances.toast.sessionExpired")); router.push("/login"); return; }
       setUserId(user.id);
       await loadData(user.id);
       setLoading(false);
@@ -183,9 +185,9 @@ export default function FinancesBusinessPage() {
       a.download = `Finanzas_${selectedYear}_${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Datos exportados");
+      toast.success(t("finances.toast.exported"));
     } catch {
-      toast.error("Error al exportar");
+      toast.error(t("finances.toast.exportError"));
     } finally {
       setIsExporting(false);
     }
@@ -193,13 +195,13 @@ export default function FinancesBusinessPage() {
 
   // Generar PDF del negocio usando buildBusinessContext como contexto
   const handleGeneratePDF = async () => {
-    if (allYearEntries.length === 0) { toast.error("Sin datos para el informe"); return; }
+    if (allYearEntries.length === 0) { toast.error(t("finances.toast.noDataReport")); return; }
     setGeneratingPDF(true);
     try {
       await generateFinanceReport(allYearEntries, selectedMonthNumber, selectedYear);
-      toast.success("Informe PDF generado");
+      toast.success(t("finances.toast.pdfGenerated"));
     } catch {
-      toast.error("Error al generar el PDF");
+      toast.error(t("finances.toast.pdfError"));
     } finally {
       setGeneratingPDF(false);
     }
@@ -215,10 +217,10 @@ export default function FinancesBusinessPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl md:text-2xl lg:text-[24px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-[-0.02em]">
-                Finanzas — {organization?.name || 'SF'}
+                {t('financesBusiness.titlePrefix')} — {organization?.name || 'SF'}
               </h1>
               <p className="text-[9px] md:text-[10px] lg:text-[11px] text-[#64748B] dark:text-[#94A3B8] font-medium mt-1 uppercase tracking-[0.08em]">
-                {loading ? "Sincronizando..." : "Gestión financiera · Datos en tiempo real"}
+                {loading ? t('financesBusiness.syncing') : t('financesBusiness.subtitle')}
               </p>
             </div>
             <div className="flex items-center gap-2 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl px-4 py-2 shadow-sm">

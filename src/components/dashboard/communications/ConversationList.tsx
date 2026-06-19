@@ -6,8 +6,15 @@ import { cn } from "@/lib/utils";
 import { Conversation } from "@/app/(dashboard)/dashboard/communications/page";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
-const tabs = ["Todos", "Correos", "WhatsApp", "Respondidos", "Pendientes"];
+const tabs = [
+  { id: "todos", labelKey: "communications.tabs.all" },
+  { id: "correos", labelKey: "communications.tabs.emails" },
+  { id: "whatsapp", labelKey: "communications.tabs.whatsapp" },
+  { id: "respondidos", labelKey: "communications.tabs.responded" },
+  { id: "pendientes", labelKey: "communications.tabs.pending" },
+];
 
 export default function ConversationList({
   conversations,
@@ -34,7 +41,7 @@ export default function ConversationList({
   onRefresh: () => void,
   onOpenSettings?: () => void
 }) {
-
+  const { t } = useLanguage();
 
   const parsePreview = (content: string): string => {
     if (!content) return ''
@@ -77,13 +84,13 @@ export default function ConversationList({
       <div className="p-4 md:p-5 lg:p-6 border-b border-slate-100 dark:border-[#111F3A]">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg md:text-xl lg:text-[24px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-[-0.02em]">
-            Comunicaciones
+            {t('communications.title')}
           </h2>
           <div className="flex items-center gap-2">
             <button
               onClick={() => onOpenSettings?.()}
               className="lg:hidden p-1.5 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
-              title="Información"
+              title={t('communications.info')}
             >
               <Settings className="w-5 h-5" />
             </button>
@@ -91,19 +98,18 @@ export default function ConversationList({
         </div>
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4">
           {tabs.map((tab) => {
-            const tabId = tab.toLowerCase();
             return (
               <button
-                key={tab}
-                onClick={() => setFilter(tabId)}
+                key={tab.id}
+                onClick={() => setFilter(tab.id)}
                 className={cn(
                   "px-3 py-1 text-[11px] font-medium uppercase tracking-wider transition-all duration-150 whitespace-nowrap shrink-0",
-                  tabId === filter
+                  tab.id === filter
                     ? "bg-[#EFF6FF] dark:bg-[#1B4FD8] text-[#1B4FD8] dark:text-white rounded-lg dark:rounded-full"
                     : "text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F1F5F9] hover:bg-slate-50 dark:hover:bg-[#162040] rounded-lg dark:rounded-full"
                 )}
               >
-                {tab}
+                {t(tab.labelKey)}
               </button>
             );
           })}
@@ -117,7 +123,7 @@ export default function ConversationList({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar conversaciones..."
+            placeholder={t('communications.searchPlaceholder')}
             className="w-full bg-[#F1F5F9] dark:bg-[#0D1B35] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl py-2 pl-10 pr-4 text-[14px] outline-none focus:ring-4 focus:ring-blue-500/10 dark:focus:border-[#1B4FD8] transition-all duration-150 font-normal text-[#0F172A] dark:text-[#F1F5F9] placeholder:text-[#64748B] dark:placeholder:text-[#475569] min-h-[40px]"
           />
         </div>
@@ -139,8 +145,8 @@ export default function ConversationList({
         ) : filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center opacity-60">
             <Inbox className="w-12 h-12 text-slate-300 mb-4" />
-            <p className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">No hay conversaciones</p>
-            <p className="text-[11px] text-[#94A3B8] dark:text-[#475569]">Los mensajes aparecerán aquí</p>
+            <p className="text-sm font-medium text-[#64748B] dark:text-[#94A3B8]">{t('communications.noConversations')}</p>
+            <p className="text-[11px] text-[#94A3B8] dark:text-[#475569]">{t('communications.messagesAppearHere')}</p>
           </div>
         ) : (
           <ConversationListContent
@@ -172,6 +178,7 @@ function ConversationListContent({
   onRefresh: () => void
 }) {
   const supabase = createClient();
+  const { t } = useLanguage();
   const [resolvedNames, setResolvedNames] = useState<Record<string, string>>({});
   const [chatToDelete, setChatToDelete] = useState<Conversation | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -197,12 +204,12 @@ function ConversationListContent({
 
       if (commErr) throw commErr;
 
-      toast.success("Conversación eliminada");
+      toast.success(t('communications.toast.deleted'));
       setChatToDelete(null);
       onRefresh();
     } catch (err: any) {
       console.error(err);
-      toast.error("Error al eliminar: " + (err.message || "Desconocido"));
+      toast.error(t('communications.toast.deleteError') + ": " + (err.message || "Desconocido"));
     } finally {
       setIsDeleting(false);
     }
@@ -243,7 +250,7 @@ function ConversationListContent({
       {conversations.map((chat) => {
         const displayName = chat.contact_name
           || chat.contact_identifier?.split('@')[0]
-          || 'Contacto';
+          || t('communications.contactFallback');
 
         return (
           <div
@@ -308,7 +315,7 @@ function ConversationListContent({
                           className="w-full text-left px-4 py-2.5 text-[12px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 flex items-center gap-2 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                          Eliminar conversación
+                          {t('communications.deleteConversation')}
                         </button>
                       </div>
                     )}
@@ -324,13 +331,13 @@ function ConversationListContent({
                       chat.status === "resolved" ? "bg-[#D1FAE5] dark:bg-[#10B981]/15 text-[#059669] dark:text-[#10B981] border-transparent dark:border-[#10B981]/30" :
                         "bg-blue-100 dark:bg-blue-900/15 text-blue-600 dark:text-blue-400 border-transparent dark:border-blue-500/30"
                   )}>
-                    {chat.status === 'pending' || chat.status === 'seen' ? 'PENDIENTE' :
-                      chat.status === 'responded' ? 'RESPONDIDO' : 'RESUELTO'}
+                    {chat.status === 'pending' || chat.status === 'seen' ? t('communications.status.pending') :
+                      chat.status === 'responded' ? t('communications.status.responded') : t('communications.status.resolved')}
                   </span>
                   {chat.responded_by === 'ai' && (
                     <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-[#6366F1]/15 rounded-full text-[8px] md:text-[9px] lg:text-[11px] font-medium text-[#64748B] dark:text-[#818CF8] tracking-[0.05em] uppercase whitespace-nowrap border border-slate-200 dark:border-[#6366F1]/30 transition-colors duration-150">
                       <Bot className="w-2.5 h-2.5" />
-                      AUTO
+                      {t('communications.status.auto')}
                     </div>
                   )}
                 </div>
@@ -362,30 +369,31 @@ function DeleteConfirmationModal({
   onConfirm: () => void,
   loading: boolean
 }) {
+  const { t } = useLanguage();
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
       <div className="bg-white dark:bg-[#111F3A] w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-slate-200 dark:border-[#1E3A5F] animate-in zoom-in-95 duration-200">
         <div className="flex items-center gap-3 mb-4 text-red-500">
           <Trash2 className="w-6 h-6" />
-          <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F1F5F9]">¿Eliminar conversación?</h3>
+          <h3 className="text-lg font-bold text-[#0F172A] dark:text-[#F1F5F9]">{t('communications.deleteModal.title')}</h3>
         </div>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-          Esta acción no se puede deshacer y borrará permanentemente todos los mensajes asociados.
+          {t('communications.deleteModal.desc')}
         </p>
         <div className="flex gap-3">
           <button
             onClick={onClose}
             className="flex-1 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors uppercase tracking-tight"
           >
-            Cancelar
+            {t('common.cancel')}
           </button>
           <button
             disabled={loading}
             onClick={onConfirm}
             className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-tight"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Eliminar"}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.delete')}
           </button>
         </div>
       </div>

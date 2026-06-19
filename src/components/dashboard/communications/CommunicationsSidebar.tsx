@@ -5,6 +5,7 @@ import { Mail, Smartphone, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Conversation } from "@/app/(dashboard)/dashboard/communications/page";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function CommunicationsSidebar({
   conversations = [],
@@ -26,6 +27,7 @@ export default function CommunicationsSidebar({
   onQuickReply?: (text: string) => void;
 }) {
   const { organization } = useOrganization();
+  const { t } = useLanguage();
 
   // --- ESTADÍSTICAS ---
   const stats = useMemo(() => {
@@ -43,18 +45,18 @@ export default function CommunicationsSidebar({
       {/* Connected Channels */}
       <div className="space-y-4">
         <h3 className="text-[#475569] text-[11px] font-medium uppercase tracking-wider ml-1">
-          CANALES CONECTADOS
+          {t('communications.connectedChannels')}
         </h3>
         <div className="space-y-3">
           <ChannelItem
             icon={<Mail className="w-5 h-5 text-[#1B4FD8]" />}
-            label="Email Corporativo"
-            sub="Asistente IA Activo"
+            label={t('communications.corporateEmail')}
+            sub={t('communications.aiAssistantActive')}
           />
           <ChannelItem
             icon={<Smartphone className="w-5 h-5 text-[#25D366]" />}
-            label="WhatsApp Business"
-            sub="Conectado"
+            label={t('communications.whatsappBusiness')}
+            sub={t('communications.connected')}
           />
         </div>
       </div>
@@ -68,10 +70,10 @@ export default function CommunicationsSidebar({
             </div>
             <div>
               <h4 className="text-sm font-medium text-[#F1F5F9]">
-                Automatización IA
+                {t('communications.aiAutomation')}
               </h4>
               <p className="text-[10px] text-[#475569] leading-tight mt-0.5">
-                Asistente gestiona todas las respuestas
+                {t('communications.aiAssistantDesc')}
               </p>
             </div>
           </div>
@@ -79,7 +81,7 @@ export default function CommunicationsSidebar({
             <span className={`text-[10px] font-bold uppercase tracking-wider ${
               aiEnabled ? 'text-emerald-500' : 'text-slate-500'
             }`}>
-              {aiEnabled ? '● ACTIVA' : '● DESACTIVADA'}
+              {aiEnabled ? t('communications.activeStatus') : t('communications.inactiveStatus')}
             </span>
             {onToggleAI && (
               <button
@@ -104,9 +106,9 @@ export default function CommunicationsSidebar({
                 <Mail className="w-4 h-4 text-[#1B4FD8]" />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-[#F1F5F9]">IA Email</h4>
+                <h4 className="text-sm font-medium text-[#F1F5F9]">{t('communications.emailAi')}</h4>
                 <p className="text-[10px] text-[#475569] leading-tight mt-0.5">
-                  Respuesta automática email
+                  {t('communications.emailAiDesc')}
                 </p>
               </div>
             </div>
@@ -114,7 +116,7 @@ export default function CommunicationsSidebar({
               <span className={`text-[10px] font-bold uppercase tracking-wider ${
                 emailAiEnabled ? 'text-emerald-500' : 'text-slate-500'
               }`}>
-                {emailAiEnabled ? '● ACTIVA' : '● DESACTIVADA'}
+                {emailAiEnabled ? t('communications.activeStatus') : t('communications.inactiveStatus')}
               </span>
               <button
                 onClick={onToggleEmailAI}
@@ -135,13 +137,13 @@ export default function CommunicationsSidebar({
       {/* Performance Stats */}
       <div className="space-y-4">
         <h3 className="text-[#64748B] dark:text-[#475569] text-[11px] font-medium uppercase tracking-wider ml-1">
-          RENDIMIENTO GLOBAL
+          {t('communications.globalPerformance')}
         </h3>
         <div className="grid grid-cols-2 gap-3">
-          <StatCard label="RECIBIDOS" value={stats.total.toString()} />
-          <StatCard label="RESPONDIDOS" value={stats.respondidos.toString()} />
-          <StatCard label="POR IA" value={`${stats.porcentajeIA}%`} color="dark:text-[#10B981]" />
-          <StatCard label="PENDIENTES" value={stats.pendientes.toString()} color="text-amber-500" />
+          <StatCard label={t('communications.received')} value={stats.total.toString()} />
+          <StatCard label={t('communications.responded')} value={stats.respondidos.toString()} />
+          <StatCard label={t('communications.byAi')} value={`${stats.porcentajeIA}%`} color="dark:text-[#10B981]" />
+          <StatCard label={t('communications.pending')} value={stats.pendientes.toString()} color="text-amber-500" />
         </div>
       </div>
 
