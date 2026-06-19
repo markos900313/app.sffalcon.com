@@ -2,6 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const months = [
   { id: "ENE", label: "ENE" },
@@ -25,6 +26,8 @@ interface MonthSelectorProps {
 }
 
 export default function MonthSelector({ selected, onChange, statuses }: MonthSelectorProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="flex items-center gap-3 md:gap-6 lg:gap-8 border-b border-[#E2E8F0] dark:border-[#1E3A5F] pb-1.5 md:pb-2 overflow-x-auto no-scrollbar -mx-3 px-3">
       {months.map((month) => {
@@ -48,7 +51,7 @@ export default function MonthSelector({ selected, onChange, statuses }: MonthSel
                   ? "text-[#1B4FD8]" 
                   : "text-[#64748B] dark:text-[#94A3B8] group-hover:text-[#0F172A] dark:group-hover:text-[#F1F5F9]"
               )}>
-                {month.label}
+                {t('monthSelector.' + month.id)}
               </span>
             </div>
             {isSelected && (

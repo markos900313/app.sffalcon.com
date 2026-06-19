@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useTheme } from "@/lib/ThemeContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface TrendData {
   month: string;
@@ -20,26 +21,27 @@ interface TrendData {
 
 export default function FinanceTrendChart({ data }: { data: TrendData[] }) {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   
   return (
     <div className="bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-[16px] md:rounded-[20px] lg:rounded-[24px] p-3 md:p-6 lg:p-8 shadow-sm h-[300px] md:h-[400px] flex flex-col">
       <div className="flex items-center justify-between mb-4 md:mb-8">
         <div>
           <h3 className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em]">
-            Tendencia Anual
+            {t('financeTrendChart.annualTrend')}
           </h3>
           <p className="text-[13px] font-bold text-[#0F172A] dark:text-[#F1F5F9] mt-1">
-            Ingresos vs Gastos
+            {t('financeTrendChart.incomeVsExpenses')}
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-[#1B4FD8]" />
-            <span className="text-[11px] font-medium text-[#64748B]">Ingresos</span>
+            <span className="text-[11px] font-medium text-[#64748B]">{t('financeTrendChart.income')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
-            <span className="text-[11px] font-medium text-[#64748B]">Gastos</span>
+            <span className="text-[11px] font-medium text-[#64748B]">{t('financeTrendChart.expenses')}</span>
           </div>
         </div>
       </div>
@@ -67,6 +69,7 @@ export default function FinanceTrendChart({ data }: { data: TrendData[] }) {
               tickLine={false}
               tick={{ fontSize: 10, fill: '#64748B', fontWeight: 500 }}
               dy={10}
+              tickFormatter={(tick) => t('monthSelector.' + tick, { defaultValue: tick })}
             />
             <YAxis 
               axisLine={false}

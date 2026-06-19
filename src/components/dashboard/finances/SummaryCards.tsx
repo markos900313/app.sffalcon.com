@@ -4,6 +4,7 @@ import React from "react";
 import { Wallet, ArrowDownRight, ArrowUpRight, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface SummaryCardsProps {
   data: { ingresos: number; gastos: number; balance: number } | null;
@@ -11,32 +12,33 @@ interface SummaryCardsProps {
 }
 
 export default function SummaryCards({ data, loading }: SummaryCardsProps) {
+  const { t } = useLanguage();
   const ingresos = data?.ingresos ?? 0;
   const gastos = data?.gastos ?? 0;
   const balance = data?.balance ?? ingresos - gastos;
 
   const cards = [
     {
-      label: "INGRESOS",
+      label: t('summaryCards.ingresos'),
       value: formatCurrency(ingresos),
-      subtext: "Este mes",
+      subtext: t('summaryCards.esteMes'),
       color: "text-[#0F172A]",
       icon: <ArrowUpRight className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#64748B]/40" />,
       trend: "neutral"
     },
     {
-      label: "GASTOS",
+      label: t('summaryCards.gastos'),
       value: formatCurrency(gastos),
       trendText: "↓",
-      subtext: "Este mes",
+      subtext: t('summaryCards.esteMes'),
       color: "text-[#0F172A] dark:text-[#F1F5F9]",
       icon: <ArrowDownRight className="w-5 h-5 text-[#EF4444]" />,
       trend: "down"
     },
     {
-      label: "BALANCE TOTAL",
+      label: t('summaryCards.balanceTotal'),
       value: formatCurrency(balance),
-      subtext: "Cálculo tiempo real",
+      subtext: t('summaryCards.calculoTiempoReal'),
       color: "text-white",
       bg: "bg-[#1B4FD8]",
       icon: <Clock className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/60" />,

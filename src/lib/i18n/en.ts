@@ -741,6 +741,129 @@ export const en = {
     syncing: "Synchronizing...",
     subtitle: "Financial management · Real-time data",
   },
+  monthSelector: {
+    ENE: "JAN",
+    FEB: "FEB",
+    MAR: "MAR",
+    ABR: "APR",
+    MAY: "MAY",
+    JUN: "JUN",
+    JUL: "JUL",
+    AGO: "AUG",
+    SEP: "SEP",
+    OCT: "OCT",
+    NOV: "NOV",
+    DIC: "DEC"
+  },
+  summaryCards: {
+    ingresos: "INCOME",
+    gastos: "EXPENSES",
+    balanceTotal: "TOTAL BALANCE",
+    esteMes: "This month",
+    calculoTiempoReal: "Real-time calculation"
+  },
+  financesTable: {
+    types: {
+      gasto_fijo: "Fixed Expense",
+      variable: "Variable",
+      ingreso: "Income",
+      deuda: "Debt",
+      ahorro: "Savings",
+      suscripcion: "Subscription",
+    },
+    errors: {
+      conceptEmpty: "Enter a concept",
+      amountInvalid: "Invalid amount",
+    },
+    toast: {
+      addError: "Error adding concept",
+      addSuccess: "Concept added successfully",
+      updateError: "Error updating",
+      deleteError: "Error deleting concept",
+      deleteSuccess: "Concept deleted",
+    },
+    confirmDelete: "Delete {concept}?",
+    title: "Breakdown {month} {year}",
+    viewHistory: "View history",
+    headers: {
+      concept: "CONCEPT",
+      type: "TYPE",
+      amount: "AMOUNT",
+      actions: "ACTIONS",
+    },
+    noEntries: "No entries for this month",
+    addConceptPrompt: "Click + Add concept to get started",
+    editAmountTooltip: "Edit amount",
+    newConceptPlaceholder: "New concept...",
+    conceptPlaceholderExample: "E.g., Rent",
+    amountLabelWithCurrency: "Amount (€)",
+    addConceptButton: "ADD CONCEPT",
+    confirmButton: "Confirm",
+    optgroups: {
+      income: "INCOME",
+      expenses: "EXPENSES",
+    }
+  },
+  donutChart: {
+    title: "Expense Distribution (Detailed)",
+    noData: "No expense data for {month}"
+  },
+  financialAlerts: {
+    title: "Financial Alerts",
+    thisMonth: "this month",
+    noIncome: {
+      title: "No registered income",
+      message: "There is no income in {month}. Did you forget to add it?"
+    },
+    negativeProfit: {
+      title: "Negative profit"
+    },
+    budgetExceeded: {
+      title: "Budget exceeded"
+    },
+    expensesExceeded: {
+      message: "Expenses exceed income by {symbol}{amount} in {month}."
+    },
+    highExpenses: {
+      title: "High expenses",
+      message: "Expenses are {percent}% higher than the previous month."
+    },
+    balanced: {
+      businessTitle: "Balanced business",
+      hogarTitle: "Balanced finances",
+      message: "Everything is in order in {month}. Good job."
+    }
+  },
+  financeTrendChart: {
+    annualTrend: "Annual Trend",
+    incomeVsExpenses: "Income vs Expenses",
+    income: "Income",
+    expenses: "Expenses"
+  },
+  dashboardSidebar: {
+    toast: {
+      noUser: "Not authenticated"
+    },
+    summaryTitle: "Summary {month} {year}",
+    orgSummary: "{name} Summary",
+    income: "Income",
+    expenses: "Expenses",
+    profit: "Profit",
+    annualProfitability: "Annual Profitability",
+    yearLabel: "Year {year}",
+    legend: {
+      complete: "Complete",
+      partial: "Partial",
+      empty: "Empty"
+    },
+    actions: {
+      income: "INCOME",
+      expense: "EXPENSE",
+      chart: "CHART",
+      export: "EXPORT"
+    },
+    pdfReportButton: "PDF Report"
+  },
   invoices: {
     toast: {
       loadError: "Error loading invoices",

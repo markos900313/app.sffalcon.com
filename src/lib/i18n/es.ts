@@ -741,6 +741,129 @@ export const es = {
     syncing: "Sincronizando...",
     subtitle: "Gestión financiera · Datos en tiempo real",
   },
+  monthSelector: {
+    ENE: "ENE",
+    FEB: "FEB",
+    MAR: "MAR",
+    ABR: "ABR",
+    MAY: "MAY",
+    JUN: "JUN",
+    JUL: "JUL",
+    AGO: "AGO",
+    SEP: "SEP",
+    OCT: "OCT",
+    NOV: "NOV",
+    DIC: "DIC"
+  },
+  summaryCards: {
+    ingresos: "INGRESOS",
+    gastos: "GASTOS",
+    balanceTotal: "BALANCE TOTAL",
+    esteMes: "Este mes",
+    calculoTiempoReal: "Cálculo tiempo real"
+  },
+  financesTable: {
+    types: {
+      gasto_fijo: "Gasto Fijo",
+      variable: "Variable",
+      ingreso: "Ingreso",
+      deuda: "Deuda",
+      ahorro: "Ahorro",
+      suscripcion: "Suscripción",
+    },
+    errors: {
+      conceptEmpty: "Introduce un concepto",
+      amountInvalid: "Importe inválido",
+    },
+    toast: {
+      addError: "Error al añadir concepto",
+      addSuccess: "Concepto añadido correctamente",
+      updateError: "Error al actualizar",
+      deleteError: "Error al eliminar concepto",
+      deleteSuccess: "Concepto eliminado",
+    },
+    confirmDelete: "¿Eliminar {concept}?",
+    title: "Desglose {month} {year}",
+    viewHistory: "Ver histórico",
+    headers: {
+      concept: "CONCEPTO",
+      type: "TIPO",
+      amount: "IMPORTE",
+      actions: "ACCIONES",
+    },
+    noEntries: "No hay entradas para este mes",
+    addConceptPrompt: "Pulsa + Añadir concepto para comenzar",
+    editAmountTooltip: "Editar importe",
+    newConceptPlaceholder: "Nuevo concepto...",
+    conceptPlaceholderExample: "Ej: Alquiler",
+    amountLabelWithCurrency: "Importe (€)",
+    addConceptButton: "AÑADIR CONCEPTO",
+    confirmButton: "Confirmar",
+    optgroups: {
+      income: "INGRESOS",
+      expenses: "GASTOS",
+    }
+  },
+  donutChart: {
+    title: "Distribución de Gastos (Detallada)",
+    noData: "Sin datos de gastos para {month}"
+  },
+  financialAlerts: {
+    title: "Alertas financieras",
+    thisMonth: "este mes",
+    noIncome: {
+      title: "Sin ingresos registrados",
+      message: "No hay ingresos en {month}. ¿Olvidaste añadirlos?"
+    },
+    negativeProfit: {
+      title: "Beneficio negativo"
+    },
+    budgetExceeded: {
+      title: "Presupuesto excedido"
+    },
+    expensesExceeded: {
+      message: "Los gastos superan los ingresos en {amount}{symbol} en {month}."
+    },
+    highExpenses: {
+      title: "Gastos elevados",
+      message: "Los gastos son un {percent}% superiores al mes anterior."
+    },
+    balanced: {
+      businessTitle: "Negocio equilibrado",
+      hogarTitle: "Finanzas equilibradas",
+      message: "Todo en orden en {month}. Buen trabajo."
+    }
+  },
+  financeTrendChart: {
+    annualTrend: "Tendencia Anual",
+    incomeVsExpenses: "Ingresos vs Gastos",
+    income: "Ingresos",
+    expenses: "Gastos"
+  },
+  dashboardSidebar: {
+    toast: {
+      noUser: "No autenticado"
+    },
+    summaryTitle: "Resumen {month} {year}",
+    orgSummary: "Resumen {name}",
+    income: "Ingresos",
+    expenses: "Gastos",
+    profit: "Beneficio",
+    annualProfitability: "Rentabilidad Anual",
+    yearLabel: "Año {year}",
+    legend: {
+      complete: "Completo",
+      partial: "Parcial",
+      empty: "Vacío"
+    },
+    actions: {
+      income: "INGRESO",
+      expense: "GASTO",
+      chart: "GRÁFICO",
+      export: "EXPORTAR"
+    },
+    pdfReportButton: "Informe PDF"
+  },
   invoices: {
     toast: {
       loadError: "Error al cargar facturas",

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 import { OCIO_INCOME_CATEGORIES, OCIO_EXPENSE_CATEGORIES } from "./categories";
 
@@ -20,19 +21,6 @@ export type FinanceEntry = {
   year: number;
 };
 
-const TYPE_LABEL: Record<string, string> = {
-  gasto_fijo: "GASTO FIJO",
-  variable: "VARIABLE",
-  ingreso: "INGRESO",
-  deuda: "DEUDA",
-  ahorro: "AHORRO",
-  suscripcion: "SUSCRIPCIÓN",
-};
-
-// Labels for Ocio categories
-OCIO_INCOME_CATEGORIES.forEach(cat => { TYPE_LABEL[cat] = cat.toUpperCase(); });
-OCIO_EXPENSE_CATEGORIES.forEach(cat => { TYPE_LABEL[cat] = cat.toUpperCase(); });
-
 const TYPE_BADGE: Record<string, string> = {
   gasto_fijo: "bg-[#EFF6FF] dark:bg-[#1B4FD8]/20 text-[#1B4FD8] dark:text-[#93C5FD]",
   variable: "bg-[#FEF3C7] dark:bg-[#F59E0B]/20 text-[#D97706] dark:text-[#FCD34D]",
@@ -45,6 +33,14 @@ const TYPE_BADGE: Record<string, string> = {
 // Badges for Ocio categories
 OCIO_INCOME_CATEGORIES.forEach(cat => { TYPE_BADGE[cat] = "bg-[#D1FAE5] dark:bg-[#10B981]/20 text-[#059669] dark:text-[#6EE7B7]"; });
 OCIO_EXPENSE_CATEGORIES.forEach(cat => { TYPE_BADGE[cat] = "bg-[#FEF2F2] dark:bg-[#EF4444]/20 text-[#DC2626] dark:text-[#FCA5A5]"; });
+
+const getCategoryKey = (cat: string) => {
+  return cat
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s*\/\s*/g, '_')
+    .replace(/\s+/g, '_');
+};
 
 function iconForType(type: string) {
   if (type === "deuda" || OCIO_EXPENSE_CATEGORIES.includes(type)) return <Shield className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-500" />;
@@ -81,12 +77,21 @@ export default function FinancesTable({
 }) {
   const { organizationId } = useOrganization();
   const supabase = useMemo(() => createClient(), []);
+  const { t } = useLanguage();
   const [allHistoryConcepts, setAllHistoryConcepts] = useState<string[]>([]);
 
   const conceptSuggestions = useMemo(() => {
     const combined = Array.from(new Set([...OCIO_INCOME_CATEGORIES, ...OCIO_EXPENSE_CATEGORIES]));
     return combined.sort((a, b) => a.localeCompare(b, "es"));
   }, []);
+
+  const getTypeLabel = (type: string) => {
+    const lower = type.toLowerCase();
+    if (["gasto_fijo", "variable", "ingreso", "deuda", "ahorro", "suscripcion"].includes(lower)) {
+      return t(`financesTable.types.${lower}`);
+    }
+    return t(`finances.categories.${getCategoryKey(type)}`, { defaultValue: type });
+  };
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -141,11 +146,11 @@ export default function FinancesTable({
     const amountNumber = Number(String(newAmount).replace(",", "."));
 
     if (!concept) {
-      toast.error("Introduce un concepto");
+      toast.error(t("financesTable.errors.conceptEmpty"));
       return;
     }
     if (!Number.isFinite(amountNumber)) {
-      toast.error("Importe inválido");
+      toast.error(t("financesTable.errors.amountInvalid"));
       return;
     }
 
@@ -166,7 +171,7 @@ export default function FinancesTable({
       .single();
 
     if (error || !data) {
-      toast.error("Error al añadir concepto");
+      toast.error(t("financesTable.toast.addError"));
       setSavingNew(false);
       return;
     }
@@ -183,7 +188,7 @@ export default function FinancesTable({
         year: Number((data as any).year),
       },
     ]);
-    toast.success("Concepto añadido correctamente");
+    toast.success(t("financesTable.toast.addSuccess"));
     setSavingNew(false);
     cancelAdd();
   }
@@ -202,7 +207,7 @@ export default function FinancesTable({
     if (!userId) return;
     const next = Number(String(editValue).replace(",", "."));
     if (!Number.isFinite(next)) {
-      toast.error("Importe inválido");
+      toast.error(t("financesTable.errors.amountInvalid"));
       return;
     }
     
@@ -228,16 +233,13 @@ export default function FinancesTable({
 
     if (error) {
       onEntriesChange(entries.map((e) => (e.id === entry.id ? { ...e, amount: prevAmount } : e)));
-      toast.error("Error al actualizar");
-    } else {
-      // Small visual success feedback is handled by component re-render 
-      // but we could add a temporary state for the "green flash"
+      toast.error(t("financesTable.toast.updateError"));
     }
   }
 
   async function deleteEntry(entry: FinanceEntry) {
     if (!userId) return;
-    const ok = window.confirm(`¿Eliminar ${entry.concept.toUpperCase()}?`);
+    const ok = window.confirm(t("financesTable.confirmDelete", { concept: entry.concept.toUpperCase() }));
     if (!ok) return;
 
     const prev = entries;
@@ -251,21 +253,21 @@ export default function FinancesTable({
 
     if (error) {
       onEntriesChange(prev);
-      toast.error("Error al eliminar concepto");
+      toast.error(t("financesTable.toast.deleteError"));
       return;
     }
-    toast.success("Concepto eliminado");
+    toast.success(t("financesTable.toast.deleteSuccess"));
   }
 
   return (
     <div className="card-premium card-finanzas p-6 md:p-8 shadow-sm">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 mb-8 pb-6 border-b border-slate-50 dark:border-white/5">
         <h3 className="card-titulo">
-          Desglose {month} {year}
+          {t('financesTable.title', { month: t('monthSelector.' + month), year })}
         </h3>
         <div className="flex items-center gap-4">
           <button className="text-[11px] font-bold text-slate-400 uppercase tracking-widest hover:text-[#1B4FD8] transition-colors">
-            Ver histórico
+            {t('financesTable.viewHistory')}
           </button>
         </div>
       </div>
@@ -274,16 +276,16 @@ export default function FinancesTable({
           <thead>
             <tr className="text-left">
               <th className="pb-4 text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
-                CONCEPTO
+                {t('financesTable.headers.concept')}
               </th>
               <th className="pb-4 text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider">
-                TIPO
+                {t('financesTable.headers.type')}
               </th>
               <th className="pb-4 text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider text-right">
-                IMPORTE
+                {t('financesTable.headers.amount')}
               </th>
               <th className="pb-4 text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider text-right">
-                ACCIONES
+                {t('financesTable.headers.actions')}
               </th>
             </tr>
           </thead>
@@ -308,20 +310,20 @@ export default function FinancesTable({
             ) : entries.length === 0 && !isAdding ? (
               <tr>
                 <td colSpan={4} className="py-12 text-center">
-                  <p className="text-slate-500 text-sm">No hay entradas para este mes</p>
-                  <p className="text-slate-400 text-xs mt-1">Pulsa + Añadir concepto para comenzar</p>
+                  <p className="text-slate-500 text-sm">{t('financesTable.noEntries')}</p>
+                  <p className="text-slate-400 text-xs mt-1">{t('financesTable.addConceptPrompt')}</p>
                 </td>
               </tr>
             ) : (
               <>
                 {entries.map((row, idx) => (
                   <tr 
-                    key={row.id} 
-                    className={cn(
-                      "group transition-colors h-14 md:h-16",
-                      idx % 2 === 0 ? "bg-white dark:bg-[#111F3A]" : "bg-[#F8FAFC]/40 dark:bg-[#0D1B35]/40",
-                      "hover:bg-[#F0F7FF] dark:hover:bg-[#162040] border-b border-slate-50 dark:border-[#1E3A5F]"
-                    )}
+                     key={row.id} 
+                     className={cn(
+                       "group transition-colors h-14 md:h-16",
+                       idx % 2 === 0 ? "bg-white dark:bg-[#111F3A]" : "bg-[#F8FAFC]/40 dark:bg-[#0D1B35]/40",
+                       "hover:bg-[#F0F7FF] dark:hover:bg-[#162040] border-b border-slate-50 dark:border-[#1E3A5F]"
+                     )}
                   >
                     <td className="py-2">
                       <div className="flex items-center gap-3">
@@ -333,13 +335,13 @@ export default function FinancesTable({
                             {row.concept}
                           </span>
                           <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                            {row.category}
+                            {t('finances.categories.' + getCategoryKey(row.category), { defaultValue: row.category })}
                           </span>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 md:py-4 lg:py-5">
-                        {row.type.toUpperCase()}
+                      {getTypeLabel(row.type).toUpperCase()}
                     </td>
                     <td className="py-3 md:py-4 lg:py-5 text-right text-[10px] md:text-[12px] lg:text-[14px] font-normal text-[#0F172A] dark:text-[#F1F5F9] font-mono tabular-nums">
                       {editingId === row.id ? (
@@ -360,7 +362,7 @@ export default function FinancesTable({
                         <button
                           onClick={() => startEditAmount(row)}
                           className="hover:underline underline-offset-4"
-                          title="Editar importe"
+                          title={t('financesTable.editAmountTooltip')}
                         >
                           {formatCurrency(row.amount)}
                         </button>
@@ -370,7 +372,7 @@ export default function FinancesTable({
                       <div className="flex items-center justify-end gap-1">
                         <button
                           className="p-2 text-[#64748B] dark:text-[#475569] hover:text-[#1B4FD8] dark:hover:text-[#F1F5F9] transition-colors"
-                          title="Eliminar"
+                          title={t('common.delete')}
                           onClick={() => deleteEntry(row)}
                         >
                           <MoreHorizontal className="w-5 h-5" />
@@ -393,7 +395,7 @@ export default function FinancesTable({
                             onChange={(e) => setNewConcept(e.target.value)}
                             list="concept-suggestions"
                             className="bg-white dark:bg-[#0F172A] border border-blue-500/40 rounded-xl px-4 py-2 text-[13px] font-medium text-[#0F172A] dark:text-[#F1F5F9] w-48 md:w-56 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400"
-                            placeholder="Nuevo concepto..."
+                            placeholder={t('financesTable.newConceptPlaceholder')}
                           />
                           <datalist id="concept-suggestions">
                             {conceptSuggestions.map((c) => (
@@ -409,14 +411,14 @@ export default function FinancesTable({
                         onChange={(e) => setNewType(e.target.value)}
                         className="bg-white dark:bg-[#0F172A] border border-blue-500/40 rounded-xl px-3 py-2 text-[12px] font-medium text-[#0F172A] dark:text-[#F1F5F9] outline-none focus:ring-4 focus:ring-blue-500/10 transition-all min-h-[40px] appearance-none cursor-pointer"
                       >
-                        <optgroup label="INGRESOS">
+                        <optgroup label={t('financesTable.optgroups.income')}>
                           {OCIO_INCOME_CATEGORIES.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
+                            <option key={cat} value={cat}>{t('finances.categories.' + getCategoryKey(cat), { defaultValue: cat })}</option>
                           ))}
                         </optgroup>
-                        <optgroup label="GASTOS">
+                        <optgroup label={t('financesTable.optgroups.expenses')}>
                           {OCIO_EXPENSE_CATEGORIES.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
+                            <option key={cat} value={cat}>{t('finances.categories.' + getCategoryKey(cat), { defaultValue: cat })}</option>
                           ))}
                         </optgroup>
                       </select>
@@ -436,7 +438,7 @@ export default function FinancesTable({
                           disabled={savingNew}
                           onClick={confirmAdd}
                           className="w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 hover:bg-blue-700 active:scale-90 transition-all disabled:opacity-50"
-                          title="Confirmar"
+                          title={t('financesTable.confirmButton')}
                         >
                           <Check className="w-5 h-5" />
                         </button>
@@ -444,7 +446,7 @@ export default function FinancesTable({
                           disabled={savingNew}
                           onClick={cancelAdd}
                           className="w-9 h-9 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 rounded-xl flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-90 transition-all"
-                          title="Cancelar"
+                          title={t('common.cancel')}
                         >
                           <X className="w-5 h-5" />
                         </button>
@@ -464,13 +466,13 @@ export default function FinancesTable({
           <div className="p-4 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/40 rounded-2xl space-y-4">
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1 block">Concepto</label>
+                <label className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1 block">{t('financesTable.headers.concept')}</label>
                 <input
                   value={newConcept}
                   onChange={(e) => setNewConcept(e.target.value)}
                   list="concept-suggestions-mobile"
-                  className="w-full bg-white dark:bg-[#0D1B35] border border-blue-200 dark:border-blue-900/40 rounded-xl px-4 py-2 text-[14px] text-[#0F172A] dark:text-[#F1F5F9] outline-none"
-                  placeholder="Ej: Alquiler"
+                  className="w-full bg-white dark:bg-[#0D1B35] border border-blue-200 rounded-xl px-4 py-2 text-[14px] text-[#0F172A] dark:text-[#F1F5F9] outline-none"
+                  placeholder={t('financesTable.conceptPlaceholderExample')}
                 />
                 <datalist id="concept-suggestions-mobile">
                   {conceptSuggestions.map((c) => (
@@ -481,30 +483,30 @@ export default function FinancesTable({
               
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1 block">Tipo</label>
+                  <label className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1 block">{t('financesTable.headers.type')}</label>
                   <select
                     value={newType}
                     onChange={(e) => setNewType(e.target.value)}
-                    className="w-full bg-white dark:bg-[#0D1B35] border border-blue-200 dark:border-blue-900/40 rounded-xl px-3 py-2 text-[13px] text-[#0F172A] dark:text-[#F1F5F9] outline-none"
+                    className="w-full bg-white dark:bg-[#0D1B35] border border-blue-200 rounded-xl px-3 py-2 text-[13px] text-[#0F172A] dark:text-[#F1F5F9] outline-none"
                   >
-                    <optgroup label="Ingresos">
+                    <optgroup label={t('financesTable.optgroups.income')}>
                       {OCIO_INCOME_CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
+                        <option key={cat} value={cat}>{t('finances.categories.' + getCategoryKey(cat), { defaultValue: cat })}</option>
                       ))}
                     </optgroup>
-                    <optgroup label="Gastos">
+                    <optgroup label={t('financesTable.optgroups.expenses')}>
                       {OCIO_EXPENSE_CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
+                        <option key={cat} value={cat}>{t('finances.categories.' + getCategoryKey(cat), { defaultValue: cat })}</option>
                       ))}
                     </optgroup>
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1 block">Importe (€)</label>
+                  <label className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-1 block">{t('financesTable.amountLabelWithCurrency')}</label>
                   <input
                     value={newAmount}
                     onChange={(e) => setNewAmount(e.target.value)}
-                    className="w-full bg-white dark:bg-[#0D1B35] border border-blue-200 dark:border-blue-900/40 rounded-xl px-3 py-2 text-[14px] font-mono text-right text-[#0F172A] dark:text-[#F1F5F9] outline-none"
+                    className="w-full bg-white dark:bg-[#0D1B35] border border-blue-200 rounded-xl px-3 py-2 text-[14px] font-mono text-right text-[#0F172A] dark:text-[#F1F5F9] outline-none"
                     inputMode="decimal"
                     placeholder="0,00"
                   />
@@ -518,7 +520,7 @@ export default function FinancesTable({
                 onClick={confirmAdd}
                 className="flex-1 bg-[#1B4FD8] text-white py-2.5 rounded-xl font-bold text-[13px] shadow-lg shadow-blue-500/20 active:scale-95 transition-all uppercase"
               >
-                {savingNew ? "Guardando..." : "Confirmar"}
+                {savingNew ? t('common.loading') : t('financesTable.confirmButton')}
               </button>
               <button
                 disabled={savingNew}
@@ -546,7 +548,7 @@ export default function FinancesTable({
           ))
         ) : entries.length === 0 && !isAdding ? (
           <div className="py-8 text-center border-2 border-dashed border-slate-100 dark:border-[#1E3A5F] rounded-2xl">
-            <p className="text-slate-500 text-xs text-[#64748B]">No hay entradas este mes</p>
+            <p className="text-slate-500 text-xs text-[#64748B]">{t('financesTable.noEntries')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -566,7 +568,7 @@ export default function FinancesTable({
                         "text-[9px] font-bold tracking-wider rounded-md px-1.5 py-0.5 inline-block mt-0.5",
                         TYPE_BADGE[row.type]
                       )}>
-                        {TYPE_LABEL[row.type]}
+                        {getTypeLabel(row.type).toUpperCase()}
                       </span>
                     </div>
                   </div>
@@ -597,15 +599,15 @@ export default function FinancesTable({
                 <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-50 dark:border-[#1E3A5F]">
                   <button 
                     onClick={() => startEditAmount(row)}
-                    className="text-[10px] font-bold text-[#1B4FD8] px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg active:scale-95 transition-all"
+                    className="text-[10px] font-bold text-[#1B4FD8] px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
                   >
-                    EDITAR
+                    {t('common.edit').toUpperCase()}
                   </button>
                   <button 
                     onClick={() => deleteEntry(row)}
-                    className="text-[10px] font-bold text-red-500 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 rounded-lg active:scale-95 transition-all"
+                    className="text-[10px] font-bold text-red-500 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 rounded-lg"
                   >
-                    BORRAR
+                    {t('common.delete').toUpperCase()}
                   </button>
                 </div>
               </div>
@@ -620,7 +622,7 @@ export default function FinancesTable({
         className="mt-6 flex items-center gap-2 text-[13px] font-semibold text-[#1B4FD8] border border-dashed border-[#1B4FD8] rounded-xl px-4 h-11 hover:bg-[#EFF6FF] dark:hover:bg-[#162040] transition-all group disabled:opacity-50 w-full justify-center"
       >
         <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
-        AÑADIR CONCEPTO
+        {t('financesTable.addConceptButton')}
       </button>
     </div>
   );

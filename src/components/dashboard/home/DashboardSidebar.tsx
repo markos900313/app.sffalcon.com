@@ -13,6 +13,7 @@ import AddBusinessExpenseModal from "@/components/dashboard/modals/AddBusinessEx
 import AsistenteAIAssistant from "@/components/dashboard/home/AsistenteAIAssistant";
 import { generateFinanceReport } from "@/lib/generatePDF";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const MONTHS = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
 const monthToNumber: Record<string, number> = Object.fromEntries(MONTHS.map((m, i) => [m, i + 1]));
@@ -47,6 +48,7 @@ export default function DashboardSidebar({
   const router = useRouter();
   const pathname = usePathname();
   const isMainDashboard = pathname === '/dashboard';
+  const { t } = useLanguage();
 
   const supabase = createClient();
   const [isExporting, setIsExporting] = useState(false);
@@ -99,7 +101,7 @@ export default function DashboardSidebar({
     setIsExporting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { toast.error("No autenticado"); setIsExporting(false); return; }
+      if (!user) { toast.error(t('dashboardSidebar.toast.noUser')); setIsExporting(false); return; }
 
       if (mode === 'business') {
         // Exportar business_entries
@@ -117,24 +119,25 @@ export default function DashboardSidebar({
         a.download = `SF_Total_${currentYear}_${new Date().toISOString().split("T")[0]}.json`;
         a.click(); URL.revokeObjectURL(url);
       }
-      toast.success("Exportado correctamente");
-    } catch { toast.error("Error al exportar"); }
+      toast.success(t("finances.toast.exported"));
+    } catch { toast.error(t("finances.toast.exportError")); }
     finally { setIsExporting(false); }
   };
 
   // --- GENERAR PDF ---
   const handleGeneratePDF = async () => {
     const sourceEntries = mode === 'business' ? (data.businessEntries || businessEntries) : (data.entries || []);
-    if (!sourceEntries?.length) { toast.error('Sin datos para el informe'); return; }
+    if (!sourceEntries?.length) { toast.error(t('finances.toast.noDataReport')); return; }
     setGeneratingPDF(true);
     try {
       await generateFinanceReport(sourceEntries, selectedMonthNum, data.currentYear || currentYear);
-      toast.success('Informe PDF generado');
-    } catch { toast.error('Error al generar el PDF'); }
+      toast.success(t('finances.toast.pdfGenerated'));
+    } catch { toast.error(t('finances.toast.pdfError')); }
     finally { setGeneratingPDF(false); }
   };
 
   const mesNombre = numberToMonth[selectedMonthNum] || 'MES';
+  const translatedMes = t('monthSelector.' + mesNombre, { defaultValue: mesNombre });
 
   return (
     <div className="flex flex-col gap-5">
@@ -160,7 +163,7 @@ export default function DashboardSidebar({
           <div className="bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-[16px] p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.08em]">
-                Resumen {mesNombre} {currentYear}
+                {t('dashboardSidebar.summaryTitle', { month: translatedMes, year: currentYear })}
               </h3>
               <span className={cn("text-[11px] font-bold tabular-nums", combinado.total >= 0 ? "text-emerald-500" : "text-red-400")}>
                 {combinado.total >= 0 ? "+" : ""}{fmt(combinado.total, organization?.currency_symbol || '€')}
@@ -172,12 +175,14 @@ export default function DashboardSidebar({
           <div className="mb-3">
             <div className="flex items-center gap-1.5 mb-2">
               <Building2 className="w-3.5 h-3.5 text-[#1B4FD8]" />
-              <span className="text-[10px] font-semibold text-[#64748B] uppercase tracking-wider">Resumen {organization?.name || 'SF Gestor'}</span>
+              <span className="text-[10px] font-semibold text-[#64748B] uppercase tracking-wider">
+                {t('dashboardSidebar.orgSummary', { name: organization?.name || 'SF Gestor' })}
+              </span>
             </div>
               <div className="grid grid-cols-3 gap-2">
-                <MiniCard label="Ingresos" value={fmt(combinado.bizIng, organization?.currency_symbol || '€')} color="text-emerald-500" />
-                <MiniCard label="Gastos" value={fmt(combinado.bizGas, organization?.currency_symbol || '€')} color="text-red-400" />
-                <MiniCard label="Beneficio" value={fmt(combinado.bizBal, organization?.currency_symbol || '€')} color={combinado.bizBal >= 0 ? "text-emerald-500" : "text-red-400"} />
+                <MiniCard label={t('dashboardSidebar.income')} value={fmt(combinado.bizIng, organization?.currency_symbol || '€')} color="text-emerald-500" />
+                <MiniCard label={t('dashboardSidebar.expenses')} value={fmt(combinado.bizGas, organization?.currency_symbol || '€')} color="text-red-400" />
+                <MiniCard label={t('dashboardSidebar.profit')} value={fmt(combinado.bizBal, organization?.currency_symbol || '€')} color={combinado.bizBal >= 0 ? "text-emerald-500" : "text-red-400"} />
               </div>
             </div>
 
@@ -186,7 +191,7 @@ export default function DashboardSidebar({
             {/* BALANCE COMBO */}
             <div className="flex items-center justify-between bg-slate-50 dark:bg-[#0D1B35] rounded-xl px-4 py-3">
               <div>
-                <p className="text-[9px] font-semibold text-[#64748B] uppercase tracking-wider">Rentabilidad Anual</p>
+                <p className="text-[9px] font-semibold text-[#64748B] uppercase tracking-wider">{t('dashboardSidebar.annualProfitability')}</p>
                 <p className="text-[9px] text-[#94A3B8] mt-0.5">{organization?.name || 'SF Gestor'}</p>
               </div>
               <span className={cn("text-xl font-bold tabular-nums", combinado.bizAcum >= 0 ? "text-emerald-500" : "text-red-400")}>
@@ -198,7 +203,7 @@ export default function DashboardSidebar({
           {/* RESUMEN AÑO — DOTS POR MES */}
           <div className="bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-[16px] p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.08em]">Año {currentYear}</h3>
+              <h3 className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.08em]">{t('dashboardSidebar.yearLabel', { year: currentYear })}</h3>
               <span className={cn("text-[12px] font-bold tabular-nums", combinado.totalAcum >= 0 ? "text-emerald-500" : "text-red-400")}>
                 {combinado.totalAcum >= 0 ? "+" : ""}{fmt(combinado.totalAcum, organization?.currency_symbol || '€')}
               </span>
@@ -209,9 +214,9 @@ export default function DashboardSidebar({
               ))}
             </div>
             <div className="flex items-center gap-3 mt-3 pt-3 border-t border-[#F1F5F9] dark:border-[#1E3A5F]">
-              <LegendDot color="bg-emerald-500" label="Completo" />
-              <LegendDot color="bg-amber-400" label="Parcial" />
-              <LegendDot color="bg-slate-300 dark:bg-slate-700" label="Vacío" />
+              <LegendDot color="bg-emerald-500" label={t('dashboardSidebar.legend.complete')} />
+              <LegendDot color="bg-amber-400" label={t('dashboardSidebar.legend.partial')} />
+              <LegendDot color="bg-slate-300 dark:bg-slate-700" label={t('dashboardSidebar.legend.empty')} />
             </div>
           </div>
 
@@ -220,31 +225,27 @@ export default function DashboardSidebar({
             <div className="grid grid-cols-2 gap-2">
               <QuickActionButton
                 icon={<Plus className="w-5 h-5 text-emerald-500" />}
-                label="INGRESO"
+                label={t('dashboardSidebar.actions.income')}
                 onClick={() => mode === 'business' ? onOpenBizIncome?.() : onOpenIncome?.()}
               />
               <QuickActionButton
                 icon={<Plus className="w-5 h-5 text-red-400 rotate-45" />}
-                label="GASTO"
+                label={t('dashboardSidebar.actions.expense')}
                 onClick={() => mode === 'business' ? onOpenBizExpense?.() : onOpenExpense?.()}
               />
-              <QuickActionButton icon={<Activity className="w-5 h-5 text-blue-500" />} label="GRÁFICO"
+              <QuickActionButton icon={<Activity className="w-5 h-5 text-blue-500" />} label={t('dashboardSidebar.actions.chart')}
                 onClick={() => router.push(mode === 'business' ? '/dashboard/finances-business' : '/dashboard/finances')} />
-              <QuickActionButton icon={<Send className="w-5 h-5 text-[#64748B]" />} label="EXPORTAR" onClick={handleExportJSON} disabled={isExporting} />
+              <QuickActionButton icon={<Send className="w-5 h-5 text-[#64748B]" />} label={t('dashboardSidebar.actions.export')} onClick={handleExportJSON} disabled={isExporting} />
             </div>
           )}
 
           {/* BOTÓN PDF */}
           <button onClick={handleGeneratePDF} disabled={generatingPDF}
             className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-all bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] text-[#0F172A] dark:text-[#F1F5F9] hover:border-[#1B4FD8] hover:text-[#1B4FD8] disabled:opacity-50 shadow-sm">
-            {generatingPDF ? <><span className="animate-spin inline-block">⏳</span> Generando...</> : <>📄 Informe PDF</>}
+            {generatingPDF ? <><span className="animate-spin inline-block">⏳</span> {t('common.loading')}</> : <>📄 {t('dashboardSidebar.pdfReportButton')}</>}
           </button>
         </>
       )}
-
-
-
-
     </div>
   );
 }
@@ -260,9 +261,12 @@ function MiniCard({ label, value, color }: { label: string; value: string; color
 }
 
 function YTDMonthItem({ name, status }: { name: string; status: 'completo' | 'parcial' | 'vacio' }) {
+  const { t } = useLanguage();
   return (
     <div className="flex items-center justify-between gap-1">
-      <span className="text-[11px] font-medium text-[#0F172A] dark:text-[#F1F5F9]">{name}</span>
+      <span className="text-[11px] font-medium text-[#0F172A] dark:text-[#F1F5F9]">
+        {t('monthSelector.' + name, { defaultValue: name })}
+      </span>
       <div className={cn("w-2 h-2 rounded-full flex-shrink-0", status === "completo" ? "bg-[#10B981]" : status === "parcial" ? "bg-[#F59E0B]" : "bg-slate-200 dark:bg-slate-700")} />
     </div>
   );
@@ -286,4 +290,3 @@ function QuickActionButton({ icon, label, onClick, disabled }: { icon: React.Rea
     </button>
   );
 }
-

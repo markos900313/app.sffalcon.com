@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { useLanguage } from "@/lib/LanguageContext";
 
 type FinanceEntry = {
   id: string;
@@ -12,7 +13,25 @@ type FinanceEntry = {
 
 const COLORS = ["#1B4FD8", "#EF4444", "#F59E0B", "#10B981", "#6366F1", "#EC4899"];
 
+const getCategoryKey = (cat: string) => {
+  return cat
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s*\/\s*/g, '_')
+    .replace(/\s+/g, '_');
+};
+
 export default function DonutChart({ entries, month }: { entries: FinanceEntry[], month: string }) {
+  const { t } = useLanguage();
+
+  const getTypeLabel = (type: string) => {
+    const lower = type.toLowerCase();
+    if (["gasto_fijo", "variable", "ingreso", "deuda", "ahorro", "suscripcion"].includes(lower)) {
+      return t(`financesTable.types.${lower}`);
+    }
+    return t(`finances.categories.${getCategoryKey(type)}`, { defaultValue: type });
+  };
+
   const chartData = useMemo(() => {
     const gastosOnly = entries.filter(e => e.type !== 'ingreso');
     const totalGastos = gastosOnly.reduce((sum, e) => sum + e.amount, 0);
@@ -21,7 +40,7 @@ export default function DonutChart({ entries, month }: { entries: FinanceEntry[]
 
     // Agrupar por tipo
     const grouped = gastosOnly.reduce((acc, e) => {
-      const typeLabel = e.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      const typeLabel = getTypeLabel(e.type);
       acc[typeLabel] = (acc[typeLabel] || 0) + e.amount;
       return acc;
     }, {} as Record<string, number>);
@@ -32,12 +51,14 @@ export default function DonutChart({ entries, month }: { entries: FinanceEntry[]
       amount: value,
       color: COLORS[i % COLORS.length]
     })).sort((a, b) => b.value - a.value);
-  }, [entries]);
+  }, [entries, t]);
+
+  const translatedMonth = t('monthSelector.' + month, { defaultValue: month });
 
   return (
     <div className="bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-[16px] md:rounded-[20px] lg:rounded-[24px] p-4 md:p-6 lg:p-8 shadow-sm h-full flex flex-col min-h-[350px] md:min-h-[400px]">
       <h3 className="text-[11px] font-semibold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] mb-4 md:mb-8">
-        Distribución de Gastos (Detallada)
+        {t('donutChart.title')}
       </h3>
 
       <div className="flex flex-col items-center justify-center gap-4 md:gap-8 flex-1">
@@ -63,12 +84,12 @@ export default function DonutChart({ entries, month }: { entries: FinanceEntry[]
             </ResponsiveContainer>
           ) : (
             <div className="text-center p-4">
-              <p className="text-xs text-slate-400">Sin datos de gastos para {month}</p>
+              <p className="text-xs text-slate-400">{t('donutChart.noData', { month: translatedMonth })}</p>
             </div>
           )}
           {chartData.length > 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center pb-1">
-              <span className="text-[10px] font-bold text-[#64748B] dark:text-[#475569] uppercase tracking-[0.15em] mb-1">{month}</span>
+              <span className="text-[10px] font-bold text-[#64748B] dark:text-[#475569] uppercase tracking-[0.15em] mb-1">{translatedMonth}</span>
               <span className="text-xl md:text-2xl font-bold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight tabular-nums">
                 {`${chartData.reduce((s, d) => s + d.amount, 0).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€`}
               </span>

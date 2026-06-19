@@ -3,11 +3,7 @@
 import React, { useMemo } from "react";
 import { AlertTriangle, CheckCircle, Info } from "lucide-react";
 import { useOrganization } from "@/context/OrganizationContext";
-
-const MESES = [
-  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
-];
+import { useLanguage } from "@/lib/LanguageContext";
 
 type Alert = {
   type: 'warning' | 'success' | 'info';
@@ -27,6 +23,22 @@ interface Props {
 export default function FinancialAlerts({ entries, selectedMonth, year, aiAlerts, mode = 'hogar' }: Props) {
   const { organization } = useOrganization();
   const symbol = organization?.currency_symbol || '€';
+  const { t } = useLanguage();
+
+  const monthsMap = useMemo(() => [
+    t('common.months.january'),
+    t('common.months.february'),
+    t('common.months.march'),
+    t('common.months.april'),
+    t('common.months.may'),
+    t('common.months.june'),
+    t('common.months.july'),
+    t('common.months.august'),
+    t('common.months.september'),
+    t('common.months.october'),
+    t('common.months.november'),
+    t('common.months.december'),
+  ], [t]);
 
   const alerts: Alert[] = useMemo(() => {
     if (aiAlerts && aiAlerts.length > 0) return aiAlerts;
@@ -51,43 +63,46 @@ export default function FinancialAlerts({ entries, selectedMonth, year, aiAlerts
       .filter(e => e.type !== ingresoType)
       .reduce((s: number, e: any) => s + Number(e.amount), 0);
 
-    const mesNombre = MESES[selectedMonth - 1] || 'este mes';
+    const mesNombre = monthsMap[selectedMonth - 1] || t('financialAlerts.thisMonth');
     const result: Alert[] = [];
 
     if (ingresos === 0) {
       result.push({
         type: 'info',
-        title: 'Sin ingresos registrados',
-        message: `No hay ingresos en ${mesNombre}. ¿Olvidaste añadirlos?`
+        title: t('financialAlerts.noIncome.title'),
+        message: t('financialAlerts.noIncome.message', { month: mesNombre })
       });
     }
 
     if (balance < 0) {
       result.push({
         type: 'warning',
-        title: mode === 'business' ? 'Beneficio negativo' : 'Presupuesto excedido',
-        message: `Los gastos superan los ingresos en ${Math.abs(balance).toLocaleString('es-ES', { minimumFractionDigits: 2 })}${symbol} en ${mesNombre}.`
+        title: mode === 'business' ? t('financialAlerts.negativeProfit.title') : t('financialAlerts.budgetExceeded.title'),
+        message: t('financialAlerts.expensesExceeded.message', {
+          amount: Math.abs(balance).toLocaleString('es-ES', { minimumFractionDigits: 2 }),
+          symbol
+        })
       });
     }
 
     if (gastosAnterior > 0 && gastos > gastosAnterior * 1.2) {
       result.push({
         type: 'warning',
-        title: 'Gastos elevados',
-        message: `Los gastos son un ${Math.round(((gastos / gastosAnterior) - 1) * 100)}% superiores al mes anterior.`
+        title: t('financialAlerts.highExpenses.title'),
+        message: t('financialAlerts.highExpenses.message', { percent: Math.round(((gastos / gastosAnterior) - 1) * 100) })
       });
     }
 
     if (result.length === 0) {
       result.push({
         type: 'success',
-        title: mode === 'business' ? 'Negocio equilibrado' : 'Finanzas equilibradas',
-        message: `Todo en orden en ${mesNombre}. Buen trabajo.`
+        title: mode === 'business' ? t('financialAlerts.balanced.businessTitle') : t('financialAlerts.balanced.hogarTitle'),
+        message: t('financialAlerts.balanced.message', { month: mesNombre })
       });
     }
 
     return result;
-  }, [entries, selectedMonth, year, mode]);
+  }, [entries, selectedMonth, year, mode, aiAlerts, monthsMap, symbol, t]);
 
   const styles = {
     warning: {
@@ -113,7 +128,7 @@ export default function FinancialAlerts({ entries, selectedMonth, year, aiAlerts
   return (
     <div className="space-y-4 md:space-y-5 lg:space-y-6 flex flex-col justify-center">
       <h3 className="text-sm md:text-base lg:text-[16px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] uppercase mb-1 md:mb-2">
-        Alertas financieras
+        {t('financialAlerts.title')}
       </h3>
       {alerts.map((alert, i) => {
         const s = styles[alert.type];
