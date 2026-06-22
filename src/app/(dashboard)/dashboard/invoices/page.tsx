@@ -184,10 +184,10 @@ export default function InvoicesPage() {
       await generateInvoicePDF(inv, 'download', {
         name: organization?.name,
         nif: (organization as any)?.nif,
-        address: organization?.address,
-        city: organization?.city,
-        email: organization?.email,
-        phone: organization?.phone
+        address: organization?.address || undefined,
+        city: organization?.city || undefined,
+        email: organization?.email || undefined,
+        phone: organization?.phone || undefined
       });
       toast.success(t('invoices.toast.pdfGenerated' as any));
     } catch (e) {
@@ -208,10 +208,10 @@ export default function InvoicesPage() {
       const pdfBase64 = await generateInvoicePDF(inv, 'base64', {
         name: organization?.name,
         nif: (organization as any)?.nif,
-        address: organization?.address,
-        city: organization?.city,
-        email: organization?.email,
-        phone: organization?.phone
+        address: organization?.address || undefined,
+        city: organization?.city || undefined,
+        email: organization?.email || undefined,
+        phone: organization?.phone || undefined
       });
 
       const res = await fetch('/api/invoices/send', {

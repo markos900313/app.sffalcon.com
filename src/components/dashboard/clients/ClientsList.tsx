@@ -165,7 +165,7 @@ export default function ClientsList({ clients, onEdit, onDelete, grupo = 5 }: Cl
                     <Edit2 size={18} />
                   </button>
                   <button 
-                    onClick={() => onDelete(client.id)}
+                    onClick={() => client.id && onDelete(client.id)}
                     className="p-2 bg-slate-50 dark:bg-white/5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                     title="Eliminar"
                   >

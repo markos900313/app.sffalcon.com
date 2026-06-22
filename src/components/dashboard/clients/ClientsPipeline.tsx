@@ -104,7 +104,7 @@ export default function ClientsPipeline({ clients, onRefresh }: ClientsPipelineP
     return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
   };
 
-  const getTimeAgo = (dateStr: string | null) => {
+  const getTimeAgo = (dateStr: string | null | undefined) => {
     if (!dateStr) return 'Pendiente';
     try {
       const diff = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
@@ -186,7 +186,7 @@ export default function ClientsPipeline({ clients, onRefresh }: ClientsPipelineP
                     )}
                   >
                     {column.clients.map((client, index) => (
-                      <Draggable key={client.id} draggableId={client.id} index={index}>
+                      <Draggable key={client.id} draggableId={client.id || ''} index={index}>
                         {(provided, snapshot) => (
                           <div
                             ref={provided.innerRef}

@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Calcular mañana en formato YYYY-MM-DD
     const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd');

@@ -23,7 +23,7 @@ function withPrecioFinal<T extends Record<string, any>>(table: string, payload: 
   const transporte = Number(payload.transporte) || 0;
   const precio_final = precio + (precio * impuesto / 100) + transporte;
 
-  const formattedPayload = {
+  const formattedPayload: any = {
     ...payload,
     precio_final
   };
