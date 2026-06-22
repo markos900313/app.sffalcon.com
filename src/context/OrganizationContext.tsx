@@ -22,11 +22,24 @@ interface Organization {
   logo_url: string | null
   ai_personality: string | null
   trial_ends_at?: string | null
+  trial_used?: boolean
   business_type: 'autonomo' | 'empresa'
   created_at?: string
   status: 'active' | 'trial' | 'expired'
   archetype?: string
   archetype_modules?: any
+  sector_config?: any
+  // Geo / location fields
+  latitude?: number | null
+  longitude?: number | null
+  geo_radius?: number | null
+  address_geocoded?: string | null
+  // Contact / address fields
+  address?: string | null
+  city?: string | null
+  email?: string | null
+  phone?: string | null
+  sector?: string | null
 }
 
 interface OrganizationContextType {

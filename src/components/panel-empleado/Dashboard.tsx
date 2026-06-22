@@ -12,15 +12,18 @@ import {
   Info
 } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface DashboardProps {
   staff: any;
 }
 
 export default function Dashboard({ staff }: DashboardProps) {
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'en' ? enUS : es;
   const supabase = createClient();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [lastEntrada, setLastEntrada] = useState<any>(null);
@@ -107,9 +110,9 @@ export default function Dashboard({ staff }: DashboardProps) {
 
   const welcomeMessage = () => {
     const hour = currentTime.getHours();
-    if (hour < 12) return "Buenos días";
-    if (hour < 20) return "Buenas tardes";
-    return "Buenas noches";
+    if (hour < 12) return t("employeePanel.dashboard.welcome.morning");
+    if (hour < 20) return t("employeePanel.dashboard.welcome.afternoon");
+    return t("employeePanel.dashboard.welcome.evening");
   };
 
   return (
@@ -120,17 +123,17 @@ export default function Dashboard({ staff }: DashboardProps) {
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1B4FD8]">Panel de Control</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1B4FD8]">{t('employeePanel.dashboard.controlPanel')}</span>
               <span className="w-1 h-1 rounded-full bg-slate-300" />
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                {format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}
+                {format(currentTime, language === 'en' ? "EEEE, MMMM d" : "EEEE, d 'de' MMMM", { locale: dateLocale })}
               </span>
             </div>
             <h1 className="text-3xl font-black text-slate-900 dark:text-white leading-tight">
               {welcomeMessage()}, <span className="text-[#1B4FD8]">{staff?.full_name?.split(' ')[0]}</span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">
-              {staff?.role} en <span className="text-slate-900 dark:text-white font-bold">{staff?.organizations?.name}</span>
+              {staff?.role} {t('employeePanel.dashboard.welcome.at')} <span className="text-slate-900 dark:text-white font-bold">{staff?.organizations?.name}</span>
             </p>
           </div>
           
@@ -145,7 +148,7 @@ export default function Dashboard({ staff }: DashboardProps) {
               <div className="flex items-center gap-1.5 mt-1">
                 <div className={cn("w-2 h-2 rounded-full", lastEntrada ? "bg-emerald-500 animate-pulse" : "bg-slate-300 dark:bg-slate-600")} />
                 <span className={cn("text-[9px] font-black uppercase tracking-widest", lastEntrada ? "text-emerald-500" : "text-slate-400")}>
-                  {lastEntrada ? "En Turno" : "Fuera de Servicio"}
+                  {lastEntrada ? t('employeePanel.dashboard.status.inShift') : t('employeePanel.dashboard.status.outOfService')}
                 </span>
               </div>
             </div>
@@ -160,12 +163,14 @@ export default function Dashboard({ staff }: DashboardProps) {
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
               <Timer size={20} />
             </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiempo Hoy</span>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.dashboard.kpi.timeToday')}</span>
           </div>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">{workedToday}</p>
+          <p className="text-2xl font-black text-slate-900 dark:text-white">
+            {workedToday === "Sin turno activo" ? t('employeePanel.dashboard.status.noActiveShift') : workedToday}
+          </p>
           <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-emerald-500">
             <TrendingUp size={12} />
-            <span>Actualizado en tiempo real</span>
+            <span>{t('employeePanel.dashboard.kpi.realTime')}</span>
           </div>
         </div>
 
@@ -185,30 +190,30 @@ export default function Dashboard({ staff }: DashboardProps) {
             <span className={cn(
               "text-[10px] font-black uppercase tracking-widest",
               nextShift?.fecha === format(new Date(), 'yyyy-MM-dd') ? "text-blue-100" : "text-slate-400"
-            )}>Próximo Turno</span>
+            )}>{t('employeePanel.dashboard.kpi.nextShift')}</span>
           </div>
           
           {nextShift ? (
             <div className="space-y-1">
               <p className="text-2xl font-black capitalize">
-                {format(new Date(nextShift.fecha + 'T12:00:00'), "EEEE d", { locale: es })}
+                {format(new Date(nextShift.fecha + 'T12:00:00'), "EEEE d", { locale: dateLocale })}
               </p>
               <div className="flex items-center gap-2">
                  <Clock size={14} className="opacity-70" />
                  <span className="text-sm font-bold">{nextShift.hora_inicio} — {nextShift.hora_fin}</span>
                  <span className="px-2 py-0.5 rounded-md bg-white/10 text-[9px] font-black uppercase tracking-widest">
-                   {nextShift.tipo === 'morning' ? 'Mañana' : nextShift.tipo === 'afternoon' ? 'Tarde' : 'Partido'}
+                   {nextShift.tipo === 'morning' ? t('employeePanel.turnos.types.morning') : nextShift.tipo === 'afternoon' ? t('employeePanel.turnos.types.afternoon') : t('employeePanel.turnos.types.split')}
                  </span>
               </div>
             </div>
           ) : (
-            <p className="text-2xl font-black opacity-30 italic">Sin turnos</p>
+            <p className="text-2xl font-black opacity-30 italic">{t('employeePanel.dashboard.kpi.noShifts')}</p>
           )}
 
           {nextShift?.fecha === format(new Date(), 'yyyy-MM-dd') && (
             <div className="mt-4 flex items-center gap-1.5 text-[10px] font-black uppercase bg-white/20 w-fit px-3 py-1 rounded-full">
               <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              <span>Es hoy</span>
+              <span>{t('employeePanel.dashboard.kpi.isToday')}</span>
             </div>
           )}
         </div>
@@ -218,11 +223,11 @@ export default function Dashboard({ staff }: DashboardProps) {
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
               <Activity size={20} />
             </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estatus</span>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.dashboard.kpi.status')}</span>
           </div>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">Activo</p>
+          <p className="text-2xl font-black text-slate-900 dark:text-white">{t('employeePanel.dashboard.status.active')}</p>
           <div className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            <span>SF Staff</span>
+            <span>{t('employeePanel.dashboard.kpi.staff')}</span>
           </div>
         </div>
       </div>
@@ -234,10 +239,10 @@ export default function Dashboard({ staff }: DashboardProps) {
              <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
                <Activity size={18} />
              </div>
-             <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Historial de Actividad</h3>
+             <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{t('employeePanel.dashboard.history.title')}</h3>
            </div>
            <button className="text-[9px] font-black text-[#1B4FD8] uppercase tracking-widest flex items-center gap-1.5 hover:gap-2 transition-all">
-             Ver todo <ArrowRight size={12} />
+             {t('employeePanel.dashboard.history.viewAll')} <ArrowRight size={12} />
            </button>
         </div>
         
@@ -245,10 +250,10 @@ export default function Dashboard({ staff }: DashboardProps) {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-100 dark:border-white/5">
-                <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Fecha</th>
-                <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Evento</th>
-                <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Hora</th>
-                <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Canal</th>
+                <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.dashboard.history.date')}</th>
+                <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.dashboard.history.event')}</th>
+                <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.dashboard.history.time')}</th>
+                <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.dashboard.history.channel')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-white/5">
@@ -256,7 +261,7 @@ export default function Dashboard({ staff }: DashboardProps) {
                 <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                   <td className="px-6 py-4">
                     <span className="text-[11px] font-bold text-slate-900 dark:text-white tabular-nums">
-                      {format(new Date(item.timestamp), "d MMM, yyyy", { locale: es })}
+                      {format(new Date(item.timestamp), language === 'en' ? "MMM d, yyyy" : "d MMM, yyyy", { locale: dateLocale })}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -266,7 +271,7 @@ export default function Dashboard({ staff }: DashboardProps) {
                         ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
                         : "bg-rose-500/10 text-rose-600 border-rose-500/20"
                     )}>
-                      {item.tipo === 'entrada' ? 'Entrada' : 'Salida'}
+                      {item.tipo === 'entrada' ? t('employeePanel.dashboard.history.clockIn') : t('employeePanel.dashboard.history.clockOut')}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -286,7 +291,7 @@ export default function Dashboard({ staff }: DashboardProps) {
                   <td colSpan={4} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
                        <Info size={24} className="text-slate-200" />
-                       <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No hay registros recientes</p>
+                       <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{t('employeePanel.dashboard.history.noRecords')}</p>
                     </div>
                   </td>
                 </tr>

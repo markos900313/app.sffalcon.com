@@ -12,11 +12,12 @@ import {
   Activity
 } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
 /*
 SQL MIGRATION:
@@ -38,6 +39,8 @@ interface VacacionesProps {
 }
 
 export default function Vacaciones({ staff }: VacacionesProps) {
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'en' ? enUS : es;
   const supabase = createClient();
   const [requests, setRequests] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -79,14 +82,14 @@ export default function Vacaciones({ staff }: VacacionesProps) {
         .eq('staff_id', staff.id);
       
       if (error) {
-        toast.error('Error al cancelar');
+        toast.error(t('employeePanel.vacaciones.toast.cancelError'));
         return;
       }
       
-      toast.success('Solicitud cancelada');
+      toast.success(t('employeePanel.vacaciones.toast.cancelSuccess'));
       fetchRequests();
     } catch (err) {
-      toast.error('Error al cancelar');
+      toast.error(t('employeePanel.vacaciones.toast.cancelError'));
     }
   };
 
@@ -119,7 +122,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
       if (error) throw error;
 
       // Obtener nombre del empleado
-      const nombreEmpleado = staff.full_name || 'Un empleado';
+      const nombreEmpleado = staff.full_name || (language === 'en' ? 'An employee' : 'Un empleado');
       const fechaInicio = format(new Date(formData.fecha_inicio), "dd/MM/yyyy");
       const fechaFin = format(new Date(formData.fecha_fin), "dd/MM/yyyy");
       const motivo = formData.motivo;
@@ -129,8 +132,12 @@ export default function Vacaciones({ staff }: VacacionesProps) {
         .from('notifications')
         .insert({
           organization_id: staff.organization_id,
-          title: '🌴 Solicitud de vacaciones',
-          message: `${nombreEmpleado} ha solicitado vacaciones del ${fechaInicio} al ${fechaFin}. Motivo: ${motivo || 'Sin especificar'}.`,
+          title: t('employeePanel.vacaciones.notif.title'),
+          message: t('employeePanel.vacaciones.notif.message')
+            .replace('{name}', nombreEmpleado)
+            .replace('{start}', fechaInicio)
+            .replace('{end}', fechaFin)
+            .replace('{reason}', motivo || t('employeePanel.vacaciones.unspecified')),
           type: 'warning',
           read: false,
           target_user_id: null // visible para admin
@@ -140,12 +147,12 @@ export default function Vacaciones({ staff }: VacacionesProps) {
         console.error('Error notificación vacaciones:', notifError);
       }
 
-      toast.success("Solicitud enviada correctamente");
+      toast.success(t('employeePanel.vacaciones.toast.sendSuccess'));
       setIsModalOpen(false);
       setFormData({ fecha_inicio: "", fecha_fin: "", motivo: "" });
       fetchRequests();
     } catch (err: any) {
-      toast.error("Error al enviar solicitud: " + err.message);
+      toast.error(t('employeePanel.vacaciones.toast.sendError') + err.message);
     } finally {
       setSaving(false);
     }
@@ -156,25 +163,25 @@ export default function Vacaciones({ staff }: VacacionesProps) {
       case 'aprobada':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">
-            <CheckCircle2 size={10} /> Aprobada
+            <CheckCircle2 size={10} /> {t('employeePanel.vacaciones.states.approved')}
           </span>
         );
       case 'rechazada':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-black uppercase tracking-widest border border-rose-500/20">
-            <XCircle size={10} /> Rechazada
+            <XCircle size={10} /> {t('employeePanel.vacaciones.states.rejected')}
           </span>
         );
       case 'cancelada':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-500/10 text-slate-500 text-[9px] font-black uppercase tracking-widest border border-slate-500/20">
-            <X size={10} /> Cancelada
+            <X size={10} /> {t('employeePanel.vacaciones.states.cancelled')}
           </span>
         );
       default:
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20">
-            <Clock size={10} /> Pendiente
+            <Clock size={10} /> {t('employeePanel.vacaciones.states.pending')}
           </span>
         );
     }
@@ -188,10 +195,10 @@ export default function Vacaciones({ staff }: VacacionesProps) {
         <div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
             <Palmtree className="text-[#1B4FD8] w-8 h-8" />
-            Mis Vacaciones
+            {t('employeePanel.vacaciones.title')}
           </h2>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-             Gestiona tus periodos de descanso y solicitudes
+             {t('employeePanel.vacaciones.subtitle')}
           </p>
         </div>
 
@@ -200,7 +207,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
           className="px-8 py-3.5 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2.5 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
         >
           <Plus size={16} />
-          Solicitar Vacaciones
+          {t('employeePanel.vacaciones.requestButton')}
         </button>
       </div>
 
@@ -210,10 +217,10 @@ export default function Vacaciones({ staff }: VacacionesProps) {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5">
-                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Periodo</th>
-                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Días</th>
-                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Motivo</th>
-                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Estatus</th>
+                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.vacaciones.table.period')}</th>
+                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">{t('employeePanel.vacaciones.table.days')}</th>
+                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.vacaciones.table.reason')}</th>
+                <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.vacaciones.table.status')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-white/5">
@@ -226,7 +233,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
                       </div>
                       <div>
                         <p className="text-[11px] font-black text-slate-900 dark:text-white uppercase leading-none">
-                          {format(new Date(req.fecha_inicio + 'T12:00:00'), "d MMM", { locale: es })} — {format(new Date(req.fecha_fin + 'T12:00:00'), "d MMM", { locale: es })}
+                          {format(new Date(req.fecha_inicio + 'T12:00:00'), language === 'en' ? "MMM d" : "d MMM", { locale: dateLocale })} — {format(new Date(req.fecha_fin + 'T12:00:00'), language === 'en' ? "MMM d" : "d MMM", { locale: dateLocale })}
                         </p>
                         <p className="text-[10px] font-bold text-slate-400 tabular-nums mt-1">{new Date(req.fecha_inicio).getFullYear()}</p>
                       </div>
@@ -239,7 +246,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
                   </td>
                   <td className="px-8 py-6">
                     <p className="text-xs text-slate-600 dark:text-slate-400 font-medium italic max-w-xs truncate">
-                      &quot;{req.motivo || 'Sin motivo especificado'}&quot;
+                      &quot;{req.motivo || t('employeePanel.vacaciones.table.noReason')}&quot;
                     </p>
                   </td>
                   <td className="px-8 py-6 flex items-center justify-between gap-4">
@@ -249,7 +256,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
                         onClick={() => handleCancelar(req.id)}
                         className="px-3 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-xl bg-slate-500/20 hover:bg-slate-500/40 text-slate-400 hover:text-slate-200 transition-all border border-slate-500/20"
                       >
-                         Cancelar
+                         {t('employeePanel.vacaciones.cancel')}
                       </button>
                     )}
                   </td>
@@ -263,9 +270,9 @@ export default function Vacaciones({ staff }: VacacionesProps) {
                  <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-white/5 flex items-center justify-center text-slate-200">
                    <Palmtree size={32} />
                  </div>
-                 <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Sin solicitudes</h4>
+                 <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">{t('employeePanel.vacaciones.noRequests.title')}</h4>
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
-                   Todavía no has solicitado ningún periodo de vacaciones.
+                   {t('employeePanel.vacaciones.noRequests.desc')}
                  </p>
               </div>
             </div>
@@ -286,7 +293,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
               <div className="p-8 border-b border-slate-100 dark:border-white/5 flex items-center justify-between text-slate-900 dark:text-white">
                  <h3 className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
                     <Plus size={20} className="text-[#1B4FD8]" />
-                    Nueva Solicitud
+                    {t('employeePanel.vacaciones.modal.title')}
                  </h3>
                  <button 
                    onClick={() => setIsModalOpen(false)}
@@ -299,7 +306,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
               <form onSubmit={handleSubmit} className="p-8 space-y-6">
                  <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inicio</label>
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.vacaciones.modal.start')}</label>
                      <input 
                        type="date"
                        required
@@ -309,7 +316,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
                      />
                    </div>
                    <div className="space-y-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fin</label>
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.vacaciones.modal.end')}</label>
                      <input 
                        type="date"
                        required
@@ -321,10 +328,10 @@ export default function Vacaciones({ staff }: VacacionesProps) {
                  </div>
 
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Motivo</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.vacaciones.modal.reason')}</label>
                     <textarea 
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-xs dark:text-white h-24 resize-none"
-                      placeholder="Ej: Viaje familiar..."
+                      placeholder={t('employeePanel.vacaciones.modal.placeholder')}
                       value={formData.motivo}
                       onChange={(e) => setFormData({...formData, motivo: e.target.value})}
                     />
@@ -335,7 +342,7 @@ export default function Vacaciones({ staff }: VacacionesProps) {
                    disabled={saving}
                    className="w-full py-4 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 active:scale-95"
                  >
-                   {saving ? 'Enviando...' : 'Enviar Solicitud'}
+                   {saving ? t('employeePanel.vacaciones.modal.sending') : t('employeePanel.vacaciones.modal.submit')}
                  </button>
               </form>
             </motion.div>

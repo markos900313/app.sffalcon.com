@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface TopbarProps {
   staff?: any;
@@ -12,6 +13,7 @@ interface TopbarProps {
 }
 
 export default function Topbar({ staff, setActiveSection }: TopbarProps) {
+  const { t } = useLanguage();
   const { isOpen, setIsOpen } = useSidebar();
   const [mounted, setMounted] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -125,7 +127,7 @@ export default function Topbar({ staff, setActiveSection }: TopbarProps) {
           <Menu className="w-6 h-6" />
         </button>
         <span className="md:hidden text-sm font-black uppercase tracking-widest text-white truncate">
-          Panel
+          {t('employeePanel.topbar.panel')}
         </span>
       </div>
 
@@ -151,10 +153,10 @@ export default function Topbar({ staff, setActiveSection }: TopbarProps) {
           {showNotifications && (
             <div className="dropdown-content fixed md:absolute top-[64px] md:top-full left-4 right-4 md:left-auto md:right-0 mt-2 w-auto md:w-80 max-w-[calc(100vw-32px)] bg-[#111F3A] border border-[#1E3A5F] rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in fade-in slide-in-from-top-1">
               <div className="p-4 border-b border-[#1E3A5F] flex items-center justify-between">
-                <span className="text-white text-xs font-bold uppercase tracking-widest">Notificaciones</span>
+                <span className="text-white text-xs font-bold uppercase tracking-widest">{t('employeePanel.topbar.notifications')}</span>
                 {unreadCount > 0 && (
                   <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded-full border border-red-500/30 font-black">
-                    {unreadCount} nuevas
+                    {t('employeePanel.topbar.newCount').replace('{count}', unreadCount.toString())}
                   </span>
                 )}
               </div>
@@ -162,7 +164,7 @@ export default function Topbar({ staff, setActiveSection }: TopbarProps) {
                 {notifications.length === 0 ? (
                   <div className="p-8 text-center opacity-20">
                     <Bell className="w-8 h-8 text-white mx-auto mb-2" />
-                    <p className="text-[10px] text-white uppercase font-black">Sin avisos</p>
+                    <p className="text-[10px] text-white uppercase font-black">{t('employeePanel.topbar.noNotifications')}</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-[#1E3A5F]/50">
@@ -197,7 +199,7 @@ export default function Topbar({ staff, setActiveSection }: TopbarProps) {
                     onClick={handleClearNotifications}
                     className="w-full text-red-500 text-[10px] font-black uppercase tracking-widest hover:opacity-80 transition-opacity"
                   >
-                    Limpiar notificaciones
+                    {t('employeePanel.topbar.clearNotifications')}
                   </button>
                 </div>
               )}
@@ -209,7 +211,7 @@ export default function Topbar({ staff, setActiveSection }: TopbarProps) {
           <button 
             onClick={() => setActiveSection?.("inicio")}
             className="w-8 h-8 rounded-full bg-white/10 border border-white/5 flex items-center justify-center hover:bg-white/20 transition-all"
-            title="Inicio"
+            title={t('employeePanel.topbar.inicio')}
           >
             <Home size={16} className="text-white" />
           </button>
@@ -220,7 +222,7 @@ export default function Topbar({ staff, setActiveSection }: TopbarProps) {
         <button 
           onClick={handleLogout}
           className="p-2 text-white/70 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all h-10 w-10 flex items-center justify-center border border-transparent hover:border-red-500/20"
-          title="Cerrar Sesión"
+          title={t('employeePanel.topbar.logout')}
         >
           <LogOut className="w-5 h-5" />
         </button>

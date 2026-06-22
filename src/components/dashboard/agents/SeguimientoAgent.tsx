@@ -5,15 +5,16 @@ import { Bell, Copy, Check, ExternalLink } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import AgentCard from './AgentCard';
 import toast from 'react-hot-toast';
+import { useOrganization } from '@/context/OrganizationContext';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface SeguimientoAgentProps {
   onAddLog: (log: any) => void;
 }
 
-import { useOrganization } from '@/context/OrganizationContext';
-
 export default function SeguimientoAgent({ onAddLog }: SeguimientoAgentProps) {
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const isBelleza = organization?.sector_config?.grupo?.startsWith('1_belleza');
   const supabase = createClient();
   const [isActive, setIsActive] = useState(true);
@@ -24,7 +25,11 @@ export default function SeguimientoAgent({ onAddLog }: SeguimientoAgentProps) {
   const runAgent = async () => {
     setIsRunning(true);
     setSuggestions([]);
-    onAddLog({ agent: 'Seguimiento', action: 'Inicio', result: 'Buscando clientes inactivos...' });
+    onAddLog({ 
+      agent: t('aiAgents.cards.followup.title'), 
+      action: t('aiAgents.cards.logActionStart'), 
+      result: t('aiAgents.cards.followup.logStart') 
+    });
 
     try {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -38,12 +43,20 @@ export default function SeguimientoAgent({ onAddLog }: SeguimientoAgentProps) {
       if (error) throw error;
 
       if (!clients || clients.length === 0) {
-        onAddLog({ agent: 'Seguimiento', action: 'Finalizado', result: 'Sin clientes inactivos destacados.' });
-        toast.success('No hay clientes inactivos para seguimiento.');
+        onAddLog({ 
+          agent: t('aiAgents.cards.followup.title'), 
+          action: t('aiAgents.cards.logActionFinished'), 
+          result: t('aiAgents.cards.followup.logFinished') 
+        });
+        toast.success(t('aiAgents.cards.followup.toastNoClients'));
         return;
       }
 
-      onAddLog({ agent: 'Seguimiento', action: 'Procesando', result: `Detectados ${clients.length} clientes sin contacto.` });
+      onAddLog({ 
+        agent: t('aiAgents.cards.followup.title'), 
+        action: t('aiAgents.cards.logActionProcessing'), 
+        result: t('aiAgents.cards.followup.logProcessing').replace('{count}', String(clients.length)) 
+      });
 
       for (const client of clients) {
         const days = Math.floor((Date.now() - new Date(client.last_contact).getTime()) / (1000 * 60 * 60 * 24));
@@ -71,15 +84,23 @@ export default function SeguimientoAgent({ onAddLog }: SeguimientoAgentProps) {
           days
         }]);
 
-        onAddLog({ agent: 'Seguimiento', action: 'Sugerencia', result: `Mensaje generado para ${client.name} (${days} días)` });
+        onAddLog({ 
+          agent: t('aiAgents.cards.followup.title'), 
+          action: t('aiAgents.cards.logActionSuggestion'), 
+          result: t('aiAgents.cards.followup.logSuggestion').replace('{name}', client.name).replace('{days}', String(days)) 
+        });
       }
 
       setLastRun(new Date().toLocaleString());
-      toast.success('Agente de Seguimiento finalizado.');
+      toast.success(t('aiAgents.cards.followup.toastFinished'));
 
     } catch (err) {
       console.error(err);
-      onAddLog({ agent: 'Seguimiento', action: 'Error', result: 'Fallo en la ejecución del agente.' });
+      onAddLog({ 
+        agent: t('aiAgents.cards.followup.title'), 
+        action: t('aiAgents.cards.logActionError'), 
+        result: t('aiAgents.cards.followup.logError') 
+      });
     } finally {
       setIsRunning(false);
     }
@@ -94,9 +115,9 @@ export default function SeguimientoAgent({ onAddLog }: SeguimientoAgentProps) {
 
       if (error) throw error;
       setSuggestions(prev => prev.filter(s => s.client.id !== clientId));
-      toast.success('Cliente marcado como contactado');
+      toast.success(t('aiAgents.cards.followup.toastContactedSuccess'));
     } catch (err) {
-      toast.error('Error al actualizar cliente');
+      toast.error(t('aiAgents.cards.followup.toastContactedError'));
     }
   };
 
@@ -105,42 +126,42 @@ export default function SeguimientoAgent({ onAddLog }: SeguimientoAgentProps) {
       <AgentCard
         icon={Bell}
         iconColor="#F59E0B"
-        title="Gestor Empresarial"
-        description="Automatiza el seguimiento de preventa y posventa, asegurando que cada cliente reciba la atención que merece."
+        title={t('aiAgents.cards.followup.title')}
+        description={t('aiAgents.cards.followup.desc')}
         isActive={isActive}
         isRunning={isRunning}
         lastRun={lastRun}
         onToggle={() => setIsActive(!isActive)}
-        onConfigure={() => toast.success('Configuración de Seguimiento abierta')}
+        onConfigure={() => toast.success(t('aiAgents.cards.followup.configOpen'))}
         onRun={runAgent}
       />
 
       {suggestions.length > 0 && (
         <div className="bg-white dark:bg-[#111F3A] rounded-[32px] border border-[#E2E8F0] dark:border-[#1E3A5F] p-8 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
-          <h4 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">Sugerencias del Agente</h4>
+          <h4 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">{t('aiAgents.cards.followup.suggestionsTitle')}</h4>
           <div className="grid grid-cols-1 gap-4">
             {suggestions.map((s, idx) => (
               <div key={idx} className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-[#1E3A5F]">
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="font-semibold text-slate-900 dark:text-white">{s.client.name}</p>
-                    <p className="text-xs text-slate-500">{s.days} días sin contacto · {s.client.category}</p>
+                    <p className="text-xs text-slate-500">{t('aiAgents.cards.followup.daysNoContact').replace('{days}', String(s.days))} · {s.client.category}</p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(s.message);
-                        toast.success('Mensaje copiado');
+                        toast.success(t('aiAgents.cards.followup.toastCopySuccess'));
                       }}
                       className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                      title="Copiar mensaje"
+                      title={t('aiAgents.cards.followup.copyTooltip')}
                     >
                       <Copy className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => markContacted(s.client.id)}
                       className="p-2 text-slate-400 hover:text-emerald-500 transition-colors"
-                      title="Marcar como contactado"
+                      title={t('aiAgents.cards.followup.markContactedTooltip')}
                     >
                       <Check className="w-4 h-4" />
                     </button>

@@ -81,7 +81,9 @@ export default function DashboardPage() {
     messages: [],
     inventory: [],
     org: { auto_reply_enabled: false },
-    user: null
+    user: null,
+    apiConfigs: [],
+    agentLogs: []
   });
 
   const { plan, trialEndsAt, createdAt, isTrialExpired, loading: planLoading } = usePlan();

@@ -7,12 +7,14 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, CheckCircle, ArrowLeft, Loader2, Home } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 import "../auth-pages.css";
 
 function UpdatePasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
+  const { t } = useLanguage();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -98,15 +100,15 @@ function UpdatePasswordContent() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password || !confirmPassword) {
-      toast.error("Por favor, rellena todos los campos");
+      toast.error(t("auth.errorFieldsRequired" as any));
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
+      toast.error(t("auth.errorPasswordMismatch" as any));
       return;
     }
     if (password.length < 6) {
-      toast.error("La contraseña debe tener al menos 6 caracteres");
+      toast.error(t("auth.errorPasswordMinLength" as any));
       return;
     }
     setLoading(true);
@@ -115,16 +117,16 @@ function UpdatePasswordContent() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        toast.error("Error al actualizar la contraseña: " + error.message);
+        toast.error(t("auth.errorPasswordUpdate" as any) + error.message);
         setLoading(false);
         return;
       }
 
       await supabase.auth.signOut();
-      toast.success("Contraseña actualizada correctamente. Inicia sesión con tu nueva contraseña.");
+      toast.success(t("auth.successPasswordUpdated" as any));
       router.push("/login");
     } catch (err: any) {
-      toast.error("Error inesperado: " + err.message);
+      toast.error(t("auth.errorUnexpected" as any) + err.message);
       setLoading(false);
     }
   };
@@ -140,17 +142,17 @@ function UpdatePasswordContent() {
         </Link>
         <div className="auth-left-content">
           <h2 className="auth-headline">
-            El asistente <span className="auth-headline-accent">de reservas y citas que</span><br />
-            nunca pudiste<br />
-            <span className="auth-headline-accent">tener</span>
+            {t("auth.headline.part1" as any)} <span className="auth-headline-accent">{t("auth.headline.accent1" as any)}</span><br />
+            {t("auth.headline.part2" as any)}<br />
+            <span className="auth-headline-accent">{t("auth.headline.accent2" as any)}</span>
           </h2>
 
           <div className="auth-benefits">
             {[
-              "Mientras tú trabajas, él atiende a tus clientes",
-              "Tu cliente escribe — a cualquier hora",
-              "Tu asistente responde — con tu tono",
-              "Tú lo encuentras todo listo",
+              t("auth.benefits.benefit1" as any),
+              t("auth.benefits.benefit2" as any),
+              t("auth.benefits.benefit3" as any),
+              t("auth.benefits.benefit4" as any),
             ].map((text) => (
               <div className="auth-benefit-item" key={text}>
                 <div className="auth-benefit-check">✓</div>
@@ -160,13 +162,13 @@ function UpdatePasswordContent() {
           </div>
 
           <div className="auth-quote">
-            <p>"Por fin puedo desconectar sin miedo a perder un cliente."</p>
+            <p>{t("auth.quote" as any)}</p>
           </div>
 
           <div className="auth-marketing-badges">
-            <span className="auth-marketing-badge">Sin tarjeta</span>
-            <span className="auth-marketing-badge">Listo en 5 min</span>
-            <span className="auth-marketing-badge">Hecho en España</span>
+            <span className="auth-marketing-badge">{t("auth.badges.noCard" as any)}</span>
+            <span className="auth-marketing-badge">{t("auth.badges.readyInFive" as any)}</span>
+            <span className="auth-marketing-badge">{t("auth.badges.madeInSpain" as any)}</span>
           </div>
 
           <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '8px', opacity: 0.7 }}>
@@ -182,26 +184,26 @@ function UpdatePasswordContent() {
 
       {/* ── RIGHT PANEL ── */}
       <div className="auth-right">
-        <Link href="https://www.sffalcon.com" className="auth-home-link" title="Ir a la web principal">
+        <Link href="https://www.sffalcon.com" className="auth-home-link" title={t("auth.goToMainWeb" as any)}>
           <Home size={18} />
         </Link>
         <div className="auth-card auth-card--compact">
           {isChecking ? (
             <div style={{ textAlign: 'center', padding: '20px' }}>
               <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#7C6FF7]" />
-              <p className="auth-card-subtitle" style={{ marginTop: '16px' }}>Verificando acceso...</p>
+              <p className="auth-card-subtitle" style={{ marginTop: '16px' }}>{t("auth.verifyingAccess" as any)}</p>
             </div>
           ) : sessionError ? (
             <div style={{ textAlign: 'center' }}>
               <div className="auth-success-icon" style={{ borderColor: '#ef4444' }}>
                 <CheckCircle className="w-8 h-8 text-[#ef4444] mx-auto" />
               </div>
-              <h1 className="auth-card-title" style={{ textAlign: 'center' }}>Sesión Inválida</h1>
+              <h1 className="auth-card-title" style={{ textAlign: 'center' }}>{t("auth.invalidSessionTitle" as any)}</h1>
               <p className="auth-card-subtitle" style={{ textAlign: 'center' }}>
-                Tu enlace de recuperación ha expirado o no es válido para este navegador.
+                {t("auth.invalidSessionSubtitle" as any)}
               </p>
               <Link href="/reset-password" style={{ display: 'block', backgroundColor: '#7C6FF7', color: 'white', padding: '12px', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, marginTop: '20px' }}>
-                PEDIR NUEVO ENLACE
+                {t("auth.requestNewLink" as any)}
               </Link>
             </div>
           ) : success ? (
@@ -209,19 +211,19 @@ function UpdatePasswordContent() {
               <div className="auth-success-icon">
                 <CheckCircle className="w-8 h-8 text-[#4EDEA3] mx-auto" />
               </div>
-              <h1 className="auth-card-title" style={{ textAlign: 'center' }}>¡Actualizada!</h1>
+              <h1 className="auth-card-title" style={{ textAlign: 'center' }}>{t("auth.updatedTitle" as any)}</h1>
               <p className="auth-card-subtitle" style={{ textAlign: 'center' }}>
-                Redirigiendo a la pantalla de acceso...
+                {t("auth.redirectingToLogin" as any)}
               </p>
             </div>
           ) : (
             <>
-              <h1 className="auth-card-title">Nueva Contraseña</h1>
-              <p className="auth-card-subtitle">Establece tu nueva contraseña de acceso.</p>
+              <h1 className="auth-card-title">{t("auth.newPasswordTitle" as any)}</h1>
+              <p className="auth-card-subtitle">{t("auth.newPasswordSubtitle" as any)}</p>
 
               <form onSubmit={handleUpdate}>
                 <div className="auth-field">
-                  <label className="auth-label">Nueva Contraseña</label>
+                  <label className="auth-label">{t("auth.newPasswordLabel" as any)}</label>
                   <div className="auth-input-wrap">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -240,7 +242,7 @@ function UpdatePasswordContent() {
                 </div>
 
                 <div className="auth-field">
-                  <label className="auth-label">Confirmar Contraseña</label>
+                  <label className="auth-label">{t("auth.confirmPasswordLabel" as any)}</label>
                   <div className="auth-input-wrap">
                     <input
                       type={showPassword ? "text" : "password"}
@@ -258,7 +260,7 @@ function UpdatePasswordContent() {
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                   ) : (
-                    "GUARDAR Y ENTRAR"
+                    t("auth.saveAndEnterButton" as any)
                   )}
                 </button>
               </form>
@@ -275,14 +277,14 @@ function UpdatePasswordContent() {
                 }}
               >
                 <ArrowLeft size={14} />
-                Cerrar y volver
+                {t("auth.closeAndBack" as any)}
               </button>
 
               <div className="auth-card-footer" style={{ marginTop: '28px' }}>
                 © 2026 SF &nbsp;•&nbsp;{" "}
-                <Link href="/legal">LEGAL</Link>{" "}
+                <Link href="/legal">{t("auth.legal" as any)}</Link>{" "}
                 &nbsp;•&nbsp;{" "}
-                <Link href="/privacidad">PRIVACIDAD</Link>
+                <Link href="/privacidad">{t("auth.privacy" as any)}</Link>
               </div>
             </>
           )}
@@ -293,6 +295,8 @@ function UpdatePasswordContent() {
 }
 
 export default function UpdatePasswordPage() {
+  const { t } = useLanguage();
+
   return (
     <Suspense fallback={
       <div className="auth-root wide-left flex items-center justify-center">

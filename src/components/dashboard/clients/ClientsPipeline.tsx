@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
-import { Client } from '@/app/dashboard/clients/types';
+import { Client } from '@/app/(dashboard)/dashboard/clients/types';
 
 interface ClientsPipelineProps {
   clients: Client[];

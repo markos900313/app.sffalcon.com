@@ -24,10 +24,12 @@ import { cn } from "@/lib/utils";
 import { toast } from "react-hot-toast";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function AgentReservationsPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t, language } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -138,9 +140,9 @@ export default function AgentReservationsPage() {
           updated_at: new Date().toISOString()
         }, { onConflict: 'organization_id,agent_type' });
 
-      toast.success(newStatus ? "Agente Activado" : "Agente Pausado");
+      toast.success(newStatus ? t('aiAgents.reservations.toast.statusUpdated.active') : t('aiAgents.reservations.toast.statusUpdated.paused'));
     } catch (err) {
-      toast.error("Error al actualizar estado");
+      toast.error(t('aiAgents.reservations.toast.statusUpdateError'));
       setIsActive(!newStatus);
     }
   };
@@ -156,16 +158,16 @@ export default function AgentReservationsPage() {
           greeting: config.greeting,
           tone: config.tone,
           auto_confirm: config.autoConfirm,
-          detect_conflicts: config.detect_conflicts,
+          detect_conflicts: config.detectConflicts,
           config: config,
           updated_at: new Date().toISOString()
         }, { onConflict: 'organization_id,agent_type' });
 
       if (error) throw error;
-      toast.success("Configuración guardada correctamente");
+      toast.success(t('aiAgents.reservations.toast.configSaved'));
     } catch (err) {
       console.error("Error saving config:", err);
-      toast.error("Error al guardar");
+      toast.error(t('aiAgents.reservations.toast.configSaveError'));
     } finally {
       setSaving(false);
     }
@@ -192,7 +194,7 @@ export default function AgentReservationsPage() {
           </div>
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">Gestor de Agenda IA</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">{t('aiAgents.reservations.subtitle')}</span>
               {whatsappInfo.number && (
                 <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">
                   WS: {whatsappInfo.number}
@@ -200,7 +202,11 @@ export default function AgentReservationsPage() {
               )}
             </div>
             <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-               Gestor de <span className="text-[#1B4FD8]">Agenda</span>
+              {language === 'es' ? (
+                <>Gestor de <span className="text-[#1B4FD8]">Agenda</span></>
+              ) : (
+                <><span className="text-[#1B4FD8]">Schedule</span> Manager</>
+              )}
             </h2>
           </div>
         </div>
@@ -216,23 +222,23 @@ export default function AgentReservationsPage() {
             )}
           >
             {isActive ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
-            {isActive ? "Pausar Operaciones" : "Activar Gestor de Agenda"}
+            {isActive ? t('aiAgents.reservations.btnPause') : t('aiAgents.reservations.btnActive')}
           </button>
           
           <div className="h-10 w-px bg-slate-100 dark:bg-[#1E3A5F] mx-2 hidden lg:block" />
           
           <div className="flex flex-col items-end">
              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Estado:</span>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t('aiAgents.reservations.statusLabel')}</span>
                 <span className={cn(
                   "text-[9px] font-black uppercase tracking-widest",
                   isActive ? "text-emerald-500" : "text-amber-500"
                 )}>
-                  {isActive ? "Disponible" : "En Pausa"}
+                  {isActive ? t('aiAgents.reservations.statusActive') : t('aiAgents.reservations.statusPaused')}
                 </span>
              </div>
              <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-0.5">
-               {isActive ? "En funcionamiento" : "Sistema Inactivo"}
+               {isActive ? t('aiAgents.reservations.descActive') : t('aiAgents.reservations.descPaused')}
              </p>
           </div>
         </div>
@@ -241,16 +247,16 @@ export default function AgentReservationsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <AIPerfCard title="AGENDA HOY" value={todayReservations} icon={<Zap className="text-amber-500" size={18} />} />
-            <AIPerfCard title="NIVEL DE SERVICIO" value={serviceLevel} icon={<ShieldCheck className="text-emerald-500" size={18} />} />
-            <AIPerfCard title="HORAS AHORRADAS" value={hoursSaved} icon={<Clock className="text-blue-500" size={18} />} />
+            <AIPerfCard title={t('aiAgents.reservations.kpis.today')} value={todayReservations} icon={<Zap className="text-amber-500" size={18} />} />
+            <AIPerfCard title={t('aiAgents.reservations.kpis.serviceLevel')} value={serviceLevel} icon={<ShieldCheck className="text-emerald-500" size={18} />} />
+            <AIPerfCard title={t('aiAgents.reservations.kpis.hoursSaved')} value={hoursSaved} icon={<Clock className="text-blue-500" size={18} />} />
           </div>
 
           <div className="card-premium p-6 md:p-8 bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-3xl">
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-50 dark:border-[#1E3A5F]">
               <div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1 uppercase tracking-tight">Registro de Operaciones</h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Actividad en tiempo real sincronizada con Supabase</p>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1 uppercase tracking-tight">{t('aiAgents.reservations.operationsLog')}</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('aiAgents.reservations.operationsLogDesc')}</p>
               </div>
               <button onClick={fetchData} className="p-3 rounded-xl bg-slate-50 dark:bg-[#0D1B35] border border-slate-100 dark:border-[#1E3A5F] text-slate-400 hover:text-[#1B4FD8] transition-all active:scale-95 shadow-sm">
                 <RefreshCw size={18} />
@@ -269,7 +275,7 @@ export default function AgentReservationsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-3">
-                        <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">{log.details?.client || "Sistema"}</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">{log.details?.client || t('aiAgents.reservations.anonymous')}</p>
                         <span className="text-[9px] font-black px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#111F3A] text-blue-500 dark:text-blue-400 uppercase tracking-widest border border-slate-200 dark:border-[#1E3A5F]">{log.action_type}</span>
                       </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium line-clamp-1 mt-0.5">{log.details?.message || "Operación automatizada"}</p>
@@ -281,14 +287,14 @@ export default function AgentReservationsPage() {
                     </p>
                     <p className="text-[11px] font-bold text-emerald-500 flex items-center gap-1 justify-end">
                       <CheckCircle2 size={12} />
-                      Finalizado
+                      {t('aiAgents.reservations.finished')}
                     </p>
                   </div>
                 </div>
               )) : (
                 <div className="py-12 flex flex-col items-center justify-center opacity-40">
                   <Activity size={40} className="mb-4 text-slate-600" />
-                  <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Sin actividad reciente</p>
+                  <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t('aiAgents.reservations.noActivity')}</p>
                 </div>
               )}
             </div>
@@ -299,16 +305,16 @@ export default function AgentReservationsPage() {
           <div>
             <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1 flex items-center gap-3 uppercase tracking-tight">
               <Settings className="w-5 h-5 text-[#1B4FD8]" />
-              Configuración
+              {t('aiAgents.reservations.configTitle')}
             </h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Entrenamiento y Comportamiento</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('aiAgents.reservations.configDesc')}</p>
           </div>
 
           <div className="space-y-6">
             <div className="group space-y-3">
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Saludo Personalizado</label>
-                <span className="text-[9px] font-bold text-blue-500/80 uppercase">IA Entrenada</span>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.reservations.greetingLabel')}</label>
+                <span className="text-[9px] font-bold text-blue-500/80 uppercase">{t('aiAgents.reservations.greetingAILabeled')}</span>
               </div>
               <textarea
                 className="w-full px-5 py-4 bg-slate-50 dark:bg-[#0D1B35] border border-slate-200 dark:border-[#1E3A5F] rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#1B4FD8] focus:border-transparent outline-none transition-all resize-none h-24 scrollbar-hide text-slate-900 dark:text-white shadow-inner"
@@ -320,13 +326,13 @@ export default function AgentReservationsPage() {
             <div className="space-y-3">
               <ConfigToggle
                 icon={<CheckCircle2 className="text-blue-500" size={18} />}
-                label="Auto-confirmación"
+                label={t('aiAgents.reservations.autoConfirm')}
                 checked={config.autoConfirm}
                 onChange={() => setConfig({ ...config, autoConfirm: !config.autoConfirm })}
               />
               <ConfigToggle
                 icon={<BrainCircuit className="text-blue-500" size={18} />}
-                label="Detección de Conflictos"
+                label={t('aiAgents.reservations.detectConflicts')}
                 checked={config.detectConflicts}
                 onChange={() => setConfig({ ...config, detectConflicts: !config.detectConflicts })}
               />
@@ -334,7 +340,7 @@ export default function AgentReservationsPage() {
               <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-[#0D1B35] border border-slate-200 dark:border-[#1E3A5F] rounded-2xl group hover:border-[#1B4FD8]/40 transition-all">
                 <div className="flex items-center gap-3">
                   <MessageSquare className="text-[#1B4FD8]" size={18} />
-                  <span className="text-xs font-black text-slate-400 uppercase tracking-wider">Perfil IA</span>
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-wider">{t('aiAgents.reservations.profileAITitle')}</span>
                 </div>
                 <div className="relative">
                   <select
@@ -342,9 +348,9 @@ export default function AgentReservationsPage() {
                     value={config.tone}
                     onChange={(e) => setConfig({ ...config, tone: e.target.value })}
                   >
-                    <option value="profesional">PROFESIONAL</option>
-                    <option value="cercano">CERCANO</option>
-                    <option value="informal">INFORMAL</option>
+                    <option value="profesional">{t('aiAgents.reservations.tones.profesional')}</option>
+                    <option value="cercano">{t('aiAgents.reservations.tones.cercano')}</option>
+                    <option value="informal">{t('aiAgents.reservations.tones.informal')}</option>
                   </select>
                   <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 text-[#1B4FD8] pointer-events-none" />
                 </div>
@@ -357,13 +363,13 @@ export default function AgentReservationsPage() {
               className="w-full bg-[#1B4FD8] hover:bg-blue-700 disabled:opacity-50 text-white font-black py-4 rounded-[24px] transition-all shadow-xl shadow-blue-500/25 text-xs uppercase tracking-[2px] flex items-center justify-center gap-3 active:scale-95"
             >
               {saving ? <RefreshCw size={16} className="animate-spin" /> : <SaveIcon size={16} />}
-              {saving ? "Guardando..." : "Sincronizar IA"}
+              {saving ? t('common.loading') : t('aiAgents.reservations.btnSync')}
             </button>
 
             <div className="p-4 bg-amber-500/5 rounded-2xl border border-amber-500/10 flex gap-3">
               <AlertCircle size={16} className="text-amber-500 shrink-0 mt-1" />
               <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
-                El cambio de configuración reinicia la memoria de contexto de las conversaciones activas.
+                {t('aiAgents.reservations.warningReset')}
               </p>
             </div>
           </div>

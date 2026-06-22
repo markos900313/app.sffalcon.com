@@ -12,6 +12,7 @@ import ContableAgent from '@/components/dashboard/agents/ContableAgent';
 import VoiceAgent from '@/components/dashboard/agents/VoiceAgent';
 import SyncAgent from '@/components/dashboard/agents/SyncAgent';
 import { useOrganization } from '@/context/OrganizationContext';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface AgentLog {
   date: string;
@@ -23,6 +24,7 @@ interface AgentLog {
 export default function AgentsPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [logs, setLogs] = useState<AgentLog[]>([]);
   const [financeData, setFinanceData] = useState<any>(null);
   const [businessData, setBusinessData] = useState<any>(null);
@@ -38,7 +40,7 @@ export default function AgentsPage() {
         try {
           setLogs(JSON.parse(savedLogs));
         } catch (e) {
-          console.error('Error cargando logs');
+          console.error(t('aiAgents.toast.loadLogsError'));
         }
       }
       await loadFinancialContext();
@@ -89,10 +91,10 @@ export default function AgentsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
             <Bot className="w-8 h-8 text-[#1B4FD8]" />
-            Agentes Inteligentes
+            {t('aiAgents.dashboard.title')}
           </h1>
           <p className="text-sm text-slate-500 dark:text-[#94A3B8] mt-1 font-medium">
-            Tus asistentes especializados trabajando 24/7 para tu proyecto
+            {t('aiAgents.dashboard.subtitle')}
           </p>
         </div>
       </div>
@@ -121,7 +123,7 @@ export default function AgentsPage() {
           <div className="px-6 md:px-8 py-6 border-b border-slate-50 dark:border-[#1E3A5F] flex items-center justify-between">
             <div className="flex items-center gap-3">
               <History className="w-5 h-5 text-slate-400" />
-              <h3 className="text-[12px] md:text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">Historial de Ejecución</h3>
+              <h3 className="text-[12px] md:text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">{t('aiAgents.table.title')}</h3>
             </div>
             <button 
               onClick={() => {
@@ -130,7 +132,7 @@ export default function AgentsPage() {
               }}
               className="text-[10px] font-bold text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest"
             >
-              Limpiar Historial
+              {t('aiAgents.table.clearHistory')}
             </button>
           </div>
 
@@ -138,17 +140,17 @@ export default function AgentsPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-slate-50/50 dark:bg-slate-800/30 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 dark:border-[#1E3A5F]">
-                  <th className="px-4 md:px-8 py-4">Hora</th>
-                  <th className="px-4 md:px-8 py-4">Agente</th>
-                  <th className="px-8 py-4 hidden md:table-cell">Acción</th>
-                  <th className="px-4 md:px-8 py-4">Detalle</th>
+                  <th className="px-4 md:px-8 py-4">{t('aiAgents.table.time')}</th>
+                  <th className="px-4 md:px-8 py-4">{t('aiAgents.table.agent')}</th>
+                  <th className="px-8 py-4 hidden md:table-cell">{t('aiAgents.table.action')}</th>
+                  <th className="px-4 md:px-8 py-4">{t('aiAgents.table.detail')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {logs.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-8 py-12 text-center text-sm text-slate-400 italic">
-                      No hay actividad reciente registrada.
+                      {t('aiAgents.table.noActivity')}
                     </td>
                   </tr>
                 ) : (

@@ -10,8 +10,10 @@ import Fichaje from "@/components/panel-empleado/Fichaje";
 import Turnos from "@/components/panel-empleado/Turnos";
 import Vacaciones from "@/components/panel-empleado/Vacaciones";
 import { Loader2 } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function PanelEmpleadoPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const supabase = createClient();
   const [activeSection, setActiveSection] = useState("inicio");
@@ -51,7 +53,7 @@ export default function PanelEmpleadoPage() {
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-[#1B4FD8] animate-spin" />
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Cargando Panel...</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{t('employeePanel.loading')}</p>
         </div>
       </div>
     );

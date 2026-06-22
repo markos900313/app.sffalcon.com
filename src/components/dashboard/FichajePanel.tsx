@@ -251,7 +251,7 @@ export default function FichajePanel() {
         return [
           format(parseISO(f.timestamp), "HH:mm:ss"),
           f.staff?.full_name,
-          f.tipo.toUpperCase(),
+          (f.tipo === 'entrada' ? (language === 'en' ? 'Clock In' : 'Entrada') : (language === 'en' ? 'Clock Out' : 'Salida')).toUpperCase(),
           f.canal.toUpperCase(),
           (f.address_text || "-").substring(0, 40),
           f.distance_meters != null ? `${f.distance_meters}m` : "-",
@@ -456,7 +456,7 @@ export default function FichajePanel() {
                     setAddressSearched(true);
                     setSearchStatus({
                       type: 'success',
-                      msg: "Ubicación seleccionada en mapa"
+                      msg: language === 'en' ? "Location selected on map" : "Ubicación seleccionada en mapa"
                     });
                   }}
                 />
@@ -616,7 +616,7 @@ export default function FichajePanel() {
                               "px-2 py-0.5 rounded-[6px] text-[9px] font-bold uppercase tracking-widest",
                               f.tipo === 'entrada' ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-600"
                             )}>
-                              {f.tipo}
+                              {f.tipo === 'entrada' ? (language === 'en' ? 'Clock In' : 'Entrada') : (language === 'en' ? 'Clock Out' : 'Salida')}
                             </span>
                           </td>
                           <td className="p-3 text-xs uppercase text-slate-400">{f.canal}</td>

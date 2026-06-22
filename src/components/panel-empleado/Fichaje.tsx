@@ -15,13 +15,14 @@ import {
   FileText
 } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { parseISO, startOfWeek, endOfWeek, startOfMonth, endOfMonth, differenceInMinutes, isWithinInterval } from "date-fns";
+import { useLanguage } from "@/lib/LanguageContext";
 
 function getEstadoGeo(distance: number | null | undefined, geoRadius: number) {
   if (distance === null || distance === undefined) return '-';
@@ -34,6 +35,8 @@ interface FichajeProps {
 }
 
 export default function Fichaje({ staff }: FichajeProps) {
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'en' ? enUS : es;
   const supabase = createClient();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(false);
@@ -130,8 +133,8 @@ export default function Fichaje({ staff }: FichajeProps) {
       const processed = Object.entries(grouped)
         .map(([date, events]: [string, any]) => {
           let totalMs = 0;
-          let firstIn = null;
-          let lastOut = null;
+          let firstIn: string | null = null;
+          let lastOut: string | null = null;
           let entryTime: number | null = null;
           let allCorrect = true;
           let hasGeo = false;
@@ -193,10 +196,10 @@ export default function Fichaje({ staff }: FichajeProps) {
 
       const processed = Object.entries(grouped)
         .map(([date, events]: [string, any]) => {
-          let totalMs = 0;
-          let firstIn = null;
-          let lastOut = null;
-          let entryTime: number | null = null;
+           let totalMs = 0;
+           let firstIn: string | null = null;
+           let lastOut: string | null = null;
+           let entryTime: number | null = null;
 
           events.forEach((ev: any) => {
             if (ev.tipo === 'entrada') {
@@ -220,7 +223,7 @@ export default function Fichaje({ staff }: FichajeProps) {
             date,
             firstIn,
             lastOut,
-            totalStr: inProgress ? 'En turno' : `${h}h ${m}m`,
+            totalStr: inProgress ? t('employeePanel.fichaje.inProgress') : `${h}h ${m}m`,
             rawMs: totalMs,
             inProgress
           };
@@ -232,7 +235,7 @@ export default function Fichaje({ staff }: FichajeProps) {
   }
 
   const exportCSV = () => {
-    const headers = "Fecha,Entrada,Salida,Horas Trabajadas\n";
+    const headers = `${t('employeePanel.fichaje.date')},${t('employeePanel.fichaje.clockIn')},${t('employeePanel.fichaje.clockOut')},${t('employeePanel.fichaje.hoursWorked')}\n`;
     const rows = history14Days.map(d =>
       `${d.date},${d.firstIn || '--'},${d.lastOut || '--'},${d.totalStr}`
     ).join("\n");
@@ -261,25 +264,30 @@ export default function Fichaje({ staff }: FichajeProps) {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    doc.text("MI INFORME DE FICHAJES", 14, 18);
+    doc.text(t('employeePanel.fichaje.pdf.title'), 14, 18);
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text(`Empleado: ${staff.full_name}`, 14, 25);
-    doc.text(`Periodo: Últimos 14 días`, 14, 32);
+    doc.text(t('employeePanel.fichaje.pdf.employee').replace('{name}', staff.full_name), 14, 25);
+    doc.text(t('employeePanel.fichaje.pdf.period'), 14, 32);
 
     doc.setFontSize(8);
-    doc.text(`Fecha exportación: ${nowStr}`, pageWidth - 14, 15, { align: 'right' });
+    doc.text(t('employeePanel.fichaje.pdf.exportDate').replace('{date}', nowStr), pageWidth - 14, 15, { align: 'right' });
 
     // --- TABLA HORAS TRABAJADAS ---
     doc.setTextColor(30, 58, 95);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("HORAS TRABAJADAS", 14, 50);
+    doc.text(t('employeePanel.fichaje.pdf.hoursWorked'), 14, 50);
 
     autoTable(doc, {
       startY: 55,
-      head: [['FECHA', 'ENTRADA', 'SALIDA', 'TOTAL HORAS']],
+      head: [[
+        t('employeePanel.fichaje.pdf.headers.date'),
+        t('employeePanel.fichaje.pdf.headers.clockIn'),
+        t('employeePanel.fichaje.pdf.headers.clockOut'),
+        t('employeePanel.fichaje.pdf.headers.totalHours')
+      ]],
       body: history14Days.map(d => [
         format(new Date(d.date + 'T12:00:00'), 'dd/MM/yyyy'),
         d.firstIn || '--',
@@ -295,7 +303,7 @@ export default function Fichaje({ staff }: FichajeProps) {
     doc.setTextColor(30, 58, 95);
     doc.setFontSize(12);
     doc.setFont("helvetica", "bold");
-    doc.text("ACTIVIDAD DETALLADA", 14, 20);
+    doc.text(t('employeePanel.fichaje.pdf.detailedActivity'), 14, 20);
 
     // Fetch all 14 day events raw for the detailed table
     const fourteenDaysAgo = new Date();
@@ -311,23 +319,31 @@ export default function Fichaje({ staff }: FichajeProps) {
 
     autoTable(doc, {
       startY: 25,
-      head: [['FECHA', 'HORA', 'ACCIÓN', 'CANAL', 'UBICACIÓN', 'ESTADO']],
-      body: (rawEvents || []).map(f => {
+      head: [[
+        t('employeePanel.fichaje.pdf.headers.date'),
+        t('employeePanel.fichaje.pdf.headers.time'),
+        t('employeePanel.fichaje.pdf.headers.action'),
+        t('employeePanel.fichaje.pdf.headers.channel'),
+        t('employeePanel.fichaje.pdf.headers.location'),
+        t('employeePanel.fichaje.pdf.headers.status')
+      ]],
+      body: (rawEvents || []).map((f: any) => {
         const geoStatus = getEstadoGeo(f.distance_meters, orgConfig?.geo_radius || 200);
+        const translatedGeoStatus = geoStatus === 'CORRECTO' ? t('employeePanel.fichaje.geo.correct') : geoStatus === 'INCORRECTO' ? t('employeePanel.fichaje.geo.incorrect') : geoStatus;
         return [
           format(parseISO(f.timestamp), "dd/MM/yyyy"),
           format(parseISO(f.timestamp), "HH:mm:ss"),
-          f.tipo.toUpperCase(),
+          (f.tipo === 'entrada' ? t('employeePanel.fichaje.clockIn') : t('employeePanel.fichaje.clockOut')).toUpperCase(),
           f.canal.toUpperCase(),
           (f.address_text || "-").substring(0, 40),
-          geoStatus
+          translatedGeoStatus
         ];
       }),
       didParseCell: (data: any) => {
         if (data.section === 'body' && data.column.index === 5) {
           const val = data.cell.raw;
-          if (val === 'CORRECTO') data.cell.styles.textColor = [34, 197, 94];
-          else if (val === 'INCORRECTO') data.cell.styles.textColor = [239, 68, 68];
+          if (val === 'CORRECTO' || val === t('employeePanel.fichaje.geo.correct')) data.cell.styles.textColor = [34, 197, 94];
+          else if (val === 'INCORRECTO' || val === t('employeePanel.fichaje.geo.incorrect')) data.cell.styles.textColor = [239, 68, 68];
           else data.cell.styles.textColor = [100, 116, 139];
         }
       },
@@ -341,8 +357,8 @@ export default function Fichaje({ staff }: FichajeProps) {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setTextColor(150);
-      doc.text("Documento generado por SF · app.sffalcon.com", pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
-      doc.text(`Página ${i} de ${pageCount}`, pageWidth - 20, doc.internal.pageSize.height - 10);
+      doc.text(t('employeePanel.fichaje.pdf.generatedBy'), pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+      doc.text(t('employeePanel.fichaje.pdf.page') + i + t('employeePanel.fichaje.pdf.of') + pageCount, pageWidth - 20, doc.internal.pageSize.height - 10);
     }
 
     doc.save(`fichajes_${staff.full_name.replace(/\s+/g, '_')}_${format(now, "yyyy-MM-dd")}.pdf`);
@@ -356,7 +372,7 @@ export default function Fichaje({ staff }: FichajeProps) {
     if (!navigator.geolocation) {
       setLoading(false);
       setObtainingGps(false);
-      return toast.error("Tu navegador no soporta geolocalización.");
+      return toast.error(t('employeePanel.fichaje.toast.geoNotSupported'));
     }
 
     navigator.geolocation.getCurrentPosition(async (position) => {
@@ -391,7 +407,9 @@ export default function Fichaje({ staff }: FichajeProps) {
         if (orgLat != null && distanceMeters !== null && distanceMeters > orgRadius) {
           setLoading(false);
           return toast.error(
-            `Fuera del área de trabajo. Estás a ${distanceMeters}m. Radio: ${orgRadius}m`
+            t('employeePanel.fichaje.toast.outOfArea')
+              .replace('{distance}', distanceMeters.toString())
+              .replace('{radius}', orgRadius.toString())
           );
         }
 
@@ -424,21 +442,21 @@ export default function Fichaje({ staff }: FichajeProps) {
         if (error) throw error;
 
         setIsLocked(true);
-        toast.success(tipo === 'entrada' ? "Entrada registrada" : "Salida registrada", {
+        toast.success(tipo === 'entrada' ? t('employeePanel.fichaje.toast.clockInSuccess') : t('employeePanel.fichaje.toast.clockOutSuccess'), {
           icon: tipo === 'entrada' ? "🚀" : "👋"
         });
         fetchTodayFichajes();
         fetch14DayHistory();
         setTimeout(() => setIsLocked(false), 5000);
       } catch (err: any) {
-        toast.error("Error: " + err.message);
+        toast.error(t('employeePanel.fichaje.toast.errorPrefix') + err.message);
       } finally {
         setLoading(false);
       }
     }, (err) => {
       setLoading(false);
       setObtainingGps(false);
-      toast.error("Error al obtener ubicación: " + err.message);
+      toast.error(t('employeePanel.fichaje.toast.locationError') + err.message);
     }, {
       enableHighAccuracy: true,
       timeout: 10000,
@@ -456,14 +474,14 @@ export default function Fichaje({ staff }: FichajeProps) {
         <div className="card-premium p-10 text-center rounded-[40px] bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
           <div className="flex flex-col items-center">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#1B4FD8] mb-4">Registro de Jornada</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#1B4FD8] mb-4">{t('employeePanel.fichaje.title')}</span>
             <div className="text-7xl md:text-8xl font-black tabular-nums tracking-tighter text-slate-900 dark:text-white flex items-baseline gap-2">
               {format(currentTime, "HH:mm")}
               <span className="text-3xl text-slate-300 dark:text-[#1E3A5F] font-black animate-pulse">:</span>
               <span className="text-4xl md:text-5xl text-slate-400 tabular-nums">{format(currentTime, "ss")}</span>
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-6">
-              {format(currentTime, "EEEE, d 'de' MMMM", { locale: es })}
+              {format(currentTime, language === 'en' ? "EEEE, MMMM d" : "EEEE, d 'de' MMMM", { locale: dateLocale })}
             </p>
           </div>
           <div className="flex flex-row items-center gap-4 pt-8">
@@ -476,7 +494,7 @@ export default function Fichaje({ staff }: FichajeProps) {
               )}
             >
               {loading && canCheckIn ? <RefreshCw className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
-              <span className="text-[11px] font-black uppercase tracking-widest">{loading && canCheckIn ? (obtainingGps ? "Obteniendo GPS..." : "Validando...") : "Entrada"}</span>
+              <span className="text-[11px] font-black uppercase tracking-widest">{loading && canCheckIn ? (obtainingGps ? t('employeePanel.fichaje.obtainingGps') : t('employeePanel.fichaje.validating')) : t('employeePanel.fichaje.clockIn')}</span>
             </button>
             <button
               onClick={() => handleFichaje('salida')}
@@ -487,7 +505,7 @@ export default function Fichaje({ staff }: FichajeProps) {
               )}
             >
               {loading && canCheckOut ? <RefreshCw className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
-              <span className="text-[11px] font-black uppercase tracking-widest">{loading && canCheckOut ? (obtainingGps ? "Obteniendo GPS..." : "Validando...") : "Salida"}</span>
+              <span className="text-[11px] font-black uppercase tracking-widest">{loading && canCheckOut ? (obtainingGps ? t('employeePanel.fichaje.obtainingGps') : t('employeePanel.fichaje.validating')) : t('employeePanel.fichaje.clockOut')}</span>
             </button>
           </div>
         </div>
@@ -495,7 +513,7 @@ export default function Fichaje({ staff }: FichajeProps) {
           <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Activity className="text-[#1B4FD8]" />
-              <h3 className="text-xs font-black uppercase tracking-widest">Actividad</h3>
+              <h3 className="text-xs font-black uppercase tracking-widest">{t('employeePanel.fichaje.activity')}</h3>
             </div>
             <div className="flex items-center gap-1.5 p-1 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5">
               {['HOY', 'SEMANA', 'MES'].map((tab) => (
@@ -509,7 +527,7 @@ export default function Fichaje({ staff }: FichajeProps) {
                       : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                   )}
                 >
-                  {tab}
+                  {tab === 'HOY' ? t('employeePanel.fichaje.tabs.today') : tab === 'SEMANA' ? t('employeePanel.fichaje.tabs.week') : t('employeePanel.fichaje.tabs.month')}
                 </button>
               ))}
             </div>
@@ -527,7 +545,7 @@ export default function Fichaje({ staff }: FichajeProps) {
                     </div>
                     <div>
                       <p className="text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
-                        {event.tipo}
+                        {event.tipo === 'entrada' ? t('employeePanel.fichaje.clockIn') : t('employeePanel.fichaje.clockOut')}
                         {event.address_text && (
                           <span className={cn(
                             "text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1",
@@ -550,7 +568,7 @@ export default function Fichaje({ staff }: FichajeProps) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg text-[9px] font-black uppercase text-slate-400">Verificado</div>
+                    <div className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-lg text-[9px] font-black uppercase text-slate-400">{t('employeePanel.fichaje.verified')}</div>
                   </div>
                 </div>
               ))
@@ -559,17 +577,19 @@ export default function Fichaje({ staff }: FichajeProps) {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50/50 dark:bg-white/5 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                      <th className="px-6 py-4">Fecha</th>
-                      <th className="px-6 py-4">Entrada</th>
-                      <th className="px-6 py-4">Salida</th>
-                      <th className="px-6 py-4 text-center">Horas</th>
+                      <th className="px-6 py-4">{t('employeePanel.fichaje.date')}</th>
+                      <th className="px-6 py-4">{t('employeePanel.fichaje.clockIn')}</th>
+                      <th className="px-6 py-4">{t('employeePanel.fichaje.clockOut')}</th>
+                      <th className="px-6 py-4 text-center">{t('employeePanel.fichaje.total')}</th>
                       <th className="px-6 py-4 text-right">Geo</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-white/5">
                     {periodHistory.map((day, idx) => (
                       <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4 text-[10px] font-black uppercase">{format(new Date(day.date + 'T12:00:00'), 'dd MMM')}</td>
+                        <td className="px-6 py-4 text-[10px] font-black uppercase">
+                          {format(new Date(day.date + 'T12:00:00'), language === 'en' ? 'dd MMM' : 'dd MMM', { locale: dateLocale })}
+                        </td>
                         <td className="px-6 py-4 text-[9px] font-bold text-slate-500 tabular-nums">{day.firstIn || '--'}</td>
                         <td className="px-6 py-4 text-[9px] font-bold text-slate-500 tabular-nums">{day.lastOut || '--'}</td>
                         <td className="px-6 py-4 text-center">
@@ -584,7 +604,7 @@ export default function Fichaje({ staff }: FichajeProps) {
                               day.geoStatus === 'INCORRECTO' ? "bg-rose-500/10 text-rose-500" :
                                 "bg-slate-100 dark:bg-white/5 text-slate-400"
                           )}>
-                            {day.geoStatus}
+                            {day.geoStatus === 'CORRECTO' ? t('employeePanel.fichaje.geo.correct') : day.geoStatus === 'INCORRECTO' ? t('employeePanel.fichaje.geo.incorrect') : day.geoStatus}
                           </span>
                         </td>
                       </tr>
@@ -592,7 +612,7 @@ export default function Fichaje({ staff }: FichajeProps) {
                   </tbody>
                 </table>
                 <div className="p-4 bg-slate-50 dark:bg-white/5 border-t border-slate-100 dark:border-white/5 flex justify-between items-center">
-                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Total Periodo</span>
+                  <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">{t('employeePanel.fichaje.totalPeriod')}</span>
                   <span className="text-sm font-black text-[#1B4FD8] dark:text-blue-400">
                     {periodHistory.reduce((acc, curr) => acc + curr.totalHours, 0).toFixed(1)}h
                   </span>
@@ -600,7 +620,7 @@ export default function Fichaje({ staff }: FichajeProps) {
               </div>
             )}
             {((viewTab === 'HOY' && todayEvents.length === 0) || (viewTab !== 'HOY' && periodHistory.length === 0)) && (
-              <div className="p-10 text-center text-slate-300 text-[10px] uppercase font-black tracking-widest">Sin actividad hoy</div>
+              <div className="p-10 text-center text-slate-300 text-[10px] uppercase font-black tracking-widest">{t('employeePanel.fichaje.noActivityToday')}</div>
             )}
           </div>
         </div>
@@ -608,23 +628,25 @@ export default function Fichaje({ staff }: FichajeProps) {
       <div className="w-full xl:w-96 space-y-6">
         <div className="card-premium rounded-[32px] bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] overflow-hidden flex flex-col h-full">
           <div className="p-6 border-b border-slate-100 dark:border-white/5">
-            <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Horas Trabajadas</h3>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Últimos 14 días</p>
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{t('employeePanel.fichaje.hoursWorked')}</h3>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('employeePanel.fichaje.last14Days')}</p>
           </div>
           <div className="flex-1 overflow-y-auto max-h-[500px]">
             <table className="w-full text-left border-collapse">
               <thead className="sticky top-0 bg-slate-50 dark:bg-white/5 z-10">
                 <tr className="border-b border-slate-100 dark:border-white/5">
-                  <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest">Fecha</th>
-                  <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest">E/S</th>
-                  <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
+                  <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.fichaje.date')}</th>
+                  <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('employeePanel.fichaje.es')}</th>
+                  <th className="px-4 py-3 text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">{t('employeePanel.fichaje.total')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-white/5">
                 {history14Days.map((day, idx) => (
                   <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                     <td className="px-4 py-4">
-                      <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase">{format(new Date(day.date + 'T12:00:00'), 'dd MMM')}</p>
+                      <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase">
+                        {format(new Date(day.date + 'T12:00:00'), 'dd MMM', { locale: dateLocale })}
+                      </p>
                     </td>
                     <td className="px-4 py-4">
                       <div className="text-[9px] font-bold text-slate-400 tabular-nums">
@@ -650,14 +672,14 @@ export default function Fichaje({ staff }: FichajeProps) {
               className="w-full py-3 bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
             >
               <FileText size={14} />
-              Exportar PDF
+              {t('employeePanel.fichaje.exportPdf')}
             </button>
             <button
               onClick={exportCSV}
               className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2"
             >
               <History size={14} />
-              Exportar CSV
+              {t('employeePanel.fichaje.exportCsv')}
             </button>
           </div>
         </div>

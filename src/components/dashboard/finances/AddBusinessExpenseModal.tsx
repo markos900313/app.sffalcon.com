@@ -114,7 +114,7 @@ export default function AddBusinessExpenseModal({ isOpen, onClose, onSuccess }: 
             <select value={category} onChange={e => setCategory(e.target.value)} className={inputCls}>
               {OCIO_EXPENSE_CATEGORIES.map(catOption => (
                 <option key={catOption} value={catOption} className="bg-[#111F3A] text-white">
-                  {t(`finances.categories.${getCategoryKey(catOption)}`, { defaultValue: catOption })}
+                  {t(`finances.categories.${getCategoryKey(catOption)}` as any, { defaultValue: catOption })}
                 </option>
               ))}
             </select>

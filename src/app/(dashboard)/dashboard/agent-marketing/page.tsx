@@ -45,10 +45,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function AgentMarketingPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t, language } = useLanguage();
   
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -141,48 +143,51 @@ export default function AgentMarketingPage() {
       setCampaigns([data, ...campaigns]);
       setIsModalOpen(false);
       setNewCampaign({ name: "", platform: "WhatsApp", target_audience: "Todos los clientes", scheduled_at: "" });
-      toast.success("Campaña programada por la IA");
+      toast.success(t('aiAgents.marketing.toast.saveCampaignSuccess'));
     } catch (err) {
-      toast.error("Error al crear campaña");
+      toast.error(t('aiAgents.marketing.toast.saveCampaignError'));
     }
   };
 
-  const selectTool = async (tool: string) => {
-    setActiveLabTool(tool);
+  const selectTool = async (toolKey: string) => {
+    const toolName = t(`aiAgents.marketing.tools.${toolKey}`);
+    setActiveLabTool(toolName);
     setIsLabModalOpen(true);
     setIsAnalyzing(true);
     setLabResult(null);
 
     try {
-      if (tool === "Redacción") {
+      if (toolKey === "writing") {
         const { data: inv } = await supabase.from('inventory_items').select('*').lt('stock_quantity', 10);
         const lowStockName = inv?.[0]?.name || "Item Destacado";
         setTimeout(() => {
           setLabResult({
-            insight: inv?.length ? `Alerta: Solo quedan ${inv[0].stock_quantity} unidades de ${lowStockName}.` : "Inventario estable.",
+            insight: inv?.length 
+              ? t('aiAgents.marketing.creativeLab.lowStockAlert').replace('{quantity}', String(inv[0].stock_quantity)).replace('{itemName}', lowStockName)
+              : t('aiAgents.marketing.creativeLab.stableStock'),
             suggestions: [
-              `Últimas unidades de ${lowStockName}: Descubre ahora.`,
-              `Miércoles de ${lowStockName} en ${organization?.name || "SF"}`,
-              `No te quedes sin probar nuestro ${lowStockName}`
+              t('aiAgents.marketing.creativeLab.suggestion1').replace('{itemName}', lowStockName),
+              t('aiAgents.marketing.creativeLab.suggestion2').replace('{itemName}', lowStockName).replace('{orgName}', organization?.name || "SF"),
+              t('aiAgents.marketing.creativeLab.suggestion3').replace('{itemName}', lowStockName)
             ]
           });
           setIsAnalyzing(false);
         }, 1500);
-      } else if (tool === "Audiencia") {
+      } else if (toolKey === "audience") {
         setTimeout(() => {
           setLabResult({
-            insight: "Segmentación terminada.",
-            segments: [
-              { name: "VIP", count: 12, label: "Más de 300€", color: "text-amber-500" },
-              { name: "Inactivos", count: 45, label: "30d sin visita", color: "text-red-500" },
-              { name: "Total", count: 156, label: "Contactos", color: "text-blue-500" }
+            insight: t('aiAgents.marketing.creativeLab.segmentationFinished'),
+            suggestions: [
+              `${t('aiAgents.marketing.creativeLab.segmentVIP')}: 12 (${t('aiAgents.marketing.creativeLab.segmentVIPDesc')})`,
+              `${t('aiAgents.marketing.creativeLab.segmentInactives')}: 45 (${t('aiAgents.marketing.creativeLab.segmentInactivesDesc')})`,
+              `${t('aiAgents.marketing.creativeLab.segmentTotal')}: 156 (${t('aiAgents.marketing.creativeLab.segmentTotalDesc')})`
             ]
           });
           setIsAnalyzing(false);
         }, 1500);
       } else {
         setTimeout(() => {
-           setLabResult({ insight: `Análisis de ${tool} completado.` });
+           setLabResult({ insight: t('aiAgents.marketing.creativeLab.genericCompleted').replace('{tool}', toolName) });
            setIsAnalyzing(false);
         }, 1000);
       }
@@ -193,10 +198,10 @@ export default function AgentMarketingPage() {
 
   const handleVIPBlast = () => {
     setIsBlasting(true);
-    const tId = toast.loading("Orquestando ráfaga VIP...");
+    const tId = toast.loading(t('aiAgents.marketing.toast.vipBlastOrchestrating'));
     setTimeout(() => {
       setIsBlasting(false);
-      toast.success("Blast ejecutado con éxito.", { id: tId });
+      toast.success(t('aiAgents.marketing.toast.vipBlastSuccess'), { id: tId });
     }, 2000);
   };
 
@@ -223,10 +228,14 @@ export default function AgentMarketingPage() {
               </div>
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">Estrategia Marketing IA</span>
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">{t('aiAgents.marketing.subtitle')}</span>
                 </div>
                 <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-                   Agente <span className="text-[#1B4FD8]">Marketing</span>
+                  {language === 'es' ? (
+                    <>Agente <span className="text-[#1B4FD8]">Marketing</span></>
+                  ) : (
+                    <><span className="text-[#1B4FD8]">Marketing</span> Agent</>
+                  )}
                 </h2>
               </div>
             </div>
@@ -237,13 +246,13 @@ export default function AgentMarketingPage() {
                 className="px-6 py-3 bg-[#1B4FD8] text-white rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center gap-2.5 shadow-lg"
               >
                 <Plus size={14} />
-                Crear Campaña IA
+                {t('aiAgents.marketing.createCampaign')}
               </motion.button>
               <motion.button
                  onClick={() => setIsPlanOpen(true)}
                  className="px-6 py-3 bg-white dark:bg-[#111F3A] text-slate-900 dark:text-white border border-slate-200 dark:border-[#1E3A5F] rounded-xl font-black uppercase tracking-widest text-[9px]"
               >
-                Ver Plan
+                {t('aiAgents.marketing.viewPlan')}
               </motion.button>
             </div>
           </div>
@@ -251,44 +260,44 @@ export default function AgentMarketingPage() {
 
         {/* Lab / IA Tools */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-           <AIPerfCard title="IMPACTO GLOBAL" value={stats.impact} icon={<TrendingUp className="text-blue-500" size={18} />} />
-           <AIPerfCard title="CONVERSIÓN" value={stats.conversion} icon={<Target className="text-emerald-500" size={18} />} />
-           <AIPerfCard title="LEADS" value={stats.leads} icon={<Users className="text-indigo-500" size={18} />} />
-           <AIPerfCard title="ENGAGEMENT" value={stats.engagement} icon={<Zap className="text-amber-500" size={18} />} />
+           <AIPerfCard title={t('aiAgents.marketing.kpis.reach')} value={stats.impact} icon={<TrendingUp className="text-blue-500" size={18} />} />
+           <AIPerfCard title={t('aiAgents.marketing.kpis.conversion')} value={stats.conversion} icon={<Target className="text-emerald-500" size={18} />} />
+           <AIPerfCard title={t('aiAgents.marketing.kpis.leads')} value={stats.leads} icon={<Users className="text-indigo-500" size={18} />} />
+           <AIPerfCard title={t('aiAgents.marketing.kpis.engagement')} value={stats.engagement} icon={<Zap className="text-amber-500" size={18} />} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-32">
           <div className="lg:col-span-8">
-             <div className="card-premium p-8 bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-[32px]">
-                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tight">Campañas</h3>
-                <div className="space-y-4">
-                   {campaigns.map(camp => (
-                     <CampaignCard key={camp.id} campaign={camp} />
-                   ))}
-                </div>
-             </div>
+              <div className="card-premium p-8 bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-[32px]">
+                 <h3 className="text-xl font-black text-slate-900 dark:text-white mb-6 uppercase tracking-tight">{t('aiAgents.marketing.campaignsTitle')}</h3>
+                 <div className="space-y-4">
+                    {campaigns.map(camp => (
+                      <CampaignCard key={camp.id} campaign={camp} />
+                    ))}
+                 </div>
+              </div>
           </div>
 
           <div className="lg:col-span-4 space-y-6">
              <div className="card-premium p-8 bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-[32px]">
                 <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] mb-10 flex items-center gap-3">
-                   <Sparkles className="w-5 h-5 text-blue-500" /> Laboratorio IA
+                   <Sparkles className="w-5 h-5 text-blue-500" /> {t('aiAgents.marketing.labTitle')}
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
-                   <CreativeTool icon={<PenTool />} label="Redacción" count="Pro" onClick={() => selectTool("Redacción")} />
-                   <CreativeTool icon={<Target />} label="Audiencia" count="Smart" onClick={() => selectTool("Audiencia")} />
-                   <CreativeTool icon={<MessageSquare />} label="Chat" count="Bot" onClick={() => selectTool("WhatsApp")} />
-                   <CreativeTool icon={<Star />} label="Reviews" count="4.8" onClick={() => selectTool("Reputación")} />
+                   <CreativeTool icon={<PenTool />} label={t('aiAgents.marketing.tools.writing')} count={t('aiAgents.marketing.tools.writingPro')} onClick={() => selectTool("writing")} />
+                   <CreativeTool icon={<Target />} label={t('aiAgents.marketing.tools.audience')} count={t('aiAgents.marketing.tools.audienceSmart')} onClick={() => selectTool("audience")} />
+                   <CreativeTool icon={<MessageSquare />} label={t('aiAgents.marketing.tools.chat')} count={t('aiAgents.marketing.tools.chatBot')} onClick={() => selectTool("chat")} />
+                   <CreativeTool icon={<Star />} label={t('aiAgents.marketing.tools.reviews')} count={t('aiAgents.marketing.tools.reviewsRating')} onClick={() => selectTool("reviews")} />
                 </div>
              </div>
 
              <div className="card-premium p-8 bg-indigo-600 rounded-[32px] text-white cursor-pointer" onClick={handleVIPBlast}>
                 <div className="flex items-center gap-4 mb-4">
                    <Award className="w-7 h-7" />
-                   <h4 className="text-sm font-black uppercase">Oportunidad VIP</h4>
+                   <h4 className="text-sm font-black uppercase">{t('aiAgents.marketing.vipOpportunity')}</h4>
                 </div>
-                <p className="text-xs font-bold opacity-80 mb-6">Lanzar un Smart-Blast ahora a 124 VIPs.</p>
-                <button className="w-full py-4 bg-white text-indigo-700 rounded-xl font-black uppercase text-[10px]">Ejecutar Blast IA</button>
+                <p className="text-xs font-bold opacity-80 mb-6">{t('aiAgents.marketing.vipDesc')}</p>
+                <button className="w-full py-4 bg-white text-indigo-700 rounded-xl font-black uppercase text-[10px]">{t('aiAgents.marketing.vipExecuteBtn')}</button>
              </div>
           </div>
         </div>
@@ -300,7 +309,7 @@ export default function AgentMarketingPage() {
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md">
              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white dark:bg-[#111F3A] w-full max-w-2xl rounded-[32px] p-5 md:p-8 max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
-                   <h3 className="text-xl font-bold dark:text-white">Laboratorio: {activeLabTool}</h3>
+                   <h3 className="text-xl font-bold dark:text-white">{t('aiAgents.marketing.labModal.title')} {activeLabTool}</h3>
                    <X className="cursor-pointer" onClick={() => setIsLabModalOpen(false)} />
                 </div>
                 {isAnalyzing ? <Loader2 className="animate-spin mx-auto w-10 h-10" /> : (
@@ -323,15 +332,15 @@ export default function AgentMarketingPage() {
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white dark:bg-[#111F3A] w-full max-w-lg rounded-[24px] p-5 md:p-8 max-h-[90vh] overflow-y-auto">
                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold">Nueva Campaña IA</h3>
+                  <h3 className="text-xl font-bold">{t('aiAgents.marketing.campaignModal.title')}</h3>
                   <X className="cursor-pointer" onClick={() => setIsModalOpen(false)} />
                </div>
                 <form onSubmit={handleCreateCampaign} className="space-y-4">
-                  <input className="w-full p-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold dark:text-white" placeholder="Nombre" value={newCampaign.name} onChange={e => setNewCampaign({...newCampaign, name: e.target.value})} />
+                  <input className="w-full p-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none text-sm font-bold dark:text-white" placeholder={t('aiAgents.marketing.campaignModal.namePlaceholder')} value={newCampaign.name} onChange={e => setNewCampaign({...newCampaign, name: e.target.value})} />
                   <select className="w-full p-3 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl outline-none appearance-none text-sm font-bold dark:text-white dark:[&>option]:bg-[#111F3A]" value={newCampaign.platform} onChange={e => setNewCampaign({...newCampaign, platform: e.target.value})}>
                      <option>WhatsApp</option><option>Instagram</option>
                   </select>
-                  <button className="w-full py-4 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-500/20 transition-all">Lanzar Campaña IA</button>
+                  <button className="w-full py-4 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-blue-500/20 transition-all">{t('aiAgents.marketing.campaignModal.submit')}</button>
                 </form>
             </motion.div>
           </div>
@@ -382,3 +391,4 @@ function CampaignCard({ campaign }: { campaign: any }) {
     </div>
   );
 }
+

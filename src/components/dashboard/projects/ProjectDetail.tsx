@@ -20,8 +20,10 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import Link from 'next/link';
+import { useLanguage } from "@/lib/LanguageContext";
+import { useOrganization } from "@/context/OrganizationContext";
 
 interface ProjectDetailProps {
   project: {
@@ -49,9 +51,14 @@ interface ProjectDetailProps {
 
 export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps) {
   const supabase = createClient();
+  const { t, language } = useLanguage();
+  const { organization } = useOrganization();
   const [loading, setLoading] = useState(false);
   const [newProgress, setNewProgress] = useState(project.progress || 0);
   const [paymentAmount, setPaymentAmount] = useState('');
+
+  const symbol = organization?.currency_symbol || '€';
+  const activeLocale = language === 'en' ? enUS : es;
 
   const handleUpdateStatus = async (status: string) => {
     setLoading(true);
@@ -62,11 +69,11 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
         .eq('id', project.id);
       
       if (error) throw error;
-      toast.success(`Estado actualizado a ${status.toUpperCase()}`);
+      toast.success(t('projectDetail.toast.statusUpdated', { status: status.toUpperCase() }));
       onRefresh();
     } catch (err) {
       console.error(err);
-      toast.error('Error al actualizar estado');
+      toast.error(t('projectDetail.toast.statusUpdateError'));
     } finally {
       setLoading(false);
     }
@@ -81,11 +88,11 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
         .eq('id', project.id);
       
       if (error) throw error;
-      toast.success(`Progreso actualizado al ${newProgress}%`);
+      toast.success(t('projectDetail.toast.progressUpdated', { progress: newProgress }));
       onRefresh();
     } catch (err) {
       console.error(err);
-      toast.error('Error al actualizar progreso');
+      toast.error(t('projectDetail.toast.progressUpdateError'));
     } finally {
       setLoading(false);
     }
@@ -94,7 +101,7 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
   const handleAddPayment = async () => {
     const amount = parseFloat(paymentAmount);
     if (isNaN(amount) || amount <= 0) {
-      toast.error('Cantidad no válida');
+      toast.error(t('projectDetail.toast.invalidAmount'));
       return;
     }
 
@@ -107,12 +114,12 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
         .eq('id', project.id);
       
       if (error) throw error;
-      toast.success(`Pago de ${amount}€ registrado`);
+      toast.success(t('projectDetail.toast.paymentRegistered', { amount, symbol }));
       setPaymentAmount('');
       onRefresh();
     } catch (err) {
       console.error(err);
-      toast.error('Error al registrar pago');
+      toast.error(t('projectDetail.toast.paymentRegisterError'));
     } finally {
       setLoading(false);
     }
@@ -143,7 +150,7 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
                 project.status === 'pausado' ? "bg-orange-50 text-orange-600 border-orange-100" :
                 "bg-slate-50 text-slate-500 border-slate-100"
               )}>
-                {project.status}
+                {t(`projectDetail.statuses.${project.status}`) || project.status}
               </span>
             </div>
 
@@ -151,33 +158,33 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
               <h1 className="text-[20px] font-semibold text-slate-900 dark:text-white tracking-tight">{project.name}</h1>
               {project.clients && (
                 <Link href={`/dashboard/clients/${project.clients.id}`} className="inline-flex items-center gap-1.5 mt-2 text-sm font-medium text-[#1B4FD8] hover:underline">
-                  Ver Cliente: {project.clients.name} <ExternalLink className="w-3 h-3" />
+                  {t('projectDetail.viewClient', { name: project.clients.name })} <ExternalLink className="w-3 h-3" />
                 </Link>
               )}
             </div>
 
             <div className="space-y-4">
               <div>
-                <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Descripción</h3>
+                <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">{t('projectDetail.description')}</h3>
                 <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic border-l-2 border-slate-200 dark:border-[#1E3A5F] pl-4">
-                  {project.description || 'Sin descripción.'}
+                  {project.description || t('projectDetail.noDescription')}
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
                   <Calendar className="w-4 h-4" />
-                  <span className="text-xs font-medium">Inicio: {project.start_date ? format(new Date(project.start_date), 'dd/MM/yyyy') : '---'}</span>
+                  <span className="text-xs font-medium">{t('projectDetail.startDate', { date: project.start_date ? format(new Date(project.start_date), 'dd/MM/yyyy') : '---' })}</span>
                 </div>
                 <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
                   <Clock className="w-4 h-4" />
-                  <span className="text-xs font-medium">Fin: {project.end_date ? format(new Date(project.end_date), 'dd/MM/yyyy') : '---'}</span>
+                  <span className="text-xs font-medium">{t('projectDetail.endDate', { date: project.end_date ? format(new Date(project.end_date), 'dd/MM/yyyy') : '---' })}</span>
                 </div>
               </div>
 
               {project.notes && (
                 <div className="pt-4 border-t border-slate-100 dark:border-[#1E3A5F]">
-                  <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Notas Internas</h3>
+                  <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">{t('projectDetail.internalNotes')}</h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300">{project.notes}</p>
                 </div>
               )}
@@ -192,7 +199,7 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
               <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
                 <Target className="w-5 h-5 text-[#1B4FD8]" />
               </div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">Progreso en Ejecución</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">{t('projectDetail.executionProgress')}</h3>
             </div>
             <span className="text-2xl font-semibold text-[#1B4FD8]">{newProgress}%</span>
           </div>
@@ -215,7 +222,7 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
               disabled={loading || newProgress === project.progress}
               className="px-6 py-3 bg-[#1B4FD8] text-white rounded-xl font-semibold text-xs uppercase tracking-widest hover:bg-[#1642B5] transition-all disabled:opacity-50"
             >
-              Actualizar Progreso
+              {t('projectDetail.updateProgress')}
             </button>
           </div>
         </div>
@@ -226,27 +233,27 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
             <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center">
               <DollarSign className="w-5 h-5 text-[#059669]" />
             </div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">Análisis de Facturación</h3>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">{t('projectDetail.billingAnalysis')}</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-1">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Presupuesto</p>
-              <p className="text-xl font-semibold text-slate-900 dark:text-white">{budget.toLocaleString('es-ES')}€</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{t('projectDetail.budget')}</p>
+              <p className="text-xl font-semibold text-slate-900 dark:text-white">{budget.toLocaleString(language === 'en' ? 'en-US' : 'es-ES')}{symbol}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Cobrado</p>
-              <p className="text-xl font-semibold text-emerald-600">{paid.toLocaleString('es-ES')}€</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{t('projectDetail.collected')}</p>
+              <p className="text-xl font-semibold text-emerald-600">{paid.toLocaleString(language === 'en' ? 'en-US' : 'es-ES')}{symbol}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Pendiente</p>
-              <p className="text-xl font-semibold text-orange-600">{remaining.toLocaleString('es-ES')}€</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{t('projectDetail.pending')}</p>
+              <p className="text-xl font-semibold text-orange-600">{remaining.toLocaleString(language === 'en' ? 'en-US' : 'es-ES')}{symbol}</p>
             </div>
           </div>
 
           <div className="mt-8">
              <div className="flex justify-between text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
-              <span>Nivel de Cobro</span>
+              <span>{t('projectDetail.paymentLevel')}</span>
               <span>{Math.round(payPercentage)}%</span>
             </div>
             <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -261,39 +268,39 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
         
         {/* Card Estado */}
         <div className="bg-white dark:bg-[#111F3A] p-6 rounded-[32px] border border-[#E2E8F0] dark:border-[#1E3A5F] shadow-sm">
-          <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-6">Actualizar Estado</h3>
+          <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-6">{t('projectDetail.updateStatus')}</h3>
           <div className="flex flex-col gap-3">
             <StatusButton 
               active={project.status === 'propuesta'} 
-              label="Propuesta" 
+              label={t('projectDetail.statuses.propuesta')} 
               icon={<FileText className="w-4 h-4" />} 
               color="blue"
               onClick={() => handleUpdateStatus('propuesta')}
             />
             <StatusButton 
               active={project.status === 'activo'} 
-              label="En Marcha" 
+              label={t('projectDetail.statuses.activo')} 
               icon={<PlayCircle className="w-4 h-4" />} 
               color="emerald"
               onClick={() => handleUpdateStatus('activo')}
             />
             <StatusButton 
               active={project.status === 'pausado'} 
-              label="Pausado" 
+              label={t('projectDetail.statuses.pausado')} 
               icon={<PauseCircle className="w-4 h-4" />} 
               color="orange"
               onClick={() => handleUpdateStatus('pausado')}
             />
             <StatusButton 
               active={project.status === 'completado'} 
-              label="Completado" 
+              label={t('projectDetail.statuses.completado')} 
               icon={<CheckCircle2 className="w-4 h-4" />} 
               color="slate"
               onClick={() => handleUpdateStatus('completado')}
             />
             <StatusButton 
               active={project.status === 'cancelado'} 
-              label="Cancelado" 
+              label={t('projectDetail.statuses.cancelado')} 
               icon={<XCircle className="w-4 h-4" />} 
               color="red"
               onClick={() => handleUpdateStatus('cancelado')}
@@ -303,24 +310,24 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
 
         {/* Card Pago */}
         <div className="bg-white dark:bg-[#111F3A] p-6 rounded-[32px] border border-[#E2E8F0] dark:border-[#1E3A5F] shadow-sm">
-          <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-6">Registrar Pago</h3>
+          <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-6">{t('projectDetail.registerPayment')}</h3>
           <div className="space-y-4">
             <div className="relative">
               <input 
                 type="number"
-                placeholder="Importe del pago..."
+                placeholder={t('projectDetail.placeholders.paymentAmount')}
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-800/50 border-none rounded-xl px-4 py-3.5 text-sm font-semibold text-slate-900 dark:text-white"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{symbol}</span>
             </div>
             <button 
               onClick={handleAddPayment}
               disabled={loading || !paymentAmount}
               className="w-full py-4 bg-[#1B4FD8] text-white rounded-xl font-semibold text-xs uppercase tracking-widest hover:bg-[#1642B5] transition-all flex items-center justify-center gap-2"
             >
-              <Plus className="w-4 h-4" /> Registrar Pago
+              <Plus className="w-4 h-4" /> {t('projectDetail.registerPayment')}
             </button>
           </div>
         </div>
@@ -328,25 +335,25 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
         {/* Card Cliente */}
         {project.clients && (
           <div className="bg-white dark:bg-[#111F3A] p-6 rounded-[32px] border border-[#E2E8F0] dark:border-[#1E3A5F] shadow-sm">
-            <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-6">Cliente</h3>
+            <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-6">{t('projectDetail.client')}</h3>
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/10 text-[#1B4FD8] rounded-2xl flex items-center justify-center font-bold text-lg">
                 {project.clients.name?.substring(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{project.clients.name}</p>
-                <p className="text-xs text-slate-500 truncate">{project.clients.company || 'Sin empresa'}</p>
+                <p className="text-xs text-slate-500 truncate">{project.clients.company || t('projectDetail.noCompany')}</p>
               </div>
             </div>
             
             <div className="space-y-4 mb-6 pt-4 border-t border-slate-50 dark:border-[#1E3A5F]">
               <div className="flex items-center gap-3 text-xs text-slate-500">
                 <FileText className="w-3.5 h-3.5" />
-                <span className="truncate">{project.clients.email || 'Sin email'}</span>
+                <span className="truncate">{project.clients.email || t('projectDetail.noEmail')}</span>
               </div>
               <div className="flex items-center gap-3 text-xs text-slate-500">
                  <CreditCard className="w-3.5 h-3.5" />
-                 <span className="truncate">{(project.clients as any).phone || 'Sin teléfono'}</span>
+                 <span className="truncate">{(project.clients as any).phone || t('projectDetail.noPhone')}</span>
               </div>
             </div>
 
@@ -354,7 +361,7 @@ export default function ProjectDetail({ project, onRefresh }: ProjectDetailProps
               href={`/dashboard/clients/${project.clients.id}`}
               className="block w-full text-center py-3 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 rounded-xl font-semibold text-xs uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-100 dark:border-slate-800"
             >
-              Ver ficha cliente →
+              {t('projectDetail.viewClientCard')}
             </Link>
           </div>
         )}

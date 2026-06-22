@@ -6,6 +6,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import { CheckCircle, ArrowLeft, Loader2, AlertCircle, Home } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useLanguage } from "@/lib/LanguageContext";
 import "../auth-pages.css";
 
 function ResetPasswordForm() {
@@ -14,11 +15,12 @@ function ResetPasswordForm() {
   const [success, setSuccess] = useState(false);
   const searchParams = useSearchParams();
   const errorParam = searchParams.get('error');
+  const { t } = useLanguage();
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      toast.error("Introduce un correo electrónico válido");
+      toast.error(t("auth.errorInvalidEmail" as any));
       return;
     }
     setLoading(true);
@@ -33,15 +35,15 @@ function ResetPasswordForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || "Error al enviar el enlace");
+        toast.error(data.error || t("auth.errorSendingResetLink" as any));
         setLoading(false);
         return;
       }
 
       setSuccess(true);
-      toast.success("¡Enlace enviado!");
+      toast.success(t("auth.successResetLinkSent" as any));
     } catch (err) {
-      toast.error("Error de conexión. Inténtalo de nuevo.");
+      toast.error(t("auth.errorConnectionFailed" as any));
     } finally {
       setLoading(false);
     }
@@ -53,14 +55,14 @@ function ResetPasswordForm() {
         <div className="auth-success-icon">
           <CheckCircle size={32} color="#4EDEA3" />
         </div>
-        <h1 className="auth-card-title" style={{ textAlign: 'center' }}>¡Enviado!</h1>
+        <h1 className="auth-card-title" style={{ textAlign: 'center' }}>{t("auth.sentTitle" as any)}</h1>
         <p className="auth-card-subtitle" style={{ textAlign: 'center' }}>
-          Instrucciones enviadas a <strong style={{ color: '#7C6FF7' }}>{email}</strong>.
+          {t("auth.instructionsSentTo" as any)} <strong style={{ color: '#7C6FF7' }}>{email}</strong>.
         </p>
         <div style={{ textAlign: 'center' }}>
           <Link href="/login" className="auth-back-link" style={{ justifyContent: 'center' }}>
             <ArrowLeft size={13} />
-            Volver al inicio
+            {t("auth.backToHome" as any)}
           </Link>
         </div>
       </div>
@@ -69,8 +71,8 @@ function ResetPasswordForm() {
 
   return (
     <>
-      <h1 className="auth-card-title">Recupera tu acceso</h1>
-      <p className="auth-card-subtitle">Recibirás un enlace de recuperación en tu correo.</p>
+      <h1 className="auth-card-title">{t("auth.recoverAccessTitle" as any)}</h1>
+      <p className="auth-card-subtitle">{t("auth.recoverAccessSubtitle" as any)}</p>
 
       {errorParam && (
         <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs leading-relaxed flex items-start gap-3 rounded-none">
@@ -81,7 +83,7 @@ function ResetPasswordForm() {
 
       <form onSubmit={handleReset}>
         <div className="auth-field">
-          <label className="auth-label">Correo Electrónico</label>
+          <label className="auth-label">{t("auth.emailLabel" as any)}</label>
           <input
             type="email"
             placeholder="email@empresa.com"
@@ -97,20 +99,22 @@ function ResetPasswordForm() {
           {loading ? (
             <Loader2 className="w-5 h-5 animate-spin mx-auto" />
           ) : (
-            "ENVIAR ENLACE"
+            t("auth.sendLinkButton" as any)
           )}
         </button>
       </form>
 
       <Link href="/login" className="auth-back-link">
         <ArrowLeft size={13} />
-        Cerrar y volver
+        {t("auth.closeAndBack" as any)}
       </Link>
     </>
   );
 }
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="auth-root wide-left">
       {/* ── LEFT PANEL ── */}
@@ -122,17 +126,17 @@ export default function ResetPasswordPage() {
         </Link>
         <div className="auth-left-content">
           <h2 className="auth-headline">
-            El asistente <span className="auth-headline-accent">de reservas y citas que</span><br />
-            nunca pudiste<br />
-            <span className="auth-headline-accent">tener</span>
+            {t("auth.headline.part1" as any)} <span className="auth-headline-accent">{t("auth.headline.accent1" as any)}</span><br />
+            {t("auth.headline.part2" as any)}<br />
+            <span className="auth-headline-accent">{t("auth.headline.accent2" as any)}</span>
           </h2>
 
           <div className="auth-benefits">
             {[
-              "Mientras tú trabajas, él atiende a tus clientes",
-              "Tu cliente escribe — a cualquier hora",
-              "Tu asistente responde — con tu tono",
-              "Tú lo encuentras todo listo",
+              t("auth.benefits.benefit1" as any),
+              t("auth.benefits.benefit2" as any),
+              t("auth.benefits.benefit3" as any),
+              t("auth.benefits.benefit4" as any),
             ].map((text) => (
               <div className="auth-benefit-item" key={text}>
                 <div className="auth-benefit-check">✓</div>
@@ -142,13 +146,13 @@ export default function ResetPasswordPage() {
           </div>
 
           <div className="auth-quote">
-            <p>&quot;Por fin puedo desconectar sin miedo a perder un cliente.&quot;</p>
+            <p>{t("auth.quote" as any)}</p>
           </div>
 
           <div className="auth-marketing-badges">
-            <span className="auth-marketing-badge">Sin tarjeta</span>
-            <span className="auth-marketing-badge">Listo en 5 min</span>
-            <span className="auth-marketing-badge">Hecho en España</span>
+            <span className="auth-marketing-badge">{t("auth.badges.noCard" as any)}</span>
+            <span className="auth-marketing-badge">{t("auth.badges.readyInFive" as any)}</span>
+            <span className="auth-marketing-badge">{t("auth.badges.madeInSpain" as any)}</span>
           </div>
 
           <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '8px', opacity: 0.7 }}>
@@ -165,7 +169,7 @@ export default function ResetPasswordPage() {
 
       {/* ── RIGHT PANEL ── */}
       <div className="auth-right">
-        <Link href="https://www.sffalcon.com" className="auth-home-link" title="Ir a la web principal">
+        <Link href="https://www.sffalcon.com" className="auth-home-link" title={t("auth.goToMainWeb" as any)}>
           <Home size={18} />
         </Link>
         <div className="auth-card auth-card--compact">
@@ -179,9 +183,9 @@ export default function ResetPasswordPage() {
 
           <div className="auth-card-footer" style={{ marginTop: '28px' }}>
             © 2026 SF &nbsp;•&nbsp;{" "}
-            <Link href="/legal">LEGAL</Link>{" "}
+            <Link href="/legal">{t("auth.legal" as any)}</Link>{" "}
             &nbsp;•&nbsp;{" "}
-            <Link href="/privacidad">PRIVACIDAD</Link>
+            <Link href="/privacidad">{t("auth.privacy" as any)}</Link>
           </div>
         </div>
       </div>

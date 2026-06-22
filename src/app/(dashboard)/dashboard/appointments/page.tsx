@@ -140,7 +140,7 @@ function AppointmentsContent() {
   }, [currentDate]);
 
   const sector = organization?.sector?.toLowerCase() || 'default';
-  const grupo = getSectorGrupo(sector);
+  const grupo = parseInt(String((getSectorGrupo as any)(sector))) || 1;
   
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">

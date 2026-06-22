@@ -75,7 +75,8 @@ export default function FinancesTable({
   loading: boolean;
   onEntriesChange: (next: FinanceEntry[]) => void;
 }) {
-  const { organizationId } = useOrganization();
+  const { organization } = useOrganization();
+  const organizationId = organization?.id;
   const supabase = useMemo(() => createClient(), []);
   const { t } = useLanguage();
   const [allHistoryConcepts, setAllHistoryConcepts] = useState<string[]>([]);
@@ -88,9 +89,9 @@ export default function FinancesTable({
   const getTypeLabel = (type: string) => {
     const lower = type.toLowerCase();
     if (["gasto_fijo", "variable", "ingreso", "deuda", "ahorro", "suscripcion"].includes(lower)) {
-      return t(`financesTable.types.${lower}`);
+      return t(`financesTable.types.${lower}` as any);
     }
-    return t(`finances.categories.${getCategoryKey(type)}`, { defaultValue: type });
+    return t(`finances.categories.${getCategoryKey(type)}` as any, { defaultValue: type });
   };
 
   useEffect(() => {

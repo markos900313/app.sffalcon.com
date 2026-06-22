@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/lib/LanguageContext";
 
 import { useSidebar } from "@/app/panel-empleado/SidebarContext";
 
@@ -22,15 +23,16 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeSection, setActiveSection }: SidebarProps) {
+  const { t } = useLanguage();
   const router = useRouter();
   const supabase = createClient();
   const { isOpen, setIsOpen } = useSidebar();
 
   const menuItems = [
-    { id: "fichaje", label: "Mi Fichaje", icon: Clock, section: "PANEL" },
-    { id: "inicio", label: "Inicio", icon: Home, section: "PANEL" },
-    { id: "turnos", label: "Mis Turnos", icon: CalendarDays, section: "PANEL" },
-    { id: "vacaciones", label: "Mis Vacaciones", icon: Palmtree, section: "PANEL" },
+    { id: "fichaje", label: t("employeePanel.menu.fichaje"), icon: Clock, section: "PANEL" },
+    { id: "inicio", label: t("employeePanel.menu.inicio"), icon: Home, section: "PANEL" },
+    { id: "turnos", label: t("employeePanel.menu.turnos"), icon: CalendarDays, section: "PANEL" },
+    { id: "vacaciones", label: t("employeePanel.menu.vacaciones"), icon: Palmtree, section: "PANEL" },
   ];
 
   const sections = ["PANEL"];
@@ -79,7 +81,7 @@ export default function Sidebar({ activeSection, setActiveSection }: SidebarProp
           <div key={sectionName} className="flex flex-col gap-1">
             <div className="px-4 flex items-center justify-between mb-1">
               <h3 className="text-[10px] font-bold text-slate-500/70 uppercase tracking-[0.15em]">
-                {sectionName}
+                {sectionName === "PANEL" ? t("employeePanel.menu.section") : sectionName}
               </h3>
             </div>
 

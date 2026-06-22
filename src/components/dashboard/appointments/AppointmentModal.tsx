@@ -8,11 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "react-hot-toast";
 import { useOrganization } from "@/context/OrganizationContext";
 import { useLanguage } from "@/lib/LanguageContext";
-import { 
-  getModuleLabel, 
-  getAppointmentModalidades,
-  getSectorGrupo 
-} from "@/lib/sectorConfig";
+
 
 interface Client {
   id: string;

@@ -115,7 +115,7 @@ export default function AddBusinessIncomeModal({ isOpen, onClose, onSuccess }: P
             >
               {OCIO_INCOME_CATEGORIES.map(cat => (
                 <option key={cat} value={cat} className="bg-[#111F3A] text-white">
-                  {t(`finances.categories.${getCategoryKey(cat)}`, { defaultValue: cat })}
+                  {t(`finances.categories.${getCategoryKey(cat)}` as any, { defaultValue: cat })}
                 </option>
               ))}
             </select>

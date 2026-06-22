@@ -7,16 +7,21 @@ import { TranslationKeys } from './i18n/types';
 
 export type Language = 'es' | 'en';
 
+type TOptions = {
+  defaultValue?: string;
+  [key: string]: any;
+};
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: TranslationKeys) => string;
+  t: (key: TranslationKeys | (string & {}), options?: TOptions) => string;
 }
 
 export const LanguageContext = createContext<LanguageContextType>({
   language: 'es',
   setLanguage: () => {},
-  t: (key) => key,
+  t: (key) => key as string,
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
@@ -39,18 +44,21 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const t = (key: TranslationKeys): string => {
+  const t = (key: TranslationKeys | (string & {}), options?: TOptions): string => {
     const dict = language === 'en' ? en : es;
-    const parts = key.split('.');
+    const parts = (key as string).split('.');
     let val: any = dict;
     for (const part of parts) {
       if (val && typeof val === 'object' && part in val) {
         val = val[part];
       } else {
-        return key;
+        // Key not found — use defaultValue or the key itself
+        const fallback = options?.defaultValue ?? (key as string);
+        return interpolate(fallback, options);
       }
     }
-    return typeof val === 'string' ? val : key;
+    const result = typeof val === 'string' ? val : (key as string);
+    return interpolate(result, options);
   };
 
   return (
@@ -58,6 +66,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       {children}
     </LanguageContext.Provider>
   );
+}
+
+/** Replace {varName} placeholders with values from options */
+function interpolate(str: string, options?: TOptions): string {
+  if (!options) return str;
+  return str.replace(/\{(\w+)\}/g, (_, varName) => {
+    if (varName === 'defaultValue') return _;
+    return options[varName] !== undefined ? String(options[varName]) : `{${varName}}`;
+  });
 }
 
 export const useLanguage = () => {

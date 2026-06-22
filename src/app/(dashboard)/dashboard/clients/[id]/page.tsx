@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { DashboardPageContainer } from "@/components/dashboard/DashboardPageContainer";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const STATUS_COLORS: Record<string, string> = {
   lead: 'border-t-blue-500',
@@ -26,10 +27,27 @@ const STATUS_BADGE: Record<string, string> = {
   inactivo: 'bg-slate-50 text-slate-600 dark:bg-slate-500/10 dark:text-slate-400'
 };
 
+const STATUS_LABELS: Record<string, Record<string, string>> = {
+  es: {
+    lead: 'Lead',
+    potencial: 'Potencial',
+    activo: 'Activo',
+    inactivo: 'Inactivo',
+  },
+  en: {
+    lead: 'Lead',
+    potencial: 'Potential',
+    activo: 'Active',
+    inactivo: 'Inactive',
+  }
+};
+
 export default function ClientDetailPage() {
   const router = useRouter();
   const { id } = useParams();
   const supabase = createClient();
+  const { t, language } = useLanguage();
+  const activeLang = language || 'es';
   const [client, setClient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [comms, setComms] = useState<any[]>([]);
@@ -66,7 +84,7 @@ export default function ClientDetailPage() {
         setComms(commsData || []);
       }
     } catch (error: any) {
-      toast.error('Error al cargar el cliente');
+      toast.error(t('clientDetail.toast.loadError'));
     } finally {
       setLoading(false);
     }
@@ -87,9 +105,9 @@ export default function ClientDetailPage() {
       
       if (error) throw error;
       setClient({ ...client, status: newStatus });
-      toast.success('Estado actualizado');
+      toast.success(t('clientDetail.toast.statusUpdated'));
     } catch (error) {
-      toast.error('Error al actualizar estado');
+      toast.error(t('clientDetail.toast.statusUpdateError'));
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -99,7 +117,8 @@ export default function ClientDetailPage() {
     if (!newNote.trim()) return;
     setIsRegistering(true);
     try {
-      const updatedNotes = `${client.notes || ''}\n[${new Date().toLocaleDateString('es-ES')}]: ${newNote.trim()}`;
+      const dateLocale = language === 'en' ? 'en-US' : 'es-ES';
+      const updatedNotes = `${client.notes || ''}\n[${new Date().toLocaleDateString(dateLocale)}]: ${newNote.trim()}`;
       const { error } = await supabase
         .from('clients')
         .update({ 
@@ -112,9 +131,9 @@ export default function ClientDetailPage() {
       if (error) throw error;
       setClient({ ...client, notes: updatedNotes, last_contact: new Date().toISOString() });
       setNewNote('');
-      toast.success('Contacto registrado');
+      toast.success(t('clientDetail.toast.contactRegistered'));
     } catch (error) {
-      toast.error('Error al registrar contacto');
+      toast.error(t('clientDetail.toast.contactRegisterError'));
     } finally {
       setIsRegistering(false);
     }
@@ -139,12 +158,12 @@ export default function ClientDetailPage() {
           notes: editForm.notes
         })
       });
-      if (!res.ok) throw new Error('Error al actualizar');
+      if (!res.ok) throw new Error(t('clientDetail.toast.clientUpdateError'));
       setClient({ ...client, ...editForm });
       setIsEditing(false);
-      toast.success('Cliente actualizado');
+      toast.success(t('clientDetail.toast.clientUpdated'));
     } catch (error) {
-      toast.error('Error al actualizar');
+      toast.error(t('clientDetail.toast.clientUpdateError'));
     } finally {
       setIsSavingProfile(false);
     }
@@ -163,26 +182,26 @@ export default function ClientDetailPage() {
         },
         body: JSON.stringify({ notes: notesValue })
       });
-      if (!res.ok) throw new Error('Error al guardar');
+      if (!res.ok) throw new Error(t('clientDetail.toast.notesSaveError'));
       setClient({ ...client, notes: notesValue });
       setEditingNotes(false);
-      toast.success('Notas guardadas');
+      toast.success(t('clientDetail.toast.notesSaved'));
     } catch (error) {
-      toast.error('Error al guardar notas');
+      toast.error(t('clientDetail.toast.notesSaveError'));
     } finally {
       setIsSavingNotes(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm('¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer.')) return;
+    if (!confirm(t('clientDetail.deleteConfirm'))) return;
     try {
       const { error } = await supabase.from('clients').delete().eq('id', id);
       if (error) throw error;
-      toast.success('Cliente eliminado');
+      toast.success(t('clientDetail.toast.clientDeleted'));
       router.push('/dashboard/clients');
     } catch (error) {
-      toast.error('Error al eliminar');
+      toast.error(t('clientDetail.toast.deleteError'));
     }
   };
 
@@ -195,14 +214,15 @@ export default function ClientDetailPage() {
   if (!client) return (
     <div className="p-12 text-center bg-slate-50 dark:bg-white/5 rounded-3xl border border-dashed border-slate-200 dark:border-white/10">
       <Users size={48} className="mx-auto text-slate-200 mb-4" />
-      <h2 className="text-xl font-black text-slate-400 uppercase tracking-widest">Cliente no encontrado</h2>
+      <h2 className="text-xl font-black text-slate-400 uppercase tracking-widest">{t('clientDetail.notFound')}</h2>
       <button onClick={() => router.push('/dashboard/clients')} className="mt-6 px-6 py-2.5 bg-[#1B4FD8] text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
-        Volver al Panel
+        {t('clientDetail.backToDashboard')}
       </button>
     </div>
   );
 
   const daysSinceCreated = Math.floor((new Date().getTime() - new Date(client.created_at).getTime()) / (1000 * 60 * 60 * 24));
+  const activeLang = language === 'en' ? 'en' : 'es';
 
   return (
     <DashboardPageContainer>
@@ -215,7 +235,7 @@ export default function ClientDetailPage() {
             className="group flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-[#1B4FD8] transition-colors uppercase tracking-[0.2em]"
           >
             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-            Volver a Clientes
+            {t('clientDetail.backToClients')}
           </button>
           <div className="flex items-center gap-4">
             <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-none group">
@@ -225,7 +245,7 @@ export default function ClientDetailPage() {
               "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest",
               STATUS_BADGE[client.status] || STATUS_BADGE.lead
             )}>
-              {client.status}
+              {STATUS_LABELS[activeLang]?.[client.status] || client.status}
             </div>
           </div>
         </div>
@@ -245,7 +265,7 @@ export default function ClientDetailPage() {
             className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-2xl text-[11px] font-black text-slate-600 dark:text-slate-300 hover:border-[#1B4FD8] transition-all shadow-sm active:scale-95 uppercase tracking-widest"
           >
             <Edit2 size={14} />
-            Editar Perfil
+            {t('clientDetail.editProfile')}
           </button>
           <button onClick={handleDelete} className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-2xl text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-all shadow-sm active:scale-95">
             <Trash2 size={18} />
@@ -263,25 +283,25 @@ export default function ClientDetailPage() {
             STATUS_COLORS[client.status] || STATUS_COLORS.lead
           )}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <ProfileItem icon={<Building2 size={18} />} label="Empresa / Entidad" value={client.company || 'Consumidor Final'} color="blue" />
-              <ProfileItem icon={<Mail size={18} />} label="Correo Electrónico" value={client.email || 'No proporcionado'} color="indigo" />
-              <ProfileItem icon={<Phone size={18} />} label="Teléfono móvil" value={client.phone || 'No proporcionado'} color="emerald" />
-              <ProfileItem icon={<Tag size={18} />} label="Categoría" value={client.category || 'Otros'} color="amber" />
-              <ProfileItem icon={<Globe size={18} />} label="Canal de Entrada" value={`Vía ${client.source}`} color="purple" />
-              <ProfileItem icon={<MapPin size={18} />} label="Ubicación" value={client.city || 'Desconocida'} color="rose" />
+              <ProfileItem icon={<Building2 size={18} />} label={t('clientDetail.fields.company')} value={client.company || t('clientDetail.values.finalConsumer')} color="blue" />
+              <ProfileItem icon={<Mail size={18} />} label={t('clientDetail.fields.email')} value={client.email || t('clientDetail.values.notProvided')} color="indigo" />
+              <ProfileItem icon={<Phone size={18} />} label={t('clientDetail.fields.phone')} value={client.phone || t('clientDetail.values.notProvided')} color="emerald" />
+              <ProfileItem icon={<Tag size={18} />} label={t('clientDetail.fields.category')} value={client.category || t('clientDetail.values.other')} color="amber" />
+              <ProfileItem icon={<Globe size={18} />} label={t('clientDetail.fields.source')} value={t('clientDetail.values.sourceVia', { source: client.source })} color="purple" />
+              <ProfileItem icon={<MapPin size={18} />} label={t('clientDetail.fields.location')} value={client.city || t('clientDetail.values.unknown')} color="rose" />
             </div>
 
             <div className="mt-10 pt-8 border-t border-slate-100 dark:border-slate-800/50">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <FileText size={14} /> 
-                  Expediente y Notas Internas
+                  {t('clientDetail.sections.notes')}
                 </h3>
                 <button 
                   onClick={() => { setNotesValue(client.notes || ''); setEditingNotes(true); }}
                   className="text-[10px] font-black text-[#1B4FD8] uppercase hover:underline"
                 >
-                  Ampliar
+                  {t('clientDetail.actions.expand')}
                 </button>
               </div>
               {editingNotes ? (
@@ -299,14 +319,14 @@ export default function ClientDetailPage() {
                       disabled={isSavingNotes}
                       className="flex-1 py-2 rounded-xl border border-slate-200 dark:border-[#1E3A5F] text-sm font-bold text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors disabled:opacity-50"
                     >
-                      Cancelar
+                      {t('clientDetail.actions.cancel')}
                     </button>
                     <button 
                       onClick={handleSaveNotes} 
                       disabled={isSavingNotes}
                       className="flex-1 py-2 rounded-xl bg-[#1B4FD8] text-white text-sm font-bold hover:bg-[#1642B5] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      {isSavingNotes ? 'Guardando...' : 'Guardar'}
+                      {isSavingNotes ? t('clientDetail.actions.saving') : t('clientDetail.actions.save')}
                     </button>
                   </div>
                 </div>
@@ -316,7 +336,7 @@ export default function ClientDetailPage() {
                     <Edit2 size={14} className="text-slate-300 cursor-pointer hover:text-[#1B4FD8]" 
                       onClick={() => { setNotesValue(client.notes || ''); setEditingNotes(true); }} />
                   </div>
-                  {client.notes || 'Inicie el expediente registrando su primera nota de seguimiento para este cliente.'}
+                  {client.notes || t('clientDetail.notesEmpty')}
                 </div>
               )}
             </div>
@@ -329,11 +349,11 @@ export default function ClientDetailPage() {
                 <div className="p-2 bg-blue-50 dark:bg-blue-500/10 text-[#1B4FD8] rounded-xl shadow-sm">
                   <History size={20} />
                 </div>
-                Línea de Tiempo
+                {t('clientDetail.sections.timeline')}
               </h3>
               <div className="flex gap-2">
-                 <button className="px-3 py-1.5 bg-slate-50 dark:bg-white/5 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-colors">Todo</button>
-                 <button className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</button>
+                 <button className="px-3 py-1.5 bg-slate-50 dark:bg-white/5 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-colors">{t('clientDetail.filters.all')}</button>
+                 <button className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('clientDetail.filters.email')}</button>
               </div>
             </div>
 
@@ -350,7 +370,7 @@ export default function ClientDetailPage() {
                     <div className="flex-1 pb-6 min-w-0">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-[11px] font-black uppercase text-[#1B4FD8] tracking-widest">{msg.channel}</span>
-                        <span className="text-[10px] font-bold text-slate-400">{new Date(msg.created_at).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-[10px] font-bold text-slate-400">{new Date(msg.created_at).toLocaleString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                       <div className="p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-transparent group-hover:border-slate-100 dark:group-hover:border-white/10 transition-all group-hover:shadow-sm">
                         <p className="text-[13px] text-slate-600 dark:text-slate-300 font-medium leading-relaxed">{msg.content}</p>
@@ -361,7 +381,7 @@ export default function ClientDetailPage() {
               ) : (
                 <div className="text-center py-16 bg-slate-50/50 dark:bg-white/5 rounded-[40px] border-2 border-dashed border-slate-100 dark:border-slate-800/50">
                    <Clock size={40} className="mx-auto text-slate-200 mb-4" />
-                   <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Sin actividad registrada</p>
+                   <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{t('clientDetail.timelineEmpty')}</p>
                 </div>
               )}
             </div>
@@ -373,13 +393,13 @@ export default function ClientDetailPage() {
           
           {/* Key Metrics */}
           <div className="grid grid-cols-2 gap-4">
-            <StatSmall label="Relación" value={`${daysSinceCreated} días`} icon={<Calendar size={16} />} color="blue" />
-            <StatSmall label="Contrato" value={client.value ? `${Number(client.value).toLocaleString('es-ES')}€` : '0€'} icon={<Euro size={16} />} color="emerald" />
+            <StatSmall label={t('clientDetail.metrics.relation')} value={t('clientDetail.metrics.relationDays', { days: daysSinceCreated })} icon={<Calendar size={16} />} color="blue" />
+            <StatSmall label={t('clientDetail.metrics.contract')} value={client.value ? `${Number(client.value).toLocaleString(language === 'en' ? 'en-US' : 'es-ES')}€` : '0€'} icon={<Euro size={16} />} color="emerald" />
           </div>
 
           {/* Quick Status Update */}
           <div className="card-premium p-6 bg-slate-900 border-none shadow-2xl shadow-blue-500/10">
-            <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Gestión de Estado</h4>
+            <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">{t('clientDetail.sections.statusManagement')}</h4>
             <div className="space-y-4">
               <div className="relative group">
                 <select 
@@ -388,15 +408,15 @@ export default function ClientDetailPage() {
                   disabled={isUpdatingStatus}
                   className="w-full bg-white/5 border border-white/10 text-white text-xs font-bold rounded-2xl py-4 px-5 appearance-none focus:ring-2 focus:ring-blue-500/50 transition-all outline-none relative z-10"
                 >
-                  <option value="lead" className="bg-slate-900">LEAD (CAPTACIÓN)</option>
-                  <option value="potencial" className="bg-slate-900">POTENCIAL (NEGOCIACIÓN)</option>
-                  <option value="activo" className="bg-slate-900">ACTIVO (CLIENTE)</option>
-                  <option value="inactivo" className="bg-slate-900">INACTIVO (CERRADO)</option>
+                  <option value="lead" className="bg-slate-900">{STATUS_LABELS[activeLang]?.lead}</option>
+                  <option value="potencial" className="bg-slate-900">{STATUS_LABELS[activeLang]?.potencial}</option>
+                  <option value="activo" className="bg-slate-900">{STATUS_LABELS[activeLang]?.activo}</option>
+                  <option value="inactivo" className="bg-slate-900">{STATUS_LABELS[activeLang]?.inactivo}</option>
                 </select>
                 <ChevronRight size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 rotate-90" />
               </div>
               <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider px-1 text-center">
-                Último cambio: {client.updated_at ? new Date(client.updated_at).toLocaleDateString('es-ES') : 'Nunca'}
+                {t('clientDetail.lastChange', { date: client.updated_at ? new Date(client.updated_at).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES') : t('clientDetail.never') })}
               </p>
             </div>
           </div>
@@ -405,11 +425,11 @@ export default function ClientDetailPage() {
           <div className="card-premium p-6 shadow-xl border-t-4 border-t-blue-500">
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
               <PlusCircle size={16} className="text-[#1B4FD8]" /> 
-              Registrar Interacción
+              {t('clientDetail.sections.logInteraction')}
             </h4>
             <div className="space-y-4">
               <textarea 
-                placeholder="Escribe un resumen de la llamada o reunión..."
+                placeholder={t('clientDetail.placeholders.interactionSummary')}
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 className="w-full bg-slate-50 dark:bg-slate-900/50 border-none rounded-2xl text-[13px] p-5 min-h-[140px] resize-none outline-none focus:ring-2 focus:ring-[#1B4FD8]/20 text-slate-800 dark:text-slate-200 font-medium placeholder:text-slate-400"
@@ -419,7 +439,7 @@ export default function ClientDetailPage() {
                 disabled={isRegistering || !newNote.trim()}
                 className="w-full py-4 bg-[#1B4FD8] text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#1642B5] transition-all disabled:opacity-50 active:scale-95 shadow-xl shadow-blue-500/20 flex items-center justify-center gap-2"
               >
-                {isRegistering ? 'Sincronizando...' : 'Guardar en Bitácora'}
+                {isRegistering ? t('clientDetail.actions.syncing') : t('clientDetail.actions.saveLog')}
                 <Save size={16} />
               </button>
             </div>
@@ -431,47 +451,48 @@ export default function ClientDetailPage() {
                 <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center shadow-sm">
                   <Calendar size={18} className="text-slate-400" />
                 </div>
-                <span className="text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">Metadata de Registro</span>
+                <span className="text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">{t('clientDetail.sections.metadata')}</span>
              </div>
              <div className="space-y-4">
-               <div className="flex justify-between items-center group">
-                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Último Contacto</span>
-                 <span className="text-[11px] font-black text-slate-700 dark:text-slate-200">{client.last_contact ? new Date(client.last_contact).toLocaleDateString('es-ES') : '--'}</span>
-               </div>
-               <div className="flex justify-between items-center group">
-                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ID Único</span>
-                 <span className="text-[11px] font-black text-slate-400 font-mono text-[9px]">{id.toString().substring(0, 8)}...</span>
-               </div>
-                <button 
-                  onClick={() => {
-                    const content = `
-FICHA DE CONTACTO
+                <div className="flex justify-between items-center group">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('clientDetail.metadata.lastContact')}</span>
+                  <span className="text-[11px] font-black text-slate-700 dark:text-slate-200">{client.last_contact ? new Date(client.last_contact).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES') : '--'}</span>
+                </div>
+                <div className="flex justify-between items-center group">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t('clientDetail.metadata.uniqueId')}</span>
+                  <span className="text-[11px] font-black text-slate-400 font-mono text-[9px]">{id.toString().substring(0, 8)}...</span>
+                </div>
+                 <button 
+                   onClick={() => {
+                     const txtLocale = language === 'en' ? 'en-US' : 'es-ES';
+                     const content = `
+${t('clientDetail.txt.header')}
 =================
-Nombre: ${client.name}
-Email: ${client.email || 'No proporcionado'}
-Teléfono: ${client.phone || 'No proporcionado'}
-Empresa: ${client.company || 'Consumidor Final'}
-Estado: ${client.status}
-Canal: ${client.source || 'Desconocido'}
-Ciudad: ${client.city || 'Desconocida'}
-Notas: ${client.notes || 'Sin notas'}
-ID: ${id}
-Generado: ${new Date().toLocaleDateString('es-ES')}
-                    `.trim();
-                    const blob = new Blob([content], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `ficha-${client.name.replace(/\s+/g, '-')}.txt`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    toast.success('Ficha descargada');
-                  }}
-                  className="w-full mt-4 flex items-center justify-center gap-2 text-[10px] font-black text-[#1B4FD8] uppercase tracking-widest hover:bg-[#1B4FD8]/5 py-2 rounded-lg transition-all"
-                >
-                  Descargar ficha TXT
-                  <ExternalLink size={12} />
-                </button>
+${t('clientDetail.txt.name')}: ${client.name}
+${t('clientDetail.txt.email')}: ${client.email || t('clientDetail.values.notProvided')}
+${t('clientDetail.txt.phone')}: ${client.phone || t('clientDetail.values.notProvided')}
+${t('clientDetail.txt.company')}: ${client.company || t('clientDetail.values.finalConsumer')}
+${t('clientDetail.txt.status')}: ${client.status}
+${t('clientDetail.txt.source')}: ${client.source || t('clientDetail.values.unknown')}
+${t('clientDetail.txt.city')}: ${client.city || t('clientDetail.values.unknown')}
+${t('clientDetail.txt.notes')}: ${client.notes || ''}
+${t('clientDetail.txt.id')}: ${id}
+${t('clientDetail.txt.generated')}: ${new Date().toLocaleDateString(txtLocale)}
+                     `.trim();
+                     const blob = new Blob([content], { type: 'text/plain' });
+                     const url = URL.createObjectURL(blob);
+                     const a = document.createElement('a');
+                     a.href = url;
+                     a.download = `ficha-${client.name.replace(/\s+/g, '-')}.txt`;
+                     a.click();
+                     URL.revokeObjectURL(url);
+                     toast.success(t('clientDetail.toast.downloadSuccess'));
+                   }}
+                   className="w-full mt-4 flex items-center justify-center gap-2 text-[10px] font-black text-[#1B4FD8] uppercase tracking-widest hover:bg-[#1B4FD8]/5 py-2 rounded-lg transition-all"
+                 >
+                   {t('clientDetail.actions.downloadTxt')}
+                   <ExternalLink size={12} />
+                 </button>
              </div>
           </div>
 
@@ -482,15 +503,15 @@ Generado: ${new Date().toLocaleDateString('es-ES')}
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-white dark:bg-[#111F3A] w-full max-w-lg rounded-[24px] shadow-2xl border border-slate-200 dark:border-[#1E3A5F] overflow-hidden">
             <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 dark:border-[#1E3A5F]">
-              <h3 className="text-xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">Editar Contacto</h3>
+              <h3 className="text-xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">{t('clientDetail.modal.title')}</h3>
               <button onClick={() => setIsEditing(false)} className="p-2 text-slate-400 hover:text-slate-600">✕</button>
             </div>
             <div className="p-8 space-y-4 overflow-y-auto max-h-[60vh]">
               {[
-                { label: 'Nombre', field: 'name' },
-                { label: 'Email', field: 'email' },
-                { label: 'Teléfono', field: 'phone' },
-                { label: 'Empresa', field: 'company' },
+                { label: t('clientDetail.modal.name'), field: 'name' },
+                { label: t('clientDetail.modal.email'), field: 'email' },
+                { label: t('clientDetail.modal.phone'), field: 'phone' },
+                { label: t('clientDetail.modal.company'), field: 'company' },
               ].map(({ label, field }) => (
                 <div key={field} className="space-y-1">
                   <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{label}</label>
@@ -509,14 +530,14 @@ Generado: ${new Date().toLocaleDateString('es-ES')}
                 disabled={isSavingProfile}
                 className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-[#1E3A5F] text-sm font-bold text-slate-500 hover:bg-white dark:hover:bg-white/5 transition-colors disabled:opacity-50"
               >
-                Cancelar
+                {t('clientDetail.actions.cancel')}
               </button>
               <button 
                 onClick={handleSaveEdit} 
                 disabled={isSavingProfile}
                 className="flex-1 py-3 rounded-xl bg-[#1B4FD8] text-white text-sm font-bold hover:bg-[#1642B5] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isSavingProfile ? 'Sincronizando...' : 'Guardar Cambios'}
+                {isSavingProfile ? t('clientDetail.actions.syncing') : t('clientDetail.modal.save')}
               </button>
             </div>
           </div>

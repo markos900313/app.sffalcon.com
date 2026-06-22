@@ -23,10 +23,12 @@ import { useOrganization } from "@/context/OrganizationContext";
 import { cn } from "@/lib/utils";
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ApiSettingsPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [apiKey, setApiKey] = useState("");
@@ -71,7 +73,7 @@ export default function ApiSettingsPage() {
     const newKey = `sf_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
     setApiKey(newKey);
     if (showToast) {
-      toast.success("Nueva API Key generada localmente. Haz clic en Guardar.");
+      toast.success(t('apiSettings.toastSuccessKey'));
     }
   };
 
@@ -111,10 +113,10 @@ export default function ApiSettingsPage() {
       }
 
       if (error) throw error;
-      toast.success("Configuración guardada correctamente");
+      toast.success(t('apiSettings.toastSaveSuccess'));
     } catch (err) {
       console.error("Error saving API config:", err);
-      toast.error("Error al guardar la configuración");
+      toast.error(t('apiSettings.toastSaveError'));
     } finally {
       setSaving(false);
     }
@@ -124,7 +126,7 @@ export default function ApiSettingsPage() {
     if (!apiKey) return;
     navigator.clipboard.writeText(apiKey);
     setCopied(true);
-    toast.success("API Key copiada al portapapeles");
+    toast.success(t('apiSettings.toastCopySuccess'));
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -145,9 +147,9 @@ export default function ApiSettingsPage() {
             <div className="p-2 bg-blue-500/10 rounded-lg">
               <Key className="w-5 h-5 text-blue-400" />
             </div>
-            <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">API Pública & Integraciones</h1>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">{t('apiSettings.title')}</h1>
           </div>
-          <p className="text-[var(--text-secondary)] text-sm">Conecta SF con tus propias herramientas, TPV o sitio web.</p>
+          <p className="text-[var(--text-secondary)] text-sm">{t('apiSettings.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3 self-start md:self-auto">
           <button
@@ -156,11 +158,11 @@ export default function ApiSettingsPage() {
             className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2 text-sm"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            {saving ? 'Guardando...' : 'Guardar Cambios'}
+            {saving ? t('apiSettings.savingBtn') : t('apiSettings.saveBtn')}
           </button>
           <div className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-blue-400" />
-            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Plan Ultra Activo</span>
+            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{t('apiSettings.planActive')}</span>
           </div>
         </div>
       </DashboardSection>
@@ -179,14 +181,14 @@ export default function ApiSettingsPage() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2 text-lg">
                   <ShieldCheck className="w-5 h-5 text-blue-400" />
-                  Tu Credencial de Acceso
+                  {t('apiSettings.credentialTitle')}
                 </h3>
                 <button
                   onClick={() => generateNewKey(true)}
                   className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors uppercase tracking-widest"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  Regenerar Key
+                  {t('apiSettings.regenerateBtn')}
                 </button>
               </div>
 
@@ -208,8 +210,7 @@ export default function ApiSettingsPage() {
               <p className="text-xs text-[var(--text-secondary)] mt-4 leading-relaxed flex items-start gap-2 bg-amber-500/5 p-3 rounded-lg border border-amber-500/10">
                 <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Seguridad Crítica:</strong> Nunca expongas esta API Key en el lado del cliente (frontend).
-                  Implementa siempre tus llamadas desde un servidor seguro.
+                  <strong>{t('apiSettings.criticalSecurity')}</strong> {t('apiSettings.criticalSecurityDesc')}
                 </span>
               </p>
             </div>
@@ -218,13 +219,13 @@ export default function ApiSettingsPage() {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-[var(--text-primary)] flex items-center gap-2 text-lg">
                   <Webhook className="w-5 h-5 text-emerald-400" />
-                  Webhooks (Notificaciones)
+                  {t('apiSettings.webhooksTitle')}
                 </h3>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2 block">Endpoint de Destino (URL)</label>
+                  <label className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-2 block">{t('apiSettings.webhookUrlLabel')}</label>
                   <div className="flex gap-3">
                     <input
                       type="url"
@@ -240,8 +241,8 @@ export default function ApiSettingsPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                  <WebhookItem event="activity.created" description="Entrada de registro IA." active />
-                  <WebhookItem event="contact.notified" description="Tras campaña de comunicación." />
+                  <WebhookItem event="activity.created" description={t('apiSettings.webhooks.activity')} active />
+                  <WebhookItem event="contact.notified" description={t('apiSettings.webhooks.contact')} />
                 </div>
               </div>
             </div>
@@ -268,7 +269,7 @@ export default function ApiSettingsPage() {
             <div className="card-premium bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] p-6 md:p-8 rounded-2xl shadow-xl relative overflow-hidden group">
               <h3 className="font-bold text-[var(--text-primary)] mb-2 relative z-10">Integración Global</h3>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-4 relative z-10">
-                Sincroniza tus datos con cualquier sistema POS o automatiza procesos vía Zapier.
+                Sincroniza tus datos con cualquier system POS o automatiza procesos vía Zapier.
               </p>
               <div className="flex flex-wrap gap-2 relative z-10">
                 <span className="px-2 py-1 bg-white/5 rounded-md text-[9px] font-bold uppercase tracking-widest text-[var(--text-secondary)] border border-[var(--border-card)]">REST</span>
@@ -279,16 +280,16 @@ export default function ApiSettingsPage() {
             <div className="bg-blue-600/10 border border-blue-600/20 p-6 md:p-8 rounded-2xl shadow-xl border-l-4 border-l-blue-500/50">
               <h4 className="font-bold text-blue-400 mb-2 text-sm flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                ¿Necesitas Ayuda?
+                {t('apiSettings.guideHelpTitle')}
               </h4>
               <p className="text-[11px] text-slate-300 mb-4 leading-relaxed">
-                Consulta nuestra guía técnica para una integración rápida y segura.
+                {t('apiSettings.guideHelpDesc')}
               </p>
               <button
                 onClick={() => setShowGuide(true)}
                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-500/20"
               >
-                Ver Guía de Inicio Rápido
+                {t('apiSettings.guideHelpBtn')}
               </button>
             </div>
           </div>
@@ -314,7 +315,7 @@ export default function ApiSettingsPage() {
               {/* Header */}
               <div className="flex items-center justify-between px-5 md:px-6 py-4 md:py-5 border-b border-slate-100 dark:border-[#1E3A5F]">
                 <h3 className="text-xl font-bold text-[#0F172A] dark:text-[#F1F5F9]">
-                  Guía de Inicio Rápido
+                  {t('apiSettings.guideModal.title')}
                 </h3>
                 <button onClick={() => setShowGuide(false)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
                   <X className="w-5 h-5" />
@@ -324,7 +325,7 @@ export default function ApiSettingsPage() {
               <div className="p-5 md:p-6 space-y-5 max-h-[60vh] md:max-h-[65vh] overflow-y-auto scrollbar-hide">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Autenticación *</label>
+                    <label className="text-xs font-semibold text-slate-505 dark:text-slate-400 uppercase tracking-wider">{t('apiSettings.guideModal.authLabel')}</label>
                     <div className="w-full bg-slate-50 dark:bg-[#0D1B35] border border-slate-200 dark:border-[#1E3A5F] rounded-xl px-4 py-3 text-sm min-h-[44px] flex items-center">
                       <p className="text-blue-500 font-bold truncate">
                         <span className="text-slate-500 mr-2 uppercase text-[10px] font-black">Bearer</span> sf_live_...
@@ -332,15 +333,15 @@ export default function ApiSettingsPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Webhooks</label>
+                    <label className="text-xs font-semibold text-slate-505 dark:text-slate-400 uppercase tracking-wider">{t('apiSettings.guideModal.webhooksLabel')}</label>
                     <div className="w-full bg-slate-50 dark:bg-[#0D1B35] border border-slate-200 dark:border-[#1E3A5F] rounded-xl px-4 py-3 text-sm min-h-[44px] flex items-center">
-                      <p className="text-slate-400 font-medium">Eventos Real-time</p>
+                      <p className="text-slate-400 font-medium">{t('apiSettings.guideModal.webhooksDesc')}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Endpoints Principales</label>
+                  <label className="text-xs font-semibold text-slate-505 dark:text-slate-400 uppercase tracking-wider">{t('apiSettings.guideModal.endpointsLabel')}</label>
                   <div className="space-y-3">
                     <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-[#0D1B35] border border-slate-200 dark:border-[#1E3A5F] rounded-xl group hover:border-blue-500/20 transition-all cursor-default">
                       <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-600/10 border border-blue-200/30 flex items-center justify-center shrink-0">
@@ -348,7 +349,7 @@ export default function ApiSettingsPage() {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs font-bold text-slate-900 dark:text-white">/v1/activity</p>
-                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tight">Listado de registros</p>
+                        <p className="text-[10px] text-slate-505 font-medium uppercase tracking-tight">{t('apiSettings.guideModal.endpointGetDesc')}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-[#0D1B35] border border-slate-200 dark:border-[#1E3A5F] rounded-xl group hover:border-blue-500/20 transition-all cursor-default">
@@ -357,7 +358,7 @@ export default function ApiSettingsPage() {
                       </div>
                       <div className="flex-1">
                         <p className="text-xs font-bold text-slate-900 dark:text-white">/v1/contacts</p>
-                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-tight">Creación de perfiles</p>
+                        <p className="text-[10px] text-slate-505 font-medium uppercase tracking-tight">{t('apiSettings.guideModal.endpointPostDesc')}</p>
                       </div>
                     </div>
                   </div>
@@ -365,8 +366,8 @@ export default function ApiSettingsPage() {
 
                 <div className="p-5 bg-blue-500/5 border border-blue-500/10 rounded-2xl flex gap-4 mt-4">
                   <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                    Implementa estas llamadas desde el <span className="text-blue-500 font-bold">servidor</span> para seguridad máxima. Nunca expongas tu API Key en el front-end.
+                  <p className="text-xs text-slate-505 dark:text-slate-400 leading-relaxed font-medium">
+                    {t('apiSettings.guideModal.securityNotice')}
                   </p>
                 </div>
               </div>
@@ -377,13 +378,13 @@ export default function ApiSettingsPage() {
                   onClick={() => setShowGuide(false)}
                   className="w-full sm:flex-1 px-4 py-3 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#1E3A5F]/40 rounded-xl transition-all"
                 >
-                  Cancelar
+                  {t('apiSettings.guideModal.cancel')}
                 </button>
                 <button
                   onClick={() => setShowGuide(false)}
                   className="w-full sm:flex-1 px-4 py-3 bg-[#1B4FD8] hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
                 >
-                  Confirmar Lectura
+                  {t('apiSettings.guideModal.confirm')}
                 </button>
               </div>
             </motion.div>
@@ -395,6 +396,7 @@ export default function ApiSettingsPage() {
 }
 
 function WebhookItem({ event, description, active = false }: any) {
+  const { t } = useLanguage();
   return (
     <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-xl hover:border-blue-500/30 transition-all cursor-pointer group">
       <div className="flex items-center justify-between mb-1">
@@ -403,7 +405,7 @@ function WebhookItem({ event, description, active = false }: any) {
           "px-2 py-0.5 rounded text-[8px] font-black uppercase",
           active ? "bg-emerald-500/10 text-emerald-500" : "bg-slate-500/10 text-[var(--text-secondary)]"
         )}>
-          {active ? 'Habilitado' : 'Deshabilitado'}
+          {active ? t('apiSettings.webhookActive') : t('apiSettings.webhookInactive')}
         </div>
       </div>
       <p className="text-[10px] text-[var(--text-secondary)] leading-tight">{description}</p>

@@ -133,6 +133,24 @@ export default function Sidebar() {
   const { plan } = usePlan();
   const { language, setLanguage, t } = useLanguage();
   const [profile, setProfile] = useState<any>(null);
+
+  const getSectionTitle = (section: any) => {
+    if (section.titleKey) return t(section.titleKey as any);
+    if (section.id === 'agentes') return language === 'en' ? 'AI Agents' : 'Agentes IA';
+    if (section.id === 'sistema') return language === 'en' ? 'System' : 'Sistema';
+    return section.title;
+  };
+
+  const getItemLabel = (item: any) => {
+    if (item.labelKey) return t(item.labelKey as any);
+    if (item.key === 'agents') return language === 'en' ? 'SF AI' : 'SF IA';
+    if (item.key === 'agent_reservations') return language === 'en' ? 'Schedule Agent' : 'Gestor de Agenda';
+    if (item.key === 'agent_marketing') return language === 'en' ? 'Marketing Agent' : 'Agente Marketing';
+    if (item.key === 'agent_accounting') return language === 'en' ? 'Accounting Agent' : 'Agente Contable';
+    if (item.key === 'agent_followup') return language === 'en' ? 'Follow-up Agent' : 'Agente Seguimiento';
+    if (item.key === 'api_settings') return 'API';
+    return item.label;
+  };
   
   // Estado para las secciones colapsables
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -239,7 +257,7 @@ export default function Sidebar() {
                   onClick={() => toggleSection(section.id)}
                 >
                   <h3 className="block lg:block md:hidden text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-[0.15em] transition-colors group-hover/title:text-blue-500">
-                    {section.titleKey ? t(section.titleKey as any) : section.title}
+                    {getSectionTitle(section)}
                   </h3>
                   <div className="block lg:block md:hidden text-slate-400/70 group-hover/title:text-blue-500 transition-colors">
                     {isExpanded ? <Minus size={10} /> : <Plus size={10} />}
@@ -255,7 +273,7 @@ export default function Sidebar() {
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                       className="overflow-hidden flex flex-col gap-1"
                     >
-                      {section.items.filter(i => !i.hidden).map((item) => {
+                      {section.items.filter((i: any) => !i.hidden).map((item) => {
                         const isActive = pathname === item.path;
                         const IconComponent = ICON_MAP[item.icon] || LayoutDashboard;
 
@@ -271,7 +289,7 @@ export default function Sidebar() {
                               "lg:justify-start lg:px-4",
                               isActive ? activeItemClass : inactiveItemClass
                             )}
-                            title={item.labelKey ? t(item.labelKey as any) : item.label}
+                            title={getItemLabel(item)}
                           >
                             <IconComponent className={cn(
                               "w-5 h-5 transition-transform group-hover:scale-110 shrink-0",
@@ -281,7 +299,7 @@ export default function Sidebar() {
                               "block md:hidden lg:block text-[13px] font-medium tracking-tight truncate",
                               isActive ? "text-blue-600 dark:text-blue-400" : "text-[#64748B] dark:text-[#94A3B8]"
                             )}>
-                              {item.labelKey ? t(item.labelKey as any) : item.label}
+                              {getItemLabel(item)}
                             </span>
                           </Link>
                         );
@@ -350,13 +368,14 @@ function SubscriptionModal({ isOpen, onClose }: { isOpen: boolean, onClose: () =
   const supabase = createClient()
   const { organization } = useOrganization()
   const [loading, setLoading] = useState(false)
+  const { language, t } = useLanguage()
 
   const BENEFITS = [
-    'Gestión ilimitada de clientes',
-    'Reservas y citas sin límites',
-    'Control financiero inteligente',
-    'IA 24/7 (WhatsApp + Email)',
-    'Estadísticas y métricas pro'
+    t('upgrade.features.crm'),
+    language === 'en' ? 'Unlimited bookings and appointments' : 'Reservas y citas sin límites',
+    language === 'en' ? 'Smart financial control' : 'Control financiero inteligente',
+    t('upgrade.features.ai'),
+    language === 'en' ? 'Pro statistics and metrics' : 'Estadísticas y métricas pro'
   ]
 
   const handleActivateTrial = async () => {
@@ -368,14 +387,14 @@ function SubscriptionModal({ isOpen, onClose }: { isOpen: boolean, onClose: () =
       })
       const data = await res.json()
       if (data.success) {
-        toast.success('Prueba de 90 días activada')
+        toast.success(language === 'en' ? '90-day trial activated' : 'Prueba de 90 días activada')
         onClose()
         window.location.reload()
       } else {
-        toast.error(data.error || 'Error al activar la prueba')
+        toast.error(data.error || (language === 'en' ? 'Error activating trial' : 'Error al activar la prueba'))
       }
     } catch (err) {
-      toast.error('Error de conexión')
+      toast.error(language === 'en' ? 'Connection error' : 'Error de conexión')
     } finally {
       setLoading(false)
     }
@@ -400,11 +419,11 @@ function SubscriptionModal({ isOpen, onClose }: { isOpen: boolean, onClose: () =
       if (data.url) {
         window.location.href = data.url
       } else {
-        toast.error(data.error || 'Error al procesar el pago')
+        toast.error(data.error || (language === 'en' ? 'Error processing payment' : 'Error al procesar el pago'))
       }
     } catch (error) {
       console.error(error)
-      toast.error('Error de conexión')
+      toast.error(language === 'en' ? 'Connection error' : 'Error de conexión')
     } finally {
       setLoading(false)
     }
@@ -430,7 +449,9 @@ function SubscriptionModal({ isOpen, onClose }: { isOpen: boolean, onClose: () =
             className="relative w-full max-w-md bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90dvh]"
           >
             <div className="px-5 py-4 md:px-6 md:py-5 border-b border-slate-100 dark:border-[#1E3A5F] flex items-center justify-between">
-              <h2 className="text-[16px] md:text-[17px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight">Activar Plan Pro</h2>
+              <h2 className="text-[16px] md:text-[17px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight">
+                {language === 'en' ? 'Activate Pro Plan' : 'Activar Plan Pro'}
+              </h2>
               <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-[#1E3A5F] rounded-full transition-colors text-slate-400">
                 <X className="w-5 h-5" />
               </button>
@@ -438,21 +459,29 @@ function SubscriptionModal({ isOpen, onClose }: { isOpen: boolean, onClose: () =
 
             <div className="p-5 md:p-6 space-y-5 md:space-y-6 overflow-y-auto">
               <div className="space-y-2 md:space-y-3">
-                <label className="text-[10px] md:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">Plan Seleccionado</label>
+                <label className="text-[10px] md:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
+                  {language === 'en' ? 'Selected Plan' : 'Plan Seleccionado'}
+                </label>
                 <div className="bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-xl p-4 md:p-5 flex items-center justify-between group transition-all duration-300 hover:border-slate-300 dark:hover:border-white/20">
                   <div className="space-y-0.5 md:space-y-1">
                     <p className="text-[14px] md:text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]">SF Gestor Empresarial</p>
-                    <p className="text-[11px] md:text-[12px] text-slate-500 dark:text-slate-400">Gestión completa e IA avanzada</p>
+                    <p className="text-[11px] md:text-[12px] text-slate-500 dark:text-slate-400">
+                      {language === 'en' ? 'Full management & advanced AI' : 'Gestión completa e IA avanzada'}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="text-[16px] md:text-[18px] font-black text-[#0F172A] dark:text-[#F1F5F9]">29€</p>
-                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-tighter">/ Mes</p>
+                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                      {language === 'en' ? '/ Month' : '/ Mes'}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-2 md:space-y-3">
-                <label className="text-[10px] md:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">Beneficios Incluidos</label>
+                <label className="text-[10px] md:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
+                  {language === 'en' ? 'Included Benefits' : 'Beneficios Incluidos'}
+                </label>
                 <div className="space-y-1.5 md:space-y-2">
                   {BENEFITS.map((benefit, i) => (
                     <div key={i} className="flex items-center gap-3 p-2.5 md:p-3 bg-slate-50 dark:bg-[#111F3A]/50 border border-slate-100 dark:border-[#1E3A5F]/50 rounded-lg md:rounded-xl group hover:bg-slate-100 dark:hover:bg-[#111F3A] transition-colors">
@@ -474,7 +503,7 @@ function SubscriptionModal({ isOpen, onClose }: { isOpen: boolean, onClose: () =
                     disabled={loading}
                     className="flex-1 py-2.5 md:py-3 bg-[#10B981] hover:bg-[#059669] text-white text-[13px] md:text-sm font-bold rounded-lg md:rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_15px_rgba(16,185,129,0.2)] disabled:opacity-50"
                   >
-                    90 DÍAS GRATIS
+                    {language === 'en' ? '90 DAYS FREE' : '90 DÍAS GRATIS'}
                   </button>
                 )}
                 <button
@@ -482,14 +511,14 @@ function SubscriptionModal({ isOpen, onClose }: { isOpen: boolean, onClose: () =
                   disabled={loading}
                   className="flex-1 py-2.5 md:py-3 bg-[#1B4FD8] hover:bg-blue-700 text-white text-[13px] md:text-sm font-bold rounded-lg md:rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 disabled:opacity-50"
                 >
-                  {loading ? 'Cargando...' : 'Contratar Plan'}
+                  {loading ? (language === 'en' ? 'Loading...' : 'Cargando...') : (language === 'en' ? 'Subscribe Plan' : 'Contratar Plan')}
                 </button>
               </div>
               <button
                 onClick={onClose}
                 className="w-full text-center text-xs text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 mt-4 transition-colors uppercase tracking-widest font-bold"
               >
-                CANCELAR
+                {language === 'en' ? 'CANCEL' : 'CANCELAR'}
               </button>
             </div>
           </motion.div>

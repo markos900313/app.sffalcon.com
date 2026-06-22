@@ -109,7 +109,7 @@ export default function ConversationList({
                     : "text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-[#F1F5F9] hover:bg-slate-50 dark:hover:bg-[#162040] rounded-lg dark:rounded-full"
                 )}
               >
-                {t(tab.labelKey)}
+                {t(tab.labelKey as any)}
               </button>
             );
           })}
@@ -231,7 +231,7 @@ function ConversationListContent({
           .in('email', emailsToResolve);
 
         if (clients) {
-          const mapping = clients.reduce((acc, curr) => ({
+          const mapping = clients.reduce((acc: Record<string, string>, curr: { email: string; name: string }) => ({
             ...acc,
             [curr.email.toLowerCase()]: curr.name
           }), {});

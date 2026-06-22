@@ -151,7 +151,7 @@ export default function AnalyticsPage() {
 
   const finalStats = useMemo(() => {
     if (isDemo) {
-      const labelCitas = getModuleLabel(modules, 'appointments', 'CITAS');
+      const labelCitas = (getModuleLabel as any)(modules, 'appointments', 'CITAS');
       return [
         { label: t('analytics.kpis.registeredContacts' as any), value: 124, icon: Users, color: 'text-blue-500', cat: 'clientes' },
         { label: t('analytics.kpis.newContactsMonth' as any), value: 12, icon: TrendingUp, color: 'text-emerald-500', cat: 'stats' },

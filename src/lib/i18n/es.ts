@@ -1195,6 +1195,7 @@ export const es = {
     attachDocument: "Adjuntar documento",
     send: "Enviar",
     aiPaused: "La IA está pausada — responde tú",
+    aiActive: "La IA está activa — gestionando respuestas",
     markResolved: "Marcar resuelto",
     resolved: "Resuelto",
   },
@@ -1290,6 +1291,1188 @@ export const es = {
       saved: "Configuración de la web guardada",
       saveError: "Error al guardar",
       permissionDenied: "Permiso denegado (¿Has ejecutado el SQL?)",
+    }
+  },
+  auth: {
+    errorFieldsRequired: "Por favor, rellena todos los campos",
+    errorIncorrectPassword: "Contraseña incorrecta. Inténtalo de nuevo.",
+    errorEmailNotFound: "No existe ninguna cuenta con ese email.",
+    errorEmailNotConfirmed: "Confirma tu email antes de entrar. Revisa tu bandeja de entrada.",
+    errorLoginFailed: "Error al iniciar sesión. Inténtalo de nuevo.",
+    headline: {
+      part1: "El asistente",
+      accent1: "de reservas y citas que",
+      part2: "nunca pudiste",
+      accent2: "tener"
+    },
+    benefits: {
+      benefit1: "Mientras tú trabajas, él atiende a tus clientes",
+      benefit2: "Tu cliente escribe — a cualquier hora",
+      benefit3: "Tu asistente responde — con tu tono",
+      benefit4: "Tú lo encuentras todo listo"
+    },
+    quote: "\"Por fin puedo desconectar sin miedo a perder un cliente.\"",
+    badges: {
+      noCard: "Sin tarjeta",
+      readyInFive: "Listo en 5 min",
+      madeInSpain: "Hecho en España"
+    },
+    goToMainWeb: "Ir a la web principal",
+    welcomeTitle: "Bienvenido de nuevo",
+    welcomeSubtitle: "Introduce tus credenciales para acceder a la consola.",
+    emailLabel: "Correo Electrónico",
+    passwordLabel: "Contraseña",
+    loginButton: "ACCEDER AL PANEL",
+    forgotPassword: "¿He olvidado mi clave?",
+    noAccount: "¿Aún no tienes cuenta?",
+    registerNow: "Comienza gratis ahora",
+    legal: "LEGAL",
+    privacy: "PRIVACIDAD",
+    
+    // Register
+    errorPasswordMismatch: "Las contraseñas no coinciden",
+    errorNameExists: "Este nombre de usuario ya existe",
+    errorEmailExists: "Cuenta existente con este correo",
+    errorBusinessExists: "Ya hay un negocio registrado con este nombre",
+    errorUserCreationFailed: "No se pudo crear el usuario",
+    errorBusinessConfigFailed: "Error al configurar los datos del negocio",
+    successAccountCreated: "¡Cuenta creada correctamente!",
+    successCheckEmail: "¡Casi listo! Revisa tu email para activar tu cuenta.",
+    errorRegistrationGeneric: "Ha ocurrido un error en el registro",
+    checkEmailTitle: "¡Revisa tu correo!",
+    activationLinkSent: "Hemos enviado un enlace de activación a:",
+    goToLogin: "IR AL INICIO DE SESIÓN",
+    createAccountTitle: "Crea tu cuenta",
+    createAccountSubtitle: "Empieza hoy mismo tu SF inteligente",
+    stepChoosePlan: "1. Elige tu plan",
+    planCardSubtitle: "90 días GRATIS · Sin tarjeta · Cancela cuando quieras",
+    allIncluded: "Todo incluido",
+    planFeatures: {
+      feature1: "Clientes y agenda ilimitados",
+      feature2: "Comunicaciones WhatsApp + Email",
+      feature3: "IA responde por ti 24/7",
+      feature4: "Finanzas y facturas",
+      feature5: "Productos e inventario",
+      feature6: "Estadísticas y métricas",
+      feature7: "Equipo y fichajes",
+      feature8: "Gestor IA en el panel"
+    },
+    btnStartTrial: "EMPEZAR GRATIS 90 DÍAS",
+    noCardRequired: "No se requiere tarjeta de crédito",
+    stepYourData: "2. Tus datos",
+    fullNameLabel: "Nombre Completo",
+    fullNamePlaceholder: "Tu nombre y apellidos",
+    personalEmailLabel: "Email Personal",
+    personalEmailPlaceholder: "tu@email.com",
+    businessNameLabel: "Nombre del Negocio (Marca)",
+    businessNamePlaceholder: "Ej: Parque Infantil El Mundo",
+    businessNameHint: "Este nombre aparecerá en tus facturas y comunicaciones.",
+    whatsappLabel: "Teléfono (WhatsApp)",
+    whatsappHint: "Opcional. Tu número de WhatsApp para conectar con clientes.",
+    passwordMinPlaceholder: "Mínimo 6 caracteres",
+    confirmPasswordLabel: "Confirma tu contraseña",
+    confirmPasswordPlaceholder: "Repite la contraseña",
+    btnFinishRegistration: "FINALIZAR REGISTRO Y EMPEZAR",
+    alreadyHaveAccount: "¿Ya tienes cuenta?",
+    loginNow: "Inicia sesión ahora",
+    
+    // Reset password
+    errorInvalidEmail: "Introduce un correo electrónico válido",
+    errorSendingResetLink: "Error al enviar el enlace",
+    errorConnectionFailed: "Error de conexión. Inténtalo de nuevo.",
+    successResetLinkSent: "¡Enlace enviado!",
+    sentTitle: "¡Enviado!",
+    instructionsSentTo: "Instrucciones enviadas a",
+    backToHome: "Volver al inicio",
+    recoverAccessTitle: "Recupera tu acceso",
+    recoverAccessSubtitle: "Recibirás un enlace de recuperación en tu correo.",
+    sendLinkButton: "ENVIAR ENLACE",
+    closeAndBack: "Cerrar y volver",
+    
+    // Update password
+    errorPasswordMinLength: "La contraseña debe tener al menos 6 caracteres",
+    errorPasswordUpdate: "Error al actualizar la contraseña: ",
+    successPasswordUpdated: "Contraseña actualizada correctamente. Inicia sesión con tu nueva contraseña.",
+    errorUnexpected: "Error inesperado: ",
+    verifyingAccess: "Verificando acceso...",
+    invalidSessionTitle: "Sesión Inválida",
+    invalidSessionSubtitle: "Tu enlace de recuperación ha expirado o no es válido para este navegador.",
+    requestNewLink: "PEDIR NUEVO ENLACE",
+    updatedTitle: "¡Actualizada!",
+    redirectingToLogin: "Redirigiendo a la pantalla de acceso...",
+    newPasswordTitle: "Nueva Contraseña",
+    newPasswordSubtitle: "Establece tu nueva contraseña de acceso.",
+    newPasswordLabel: "Nueva Contraseña",
+    saveAndEnterButton: "GUARDAR Y ENTRAR"
+  },
+  employeePanel: {
+    loading: "Cargando Panel...",
+    menu: {
+      fichaje: "Mi Fichaje",
+      inicio: "Inicio",
+      turnos: "Mis Turnos",
+      vacaciones: "Mis Vacaciones",
+      section: "PANEL"
+    },
+    topbar: {
+      panel: "Panel",
+      notifications: "Notificaciones",
+      newCount: "{count} nuevas",
+      noNotifications: "Sin avisos",
+      clearNotifications: "Limpiar notificaciones",
+      inicio: "Inicio",
+      logout: "Cerrar Sesión"
+    },
+    dashboard: {
+      controlPanel: "Panel de Control",
+      welcome: {
+        morning: "Buenos días",
+        afternoon: "Buenas tardes",
+        evening: "Buenas noches",
+        at: "en"
+      },
+      status: {
+        inShift: "En Turno",
+        outOfService: "Fuera de Servicio",
+        noActiveShift: "Sin turno activo",
+        active: "Activo"
+      },
+      kpi: {
+        timeToday: "Tiempo Hoy",
+        realTime: "Actualizado en tiempo real",
+        nextShift: "Próximo Turno",
+        noShifts: "Sin turnos",
+        isToday: "Es hoy",
+        status: "Estatus",
+        staff: "SF Staff"
+      },
+      history: {
+        title: "Historial de Actividad",
+        viewAll: "Ver todo",
+        date: "Fecha",
+        event: "Evento",
+        time: "Hora",
+        channel: "Canal",
+        clockIn: "Entrada",
+        clockOut: "Salida",
+        noRecords: "No hay registros recientes"
+      }
+    },
+    fichaje: {
+      title: "Registro de Jornada",
+      clockIn: "Entrada",
+      clockOut: "Salida",
+      obtainingGps: "Obteniendo GPS...",
+      validating: "Validando...",
+      verified: "Verificado",
+      activity: "Actividad",
+      hoursWorked: "Horas Trabajadas",
+      last14Days: "Últimos 14 días",
+      date: "Fecha",
+      es: "E/S",
+      total: "Total",
+      totalPeriod: "Total Periodo",
+      noActivityToday: "Sin actividad hoy",
+      exportPdf: "Exportar PDF",
+      exportCsv: "Exportar CSV",
+      inProgress: "En turno",
+      geo: {
+        correct: "CORRECTO",
+        incorrect: "INCORRECTO"
+      },
+      tabs: {
+        today: "HOY",
+        week: "SEMANA",
+        month: "MES"
+      },
+      toast: {
+        geoNotSupported: "Tu navegador no soporta geolocalización.",
+        outOfArea: "Fuera del área de trabajo. Estás a {distance}m. Radio: {radius}m",
+        clockInSuccess: "Entrada registrada",
+        clockOutSuccess: "Salida registrada",
+        locationError: "Error al obtener ubicación: ",
+        errorPrefix: "Error: "
+      },
+      pdf: {
+        title: "MI INFORME DE FICHAJES",
+        employee: "Empleado: {name}",
+        period: "Periodo: Últimos 14 días",
+        exportDate: "Fecha exportación: {date}",
+        hoursWorked: "HORAS TRABAJADAS",
+        detailedActivity: "ACTIVIDAD DETALLADA",
+        headers: {
+          date: "FECHA",
+          clockIn: "ENTRADA",
+          clockOut: "SALIDA",
+          totalHours: "TOTAL HORAS",
+          time: "HORA",
+          action: "ACCIÓN",
+          channel: "CANAL",
+          location: "UBICACIÓN",
+          status: "ESTADO"
+        },
+        generatedBy: "Documento generado por SF · app.sffalcon.com",
+        page: "Página ",
+        of: " de "
+      }
+    },
+    turnos: {
+      title: "Planificación de Turnos",
+      subtitle: "Consulta tus horarios asignados",
+      week: "Semana",
+      month: "Mes",
+      free: "Libre",
+      noticeTitle: "Aviso de Gestión",
+      noticeDesc: "Los turnos son solo de lectura. Si necesitas realizar un cambio o notas algún error en tu planificación, por favor contacta directamente con tu responsable o administrador.",
+      types: {
+        morning: "Mañana",
+        afternoon: "Tarde",
+        split: "Partido",
+        finde: "Finde"
+      }
+    },
+    vacaciones: {
+      toast: {
+        cancelError: "Error al cancelar",
+        cancelSuccess: "Solicitud cancelada",
+        sendSuccess: "Solicitud enviada correctamente",
+        sendError: "Error al enviar solicitud: "
+      },
+      notif: {
+        title: "🌴 Solicitud de vacaciones",
+        message: "{name} ha solicitado vacaciones del {start} al {end}. Motivo: {reason}."
+      },
+      unspecified: "Sin especificar",
+      states: {
+        approved: "Aprobada",
+        rejected: "Rechazada",
+        cancelled: "Cancelada",
+        pending: "Pendiente"
+      },
+      title: "Mis Vacaciones",
+      subtitle: "Gestiona tus periodos de descanso y solicitudes",
+      requestButton: "Solicitar Vacaciones",
+      table: {
+        period: "Periodo",
+        days: "Días",
+        reason: "Motivo",
+        status: "Estatus",
+        noReason: "Sin motivo especificado"
+      },
+      cancel: "Cancelar",
+      noRequests: {
+        title: "Sin solicitudes",
+        desc: "Todavía no has solicitado ningún periodo de vacaciones."
+      },
+      modal: {
+        title: "Nueva Solicitud",
+        start: "Inicio",
+        end: "Fin",
+        reason: "Motivo",
+        placeholder: "Ej: Viaje familiar...",
+        submit: "Enviar Solicitud",
+        sending: "Enviando..."
+      }
+    }
+  },
+  aiAgents: {
+    toast: {
+      loadLogsError: "Error cargando logs",
+      clearHistory: "Limpiar Historial",
+      recentActivityNone: "No hay actividad reciente registrada."
+    },
+    dashboard: {
+      title: "Agentes Inteligentes",
+      subtitle: "Tus asistentes especializados trabajando 24/7 para tu proyecto"
+    },
+    table: {
+      time: "Hora",
+      agent: "Agente",
+      action: "Acción",
+      detail: "Detalle",
+      clearHistory: "Limpiar Historial",
+      title: "Historial de Ejecución",
+      noActivity: "No hay actividad reciente registrada."
+    },
+    cards: {
+      lastRun: "Última ejecución",
+      never: "Nunca",
+      configure: "Configurar",
+      runNow: "Exec. ahora",
+      upcoming: "Disponible próximamente",
+      devModule: "Módulo en desarrollo",
+      logActionStart: "Inicio",
+      logActionFinished: "Finalizado",
+      logActionProcessing: "Procesando",
+      logActionCompleted: "Completado",
+      logActionError: "Error",
+      logActionCriticalError: "Error Crítico",
+      logActionConnection: "Conexión",
+      logActionSyncing: "Sincronizando",
+      logActionSuggestion: "Sugerencia",
+      logActionAlert: "Alerta",
+      logActionQualification: "Cualificación de Contacto",
+      sync: {
+        title: "Recepcionista 24/7",
+        desc: "Gestiona tus canales de entrada (WhatsApp, Instagram, Email) para que nunca pierdas una consulta o reserva.",
+        configOpen: "Configuración de Sync abierta",
+        toastSuccess: "Sincronización finalizada con éxito",
+        modalTitle: "Estado de Sincronización",
+        inProgress: "En curso",
+        currentStatusSyncing: "Actualizando...",
+        currentStatusSynced: "Sincronizado",
+        currentStatusPending: "Pendiente",
+        globalProgress: "Progreso Global",
+        logStart: "Iniciando sincronización multicanal...",
+        logFetching: "Obteniendo datos de {name}...",
+        logCompleted: "Todos los canales sincronizados correctamente."
+      },
+      leads: {
+        title: "Dinamizador de eventos",
+        desc: "Atrae y fideliza a tu público objetivo a través de campañas inteligentes y segmentación avanzada.",
+        configOpen: "Configuración de Captación abierta",
+        toastNoMessages: "No hay mensajes pendientes para analizar.",
+        toastFinished: "Agente de Captación finalizado.",
+        toastError: "Error al ejecutar Agente de Captación",
+        logStart: "Analizando comunicaciones...",
+        logFinished: "Sin mensajes pendientes.",
+        logProcessing: "Detectadas {count} conversaciones.",
+        logQualifying: "{name}: {score}/10 — {reason}",
+        logAlert: "🔥 CONTACTO PRIORITARIO: {name} — Marcar como urgente",
+        logError: "Fallo al parsear respuesta para {name}",
+        logCompleted: "Análisis de captación finalizado con éxito.",
+        logCriticalError: "Fallo en la ejecución del agente."
+      },
+      followup: {
+        title: "Gestor Empresarial",
+        desc: "Automatiza el seguimiento de preventa y posventa, asegurando que cada cliente reciba la atención que merece.",
+        configOpen: "Configuración de Seguimiento abierta",
+        toastNoClients: "No hay clientes inactivos para seguimiento.",
+        toastFinished: "Agente de Seguimiento finalizado.",
+        toastContactedSuccess: "Cliente marcado como contactado",
+        toastContactedError: "Error al actualizar cliente",
+        logStart: "Buscando clientes inactivos...",
+        logFinished: "Sin clientes inactivos destacados.",
+        logProcessing: "Detectados {count} clientes sin contacto.",
+        logSuggestion: "Mensaje generado para {name} ({days} días)",
+        logError: "Fallo en la ejecución del agente.",
+        suggestionsTitle: "Sugerencias del Agente",
+        daysNoContact: "{days} días sin contacto",
+        copyTooltip: "Copiar mensaje",
+        toastCopySuccess: "Mensaje copiado",
+        markContactedTooltip: "Marcar como contactado"
+      },
+      accounting: {
+        title: "Agente de Fidelización",
+        desc: "Analiza la recurrencia de tus clientes y sugiere campañas de fidelización, bonos y promociones para aumentar el valor de vida del cliente.",
+        configOpen: "Configuración de Contable abierta",
+        toastFinished: "Agente Contable finalizado.",
+        toastCopySuccess: "Informe copiado",
+        toastDownloadSuccess: "Descarga de PDF iniciada (Demo)",
+        logStart: "Analizando datos financieros y normativa fiscal...",
+        logFinished: "Resumen contable generado con éxito.",
+        logError: "Fallo al generar informe contable.",
+        monthlyReportTitle: "Informe Mensual de Gestoría",
+        copyTooltip: "Copiar informe",
+        downloadTooltip: "Descargar PDF"
+      },
+      voice: {
+        title: "Agente de Voz",
+        desc: "Atiende llamadas de clientes automáticamente, responde dudas y gestiona reservas mediante voz con inteligencia artificial humana."
+      }
+    },
+    accounting: {
+      toast: {
+        confirmDelete: "¿Estás seguro de que deseas eliminar este registro?",
+        deleteSuccess: "Registro eliminado",
+        deleteError: "Error al eliminar el registro",
+        selectInvoice: "Por favor, selecciona una factura primero",
+        emptyResponse: "Respuesta vacía del servidor de IA",
+        scanSuccess: "Factura analizada correctamente",
+        invalidFormat: "La IA no devolvió un formato válido. Prueba con otra imagen.",
+        saveSuccess: "Gasto registrado en contabilidad",
+        saveError: "Error al guardar el gasto",
+        notAuthenticated: "Usuario no autenticado"
+      },
+      title: "Agente Contable",
+      subtitle: "Auditoría Contable IA",
+      processInvoices: "Procesar Facturas IA",
+      statusLabel: "Estado:",
+      operative: "Operativo",
+      visionActive: "Visión Artificial Activa",
+      kpis: {
+        foodCost: "FOOD COST REAL",
+        operatingExpenses: "GASTOS OPERATIVOS",
+        savings: "AHORRO IA",
+        trendOptimal: "Optimal",
+        trendAlert: "Alert",
+        trendStable: "Stable"
+      },
+      ecosystemTitle: "Ecosistema de Facturación",
+      validatedLabel: "Registros Validados IA",
+      filterPlaceholder: "FILTRAR...",
+      table: {
+        concept: "Concepto",
+        amount: "Importe",
+        actions: "Acciones",
+        verified: "IA Verified",
+        noRecords: "Sin registros fiscales en el radar"
+      },
+      insightsTitle: "Insights AuditorIA",
+      insights: {
+        stockOptTitle: "Stock Optimizable",
+        stockOptMessage: "Detección de mermas inusuales en suministros. Reducción del 5% posible.",
+        savingTitle: "Ahorro Proveedor",
+        savingMessage: "Alternativa detectada para suministros con un 12% de ahorro."
+      },
+      accountingHealth: "Salud Contable",
+      optimalHealth: "A+ Optimal",
+      predictionTitle: "Predicción Q1",
+      projectedThisMonth: "+4.2% proyectado para este mes",
+      viewFullDiagnostic: "Ver Diagnóstico Completo",
+      ocrModal: {
+        title: "Visión Artificial",
+        ocrSync: "Sincronización via OCR",
+        uploadInvoice: "Subir Factura",
+        uploadFormats: "PDF, JPG o Captura directa",
+        largeFileError: "El archivo es demasiado grande (máx 2MB)",
+        diagnosticFinished: "Diagnóstico IA Finalizado",
+        confidence: "Confidence 98%",
+        concept: "Concepto",
+        amount: "Importe",
+        date: "Fecha Emitida",
+        cancel: "Cancelar",
+        validateSave: "Validar & Guardar",
+        scanning: "Escaneo",
+        startScan: "Iniciar Escaneo IA"
+      },
+      predictiveModal: {
+        diagnosticTitle: "Diagnóstico Predictivo",
+        diagnosticDesc: "Según el análisis de los últimos {count} movimientos, el sistema IA ha proyectado la siguiente ruta fiscal para tu negocio.",
+        logisticsTitle: "Insumos y Logística",
+        logisticsDesc: "Optimización detectada en cadena de frío. Ahorro latente de 2.1%.",
+        energyTitle: "Energía",
+        energyDesc: "Potencial de ahorro: 140€/mes.",
+        syncStrategy: "Sincronizar Estrategia Fiscal"
+      }
+    },
+    followup: {
+      toast: {
+        loadError: "Error al cargar datos",
+        savePreferenceSuccess: "Preferencia actualizada",
+        savePreferenceError: "Error al guardar preferencia"
+      },
+      title: "Seguimiento IA",
+      subtitle: "Inteligencia de Retención",
+      autonomous: "Autónomo",
+      autonomousActive: "IA Autónoma Activa",
+      refreshTooltip: "Actualizar Datos",
+      kpis: {
+        reviews: "Reseñas",
+        recovered: "Recuperados",
+        savings: "Ahorro"
+      },
+      strategiesTitle: "Estrategias de Fidelización",
+      strategies: {
+        reviewsTitle: "Solicitud de Reseñas",
+        reviewsDesc: "Envío inteligente de feedback tras experiencias positivas.",
+        birthdayTitle: "Regalo de Cumpleaños",
+        birthdayDesc: "Automatización de cortesías 5 días antes de la fecha.",
+        winbackTitle: "IA Win-Back",
+        winbackDesc: "Protocolo de rescate para contactos inactivos > 45 días."
+      },
+      retentionReadyTitle: "Optimización de Retención Lista",
+      retentionReadyDesc: "IA funcionando al 100% de eficiencia operativa",
+      historyTitle: "Historial de Interacciones Reales",
+      historySync: "Live Sync",
+      anonymous: "Anónimo",
+      noActivityTitle: "Sin Actividad Hoy",
+      noActivityDesc: "Esperando primeras interacciones del día",
+      insights: {
+        title: "Insights IA",
+        message: '"Hemos detectado que el 65% de tus clientes recurrentes prefieren WhatsApp para feedback. Recomiendo priorizar este canal para campañas de Win-Back."',
+        version: "IA Alpha-One v4.2"
+      },
+      fidelizationChannels: "Canales de Fidelización",
+      channels: {
+        email: "Email Marketing Pro",
+        whatsapp: "WhatsApp Automation"
+      },
+      quarterlyRetention: "Retención Trimestral",
+      retentionGrowth: "Tu tasa de retorno ha experimentado un crecimiento real del +18.4%.",
+      scores: {
+        loyalty: "Loyalty Score",
+        recovery: "Recuperación"
+      }
+    },
+    marketing: {
+      toast: {
+        loadError: "Error al cargar datos",
+        saveCampaignSuccess: "Campaña programada por la IA",
+        saveCampaignError: "Error al crear campaña",
+        vipBlastOrchestrating: "Orquestando ráfaga VIP...",
+        vipBlastSuccess: "Blast ejecutado con éxito."
+      },
+      title: "Agente Marketing",
+      subtitle: "Estrategia Marketing IA",
+      createCampaign: "Crear Campaña IA",
+      viewPlan: "Ver Plan",
+      kpis: {
+        reach: "IMPACTO GLOBAL",
+        conversion: "CONVERSIÓN",
+        leads: "LEADS",
+        engagement: "ENGAGEMENT"
+      },
+      campaignsTitle: "Campañas",
+      labTitle: "Laboratorio IA",
+      vipOpportunity: "Oportunidad VIP",
+      vipDesc: "Lanzar un Smart-Blast ahora a 124 VIPs.",
+      vipExecuteBtn: "Ejecutar Blast IA",
+      labModal: {
+        title: "Laboratorio:",
+        insight: "Insight:",
+        scanning: "Analizando..."
+      },
+      campaignModal: {
+        title: "Nueva Campaña IA",
+        namePlaceholder: "Nombre",
+        submit: "Lanzar Campaña IA"
+      },
+      tools: {
+        writing: "Redacción",
+        audience: "Audiencia",
+        chat: "Chat",
+        reviews: "Reviews",
+        writingPro: "Pro",
+        audienceSmart: "Smart",
+        chatBot: "Bot",
+        reviewsRating: "4.8"
+      },
+      creativeLab: {
+        lowStockAlert: "Alerta: Solo quedan {quantity} unidades de {itemName}.",
+        stableStock: "Inventario estable.",
+        suggestion1: "Últimas unidades de {itemName}: Descubre ahora.",
+        suggestion2: "Miércoles de {itemName} en {orgName}",
+        suggestion3: "No te quedes sin probar nuestro {itemName}",
+        segmentationFinished: "Segmentación terminada.",
+        segmentVIP: "VIP",
+        segmentInactives: "Inactivos",
+        segmentTotal: "Total",
+        segmentVIPDesc: "Más de 300€",
+        segmentInactivesDesc: "30d sin visita",
+        segmentTotalDesc: "Contactos",
+        genericCompleted: "Análisis de {tool} completado."
+      }
+    },
+    reservations: {
+      toast: {
+        loadError: "Error al cargar datos del agente",
+        statusUpdated: {
+          active: "Agente Activado",
+          paused: "Agente Pausado"
+        },
+        statusUpdateError: "Error al actualizar estado",
+        configSaved: "Configuración guardada correctamente",
+        configSaveError: "Error al guardar"
+      },
+      title: "Gestor de Agenda",
+      subtitle: "Gestor de Agenda IA",
+      btnActive: "Activar Gestor de Agenda",
+      btnPause: "Pausar Operaciones",
+      statusLabel: "Estado:",
+      statusActive: "Disponible",
+      statusPaused: "En Pausa",
+      descActive: "En funcionamiento",
+      descPaused: "Sistema Inactivo",
+      kpis: {
+        today: "AGENDA HOY",
+        serviceLevel: "NIVEL DE SERVICIO",
+        hoursSaved: "HORAS AHORRADAS"
+      },
+      operationsLog: "Registro de Operaciones",
+      operationsLogDesc: "Actividad en tiempo real sincronizada con Supabase",
+      anonymous: "Sistema",
+      finished: "Finalizado",
+      noActivity: "Sin actividad reciente",
+      configTitle: "Configuración",
+      configDesc: "Entrenamiento y Comportamiento",
+      greetingLabel: "Saludo Personalizado",
+      greetingAILabeled: "IA Entrenada",
+      autoConfirm: "Auto-confirmación",
+      detectConflicts: "Detección de Conflictos",
+      profileAITitle: "Perfil IA",
+      tones: {
+        profesional: "PROFESIONAL",
+        cercano: "CERCANO",
+        informal: "INFORMAL"
+      },
+      btnSync: "Sincronizar IA",
+      warningReset: "El cambio de configuración reinicia la memoria de contexto de las conversaciones activas."
+    }
+  },
+  modals: {
+    onboarding: {
+      close: "Cerrar",
+      welcomeTitle: "¡Bienvenido a SF Gestor Empresarial!",
+      welcomeDesc: "Configura tu asistente empresarial con IA para que empiece a trabajar por ti hoy mismo.",
+      profileTitle: "Cuéntanos sobre ti",
+      profileDesc: "Queremos saber con quién estamos trabajando",
+      profilePhoto: "Foto de perfil",
+      fullName: "Nombre Completo",
+      cargo: "Cargo",
+      personalPhone: "Teléfono Personal",
+      businessTitle: "Tu Negocio",
+      businessDesc: "Configura la identidad corporativa de tu empresa",
+      businessName: "Nombre del Negocio",
+      autonomoCheckbox: "Soy autónomo (usar mi nombre)",
+      country: "País",
+      currency: "Moneda",
+      activity: "Actividad / Giro del Negocio",
+      businessPhone: "Teléfono del Negocio",
+      businessEmail: "Email Corporativo",
+      businessLogo: "Logo del Negocio",
+      logoSizeError: "El archivo es demasiado grande (máx 2MB)",
+      scheduleTitle: "¿Cuándo atiendes?",
+      scheduleDesc: "La IA responderá automáticamente fuera de este horario",
+      workingDays: "Días laborables",
+      startTime: "Hora Inicio",
+      endTime: "Hora Fin",
+      aiActiveNotice: "Tu IA estará activa fuera de: {days} {start} a {end}",
+      personalityTitle: "Personalidad de la IA",
+      personalityDesc: "Define cómo se comunicará SF con tu audiencia",
+      personalityFriendly: "Cercana y amigable",
+      personalityFriendlyExample: "¡Hola! Gracias por escribirnos...",
+      personalityProfessional: "Formal y profesional",
+      personalityProfessionalExample: "Buenos días. En respuesta a su consulta...",
+      businessDescriptionLabel: "Describe tu negocio en 2-3 líneas",
+      businessDescriptionPlaceholder: "Ej: Somos una clínica dental en Madrid especializada en ortodoncia...",
+      integrationsTitle: "Canales e Integraciones",
+      integrationsDesc: "Conecta tus canales para que la IA pueda responder",
+      waOptionTitle: "3 formas de conectar",
+      waOptionA: "Opción A — Mensaje de ausencia",
+      waOptionADesc: "Pon nuestro número centralita en tu mensaje de ausencia de WhatsApp. Tus clientes serán atendidos automáticamente por la IA.",
+      waCopyBtn: "Copiar",
+      waCopiedToast: "Enlace copiado",
+      waOptionB: "Opción B — Tu número en Meta",
+      waOptionBDesc: "Registra tu número personal en Meta Business API. La IA responderá desde él respetando siempre la ventana de 24 horas desde el último mensaje del cliente.",
+      waOptionC: "Opción C — Número dedicado (recomendado)",
+      waOptionCDesc: "Contrata una SIM nueva exclusiva para el negocio y regístrala en Meta Business API. Máxima profesionalidad, sin mezclar con tu número personal.",
+      waIntegrationHelp: "Podrás configurarlo desde Ajustes → Integraciones una vez completes la configuración.",
+      waSupportHelp: "¿Necesitas ayuda? Contacta con soporte: {phone}",
+      emailTitle: "📧 Tu Email en SF",
+      emailDesc: "Correo Personalizado",
+      emailExplanation: "Elige un nombre de usuario y te asignamos una dirección de correo personalizada en @sffalcon.com. Los emails que recibas ahí llegarán directamente a tu panel y la IA los gestionará.",
+      emailGuideTitle: "Guía rápida: Reenvío Gmail",
+      emailGuideDesc: "Para gestionar tus correos actuales con IA: \n1. En Gmail ve a Configuración > Reenvío y correo POP/IMAP. \n2. Haz clic en \"Añadir una dirección de reenvío\" y pega tu nueva dirección de sffalcon.com. \n3. Una vez confirmado, todos tus correos llegarán directamente a este panel.",
+      emailUsernameLabel: "Tu nombre de usuario",
+      emailUsernamePlaceholder: "tunegocio",
+      consentTitle: "Consentimiento y Acceso",
+      consentDesc: "Último paso antes de activar tu SF",
+      consentExplanation: "Para ofrecerte el servicio de respuesta automática por WhatsApp e Email, SF necesita acceso a los mensajes que recibes en los canales que configures. Al continuar autorizas a SF a leer, procesar y responder mensajes en tu nombre según las condiciones de uso. Eres responsable de informar a tus contactos que pueden estar interactuando con un sistema automatizado.",
+      consentCheckbox: "Acepto y autorizo el acceso a mis comunicaciones",
+      planActive: "Plan Activo",
+      planSelect: "Elegir Plan",
+      trialNotice: "💳 No se requiere tarjeta de crédito para el trial",
+      prevButton: "Anterior",
+      nextButton: "Siguiente",
+      completeButton: "COMPLETAR CONFIGURACIÓN",
+      completeButtonShort: "COMPLETAR",
+      toastCompleteSuccess: "¡Configuración completada! Redirigiendo...",
+      toastCompleteError: "Error al completar la configuración: ",
+      toastOrgError: "Error: organización no encontrada",
+      toastUserError: "No se encontró el usuario activo"
+    },
+    project: {
+      newTitle: "NUEVO PROYECTO",
+      editTitle: "EDITAR PROYECTO",
+      desc: "Define los parámetros del nuevo encargo.",
+      nameLabel: "Nombre del Proyecto",
+      namePlaceholder: "Ej. Diseño Web Corp",
+      clientLabel: "Contacto Vinculado",
+      clientPlaceholder: "Sin Contacto / Particular",
+      budgetLabel: "Presupuesto Total",
+      paidLabel: "Cobrado hasta hoy",
+      statusLabel: "Estado Inicial",
+      progressLabel: "Progreso Real: {progress}%",
+      startDateLabel: "Fecha Inicio",
+      endDateLabel: "Fin Estimado",
+      descriptionLabel: "Descripción del Proyecto",
+      descriptionPlaceholder: "Breve resumen del alcance...",
+      notesLabel: "Notas Internas",
+      notesPlaceholder: "Notas privadas sobre el cliente o el pago...",
+      cancel: "CANCELAR",
+      save: "GUARDAR CAMBIOS",
+      create: "CREAR PROYECTO",
+      toastUpdateSuccess: "Proyecto actualizado",
+      toastCreateSuccess: "Proyecto creado correctamente",
+      toastSaveError: "Error al guardar el proyecto",
+      statuses: {
+        propuesta: "Propuesta",
+        activo: "Activo",
+        completado: "Completado",
+        cancelado: "Cancelado"
+      }
+    },
+    subscription: {
+      title: "Nueva Suscripción",
+      selectedPlan: "Plan Seleccionado",
+      planName: "Plan Profesional",
+      planDesc: "Gestión completa e IA avanzada",
+      perMonth: "/ Mes",
+      includedBenefits: "Beneficios Incluidos",
+      cancel: "Cancelar",
+      confirm: "Confirmar Suscripción",
+      benefits: [
+        "Gestión ilimitada de contactos",
+        "Reservas y citas sin límites",
+        "Control financiero inteligente",
+        "IA 24/7 (WhatsApp + Email)",
+        "Estadísticas y métricas pro"
+      ],
+      toastStripeError: "Error al procesar el pago",
+      toastConnectionError: "Error de conexión"
+    },
+    convert: {
+      title: "Convertir Contacto",
+      desc: "Selecciona el destino para este contacto. La información de contacto y valor estimado se transferirá automáticamente.",
+      optionClient: "Nuevo Cliente",
+      optionClientDesc: "Añade este contacto a tu Cartera de Clientes",
+      optionDeal: "Nuevo Negocio (Pipeline)",
+      optionDealDesc: "Crea una oportunidad en el embudo de ventas",
+      optionBoth: "Cliente + Negocio",
+      optionBothDesc: "Crea ambos registros vinculados automáticamente",
+      keepAsLead: "Mantener como Contacto Comercial",
+      toastConvertClient: "Contacto convertido en Cliente",
+      toastConvertDeal: "Contacto convertido en Oportunidad",
+      toastConvertBoth: "Contacto convertido en Cliente y Oportunidad",
+      toastError: "Error al convertir contacto: "
+    }
+  },
+  apiSettings: {
+    title: "API Pública & Integraciones",
+    subtitle: "Conecta SF con tus propias herramientas, TPV o sitio web.",
+    saveBtn: "Guardar Cambios",
+    savingBtn: "Guardando...",
+    toastSuccessKey: "Nueva API Key generada localmente. Haz clic en Guardar.",
+    toastSaveSuccess: "Configuración guardada correctamente",
+    toastSaveError: "Error al guardar la configuración",
+    toastCopySuccess: "API Key copiada al portapapeles",
+    planActive: "Plan Ultra Activo",
+    credentialTitle: "Tu Credencial de Acceso",
+    regenerateBtn: "Regenerar Key",
+    criticalSecurity: "Seguridad Crítica:",
+    criticalSecurityDesc: "Nunca expongas esta API Key en el lado del cliente (frontend). Implementa siempre tus llamadas desde un servidor seguro.",
+    webhooksTitle: "Webhooks (Notificaciones)",
+    webhookUrlLabel: "Endpoint de Destino (URL)",
+    webhookActive: "Habilitado",
+    webhookInactive: "Deshabilitado",
+    guideHelpTitle: "¿Necesitas Ayuda?",
+    guideHelpDesc: "Consulta nuestra guía técnica para una integración rápida y segura.",
+    guideHelpBtn: "Ver Guía de Inicio Rápido",
+    guideModal: {
+      title: "Guía de Inicio Rápido",
+      authLabel: "Autenticación *",
+      webhooksLabel: "Webhooks",
+      webhooksDesc: "Eventos Real-time",
+      endpointsLabel: "Endpoints Principales",
+      endpointGetDesc: "Listado de registros",
+      endpointPostDesc: "Creación de perfiles",
+      securityNotice: "Implementa estas llamadas desde el servidor para seguridad máxima. Nunca expongas tu API Key en el front-end.",
+      cancel: "Cancelar",
+      confirm: "Confirmar Lectura"
+    },
+    webhooks: {
+      activity: "Entrada de registro IA.",
+      contact: "Tras campaña de comunicación."
+    }
+  },
+  clientDetail: {
+    toast: {
+      loadError: "Error al cargar el cliente",
+      statusUpdated: "Estado actualizado",
+      statusUpdateError: "Error al actualizar estado",
+      contactRegistered: "Contacto registrado",
+      contactRegisterError: "Error al registrar contacto",
+      clientUpdated: "Cliente actualizado",
+      clientUpdateError: "Error al actualizar",
+      notesSaved: "Notas guardadas",
+      notesSaveError: "Error al guardar notas",
+      clientDeleted: "Cliente eliminado",
+      deleteError: "Error al eliminar",
+      downloadSuccess: "Ficha descargada"
+    },
+    deleteConfirm: "¿Estás seguro de eliminar este cliente? Esta acción no se puede deshacer.",
+    notFound: "Cliente no encontrado",
+    backToDashboard: "Volver al Panel",
+    backToClients: "Volver a Clientes",
+    editProfile: "Editar Perfil",
+    fields: {
+      company: "Empresa / Entidad",
+      email: "Correo Electrónico",
+      phone: "Teléfono móvil",
+      category: "Categoría",
+      source: "Canal de Entrada",
+      location: "Ubicación"
+    },
+    values: {
+      finalConsumer: "Consumidor Final",
+      notProvided: "No proporcionado",
+      other: "Otros",
+      sourceVia: "Vía {source}",
+      unknown: "Desconocida"
+    },
+    sections: {
+      notes: "Expediente y Notas Internas",
+      timeline: "Línea de Tiempo",
+      statusManagement: "Gestión de Estado",
+      logInteraction: "Registrar Interacción",
+      metadata: "Metadata de Registro"
+    },
+    actions: {
+      expand: "Ampliar",
+      cancel: "Cancelar",
+      saving: "Guardando...",
+      save: "Guardar",
+      syncing: "Sincronizando...",
+      saveLog: "Guardar en Bitácora",
+      downloadTxt: "Descargar ficha TXT"
+    },
+    notesEmpty: "Inicie el expediente registrando su primera nota de seguimiento para este cliente.",
+    filters: {
+      all: "Todo",
+      email: "Email"
+    },
+    timelineEmpty: "Sin actividad registrada",
+    metrics: {
+      relation: "Relación",
+      relationDays: "{days} días",
+      contract: "Contrato"
+    },
+    lastChange: "Último cambio: {date}",
+    never: "Nunca",
+    placeholders: {
+      interactionSummary: "Escribe un resumen de la llamada o reunión..."
+    },
+    metadata: {
+      lastContact: "Último Contacto",
+      uniqueId: "ID Único"
+    },
+    txt: {
+      header: "FICHA DE CONTACTO",
+      name: "Nombre",
+      email: "Email",
+      phone: "Teléfono",
+      company: "Empresa",
+      status: "Estado",
+      source: "Canal",
+      city: "Ciudad",
+      notes: "Notas",
+      id: "ID",
+      generated: "Generado"
+    },
+    modal: {
+      title: "Editar Contacto",
+      name: "Nombre",
+      email: "Email",
+      phone: "Teléfono",
+      company: "Empresa",
+      save: "Guardar Cambios"
+    }
+  },
+  projectDetail: {
+    toast: {
+      loadError: "Error al cargar detalle del proyecto",
+      deleted: "Proyecto eliminado",
+      deleteError: "Error al eliminar",
+      statusUpdated: "Estado actualizado a {status}",
+      statusUpdateError: "Error al actualizar estado",
+      progressUpdated: "Progreso actualizado al {progress}%",
+      progressUpdateError: "Error al actualizar progreso",
+      invalidAmount: "Cantidad no válida",
+      paymentRegistered: "Pago de {amount}{symbol} registrado",
+      paymentRegisterError: "Error al registrar pago"
+    },
+    deleteConfirm: "¿Estás seguro de eliminar este proyecto? Esta acción no se puede deshacer.",
+    backToProjects: "VOLVER A PROYECTOS",
+    deleteProject: "Eliminar Proyecto",
+    viewClient: "Ver Cliente: {name}",
+    description: "Descripción",
+    noDescription: "Sin descripción.",
+    startDate: "Inicio: {date}",
+    endDate: "Fin: {date}",
+    internalNotes: "Notas Internas",
+    executionProgress: "Progreso en Ejecución",
+    updateProgress: "Actualizar Progreso",
+    billingAnalysis: "Análisis de Facturación",
+    budget: "Presupuesto",
+    collected: "Cobrado",
+    pending: "Pendiente",
+    paymentLevel: "Nivel de Cobro",
+    updateStatus: "Actualizar Estado",
+    registerPayment: "Registrar Pago",
+    placeholders: {
+      paymentAmount: "Importe del pago..."
+    },
+    client: "Cliente",
+    noCompany: "Sin empresa",
+    noEmail: "Sin email",
+    noPhone: "Sin teléfono",
+    viewClientCard: "Ver ficha cliente →",
+    statuses: {
+      propuesta: "Propuesta",
+      activo: "En Marcha",
+      pausado: "Pausado",
+      completado: "Completado",
+      cancelado: "Cancelado"
+    }
+  },
+  ficharCodigo: {
+    invalidCode: "Código no válido",
+    clockSuccess: "{tipo} registrada · {time}",
+    toastError: "Error al registrar el fichaje. Inténtelo de nuevo.",
+    loading: "Cargando...",
+    employeePortal: "Portal del Empleado",
+    hello: "Hola, {name}",
+    dateFormat: "EEEE, d 'de' MMMM",
+    clockInBtn: "ENTRADA",
+    clockOutBtn: "SALIDA",
+    successTypes: {
+      entrada: "Entrada",
+      salida: "Salida"
+    }
+  },
+  unauthorized: {
+    title: "Acceso no autorizado",
+    desc: "Tu cuenta no tiene acceso a este espacio de trabajo.\nComprueba que estás usando la cuenta correcta o contacta con el administrador.",
+    logoutBtn: "Cerrar sesión e ir al login",
+    errorNotice: "Si crees que esto es un error, contacta con {email}"
+  },
+  legal: {
+    meta: "AVISO LEGAL · SFFALCON",
+    title: "Términos y Condiciones",
+    lastUpdated: "Última actualización: mayo 2026\nEspaña · Unión Europea",
+    back: "← INICIO",
+    sections: {
+      s1: {
+        title: "1. Titular del servicio",
+        p1: "El titular y responsable de la plataforma SF Gestor Empresarial es:",
+        owner: "Titular",
+        brand: "Marca comercial",
+        app: "Aplicación",
+        web: "Web corporativa",
+        email: "Correo electrónico",
+        phone: "Teléfono",
+        country: "País",
+        p2: "El acceso y uso de la plataforma implica la aceptación plena de estos Términos y Condiciones, así como de nuestra {privacyLink}."
+      },
+      s2: {
+        title: "2. Objeto del servicio",
+        p1: "SF Gestor Empresarial es un asistente virtual de reservas y citas que permite a negocios y profesionales gestionar citas y comunicaciones con sus clientes a través de múltiples canales, incluida la API de WhatsApp Business de Meta Platforms, Inc. La plataforma actúa como intermediario autorizado entre el negocio (cliente de SFFALCON) y sus usuarios finales, ofreciendo:",
+        items: [
+          "Asistente de IA que atiende y gestiona reservas 24/7",
+          "Gestión de clientes y citas ilimitados",
+          "Integración con WhatsApp Business API",
+          "Recordatorios automáticos de citas",
+          "Panel de control con estadísticas y analytics",
+          "Facturación y finanzas integradas",
+          "Sincronización con Google Calendar",
+          "Gestión de usuarios del equipo"
+        ]
+      },
+      s3: {
+        title: "3. Condiciones de contratación",
+        p1: "La contratación se formaliza mediante el registro en la plataforma y la aceptación de estos términos. SF Gestor Empresarial ofrece un periodo de prueba gratuito de 90 días desde la fecha de activación, sin necesidad de tarjeta de crédito. SFFALCON se reserva el derecho de modificar las condiciones con previo aviso de 30 días al cliente mediante correo electrónico y aviso en la plataforma."
+      },
+      s4: {
+        title: "4. Planes y precios",
+        p1: "SFFALCON ofrece el siguiente plan:",
+        p2: "SF Gestor Empresarial — 29 €/mes. Incluye 90 días de prueba gratuita sin necesidad de tarjeta de crédito. Cancela cuando quieras sin permanencia. El servicio incluye: IA que responde por ti 24/7, clientes y citas ilimitados, finanzas completas, facturas profesionales en PDF, estadísticas y analytics, WhatsApp integrado, recordatorios automáticos, agentes IA, Google Calendar sync y gestión de usuarios del equipo.",
+        p3: "Todos los precios se expresan en euros e incluyen los impuestos aplicables según la normativa fiscal española vigente. El pago se realiza de forma recurrente mensual mediante tarjeta de crédito a través de la pasarela de pago segura Stripe. El cliente podrá cancelar su suscripción en cualquier momento desde el panel de control, sin penalización, con efecto al final del periodo facturado en curso."
+      },
+      s5: {
+        title: "5. Propiedad intelectual",
+        p1: "La plataforma SF Gestor Empresarial, su código, diseño, estructura y contenidos son propiedad exclusiva de SFFALCON y están protegidos por la legislación española e internacional de propiedad intelectual. El cliente no adquiere ningún derecho sobre el software de la plataforma, limitándose su derecho al uso del servicio durante la vigencia de su suscripción. Los datos introducidos por el cliente en la plataforma son de su exclusiva propiedad. SFFALCON no cederá ni venderá dichos datos a terceros."
+      },
+      s6: {
+        title: "6. Uso aceptable y prohibiciones",
+        p1: "Queda estrictamente prohibido:",
+        items: [
+          "Utilizar la plataforma para enviar spam o comunicaciones no solicitadas",
+          "Infringir las Políticas de WhatsApp Business de Meta Platforms, Inc.",
+          "Acceder o intentar acceder a cuentas o datos de otros clientes",
+          "Realizar ingeniería inversa del software de la plataforma",
+          "Utilizar la plataforma para actividades ilegales o contrarias a la buena fe",
+          "Compartir credenciales de acceso con personas no autorizadas"
+        ],
+        p2: "El incumplimiento de estas condiciones podrá dar lugar a la suspensión inmediata del servicio sin derecho a reembolso."
+      },
+      s7: {
+        title: "7. Protección de datos",
+        p1: "El tratamiento de los datos personales de los clientes se realiza conforme al Reglamento General de Protección de Datos (RGPD) y la Ley Orgánica de Protección de Datos y Garantía de Derechos Digitales (LOPDGDD), así como de las políticas de uso de la API de WhatsApp Business de Meta Platforms, Inc. El responsable del tratamiento es Marco Antonio Falcón Hernández (SFFALCON). Puede consultar el detalle completo en nuestra {privacyLink}. Para ejercer sus derechos, contacte en admin@sffalcon.com o en el teléfono +34 604 989 742."
+      },
+      s8: {
+        title: "8. Limitación de responsabilidad",
+        p1: "SFFALCON no se hace responsable de daños indirectos, pérdida de beneficios o perjuicios derivados del uso de la plataforma. SFFALCON garantiza una disponibilidad del servicio del 99% mensual. En caso de interrupciones programadas, se notificará al cliente con antelación suficiente. No se garantizan resultados concretos de negocio derivados del uso de la plataforma, aunque sí se garantiza la calidad técnica del servicio prestado según las condiciones del plan contratado."
+      },
+      s9: {
+        title: "9. Legislación aplicable y resolución de conflictos",
+        p1: "Los presentes Términos y Condiciones se rigen íntegramente por la legislación española. En caso de cualquier controversia, ambas partes se someten a los juzgados y tribunales competentes de Murcia, España, con renuncia expresa a cualquier otro fuero. Para cualquier actualización o reclamación, el cliente puede contactar previamente con SFFALCON a través de admin@sffalcon.com o llamando al +34 604 989 742, con el objetivo de resolver el conflicto de forma amistosa antes de acudir a la vía judicial."
+      },
+      s10: {
+        title: "10. Contacto",
+        p1: "Para cualquier consulta, solicitud o reclamación relacionada con estos Términos:",
+        items: [
+          "Email: admin@sffalcon.com",
+          "Teléfono: +34 604 989 742",
+          "Web corporativa: www.sffalcon.com",
+          "Aplicación: app.sffalcon.com"
+        ],
+        p2: "Nos comprometemos a responder en un plazo máximo de 72 horas laborables."
+      }
+    }
+  },
+  privacy: {
+    meta: "POLÍTICA DE PRIVACIDAD · SFFALCON",
+    title: "Política de Privacidad",
+    lastUpdated: "Última actualización: mayo 2026\nEspaña · Unión Europea",
+    back: "← INICIO",
+    sections: {
+      s1: {
+        title: "1. Responsable del tratamiento",
+        p1: "El responsable del tratamiento de sus datos personales es:",
+        owner: "Titular",
+        brand: "Marca comercial",
+        app: "Aplicación",
+        web: "Web corporativa",
+        email: "Correo electrónico",
+        phone: "Teléfono",
+        country: "País",
+        p2: "SFFALCON se compromete a tratar sus datos personales con total transparencia, en cumplimiento del Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD), así como de las políticas de uso de la API de WhatsApp Business de Meta Platforms, Inc."
+      },
+      s2: {
+        title: "2. Descripción del servicio",
+        p1: "SF Gestor Empresarial es un asistente virtual de reservas y citas que permite a negocios y profesionales gestionar citas y comunicaciones con sus clientes a través de múltiples canales, incluida la API de WhatsApp Business. La aplicación actúa como intermediario autorizado entre el negocio (cliente de SFFALCON) y sus usuarios finales."
+      },
+      s3: {
+        title: "3. Datos que recopilamos",
+        p1: "a) Datos de clientes (operadores de la plataforma):",
+        itemsA: [
+          "Nombre y apellidos",
+          "Dirección de correo electrónico",
+          "Número de teléfono",
+          "Información sobre su negocio (nombre, sector, país)",
+          "Datos de facturación y suscripción",
+          "Datos de navegación básicos mediante cookies técnicas necesarias"
+        ],
+        p2: "b) Datos de usuarios finales (clientes del negocio, gestionados a través de WhatsApp Business API):",
+        itemsB: [
+          "Número de teléfono de WhatsApp",
+          "Nombre de perfil de WhatsApp",
+          "Contenido de los mensajes intercambiados con el asistente",
+          "Fecha, hora y estado de la reserva o cita"
+        ],
+        p3: "No recopilamos datos sensibles (salud, ideología, religión, etc.) ni datos de menores de 14 años. Si detectamos que un usuario es menor de esa edad, eliminaremos sus datos de inmediato. No realizamos perfilado automatizado ni decisiones automatizadas con efectos legales sobre los usuarios."
+      },
+      s4: {
+        title: "4. Finalidad del tratamiento",
+        p1: "Sus datos se utilizan exclusivamente para:",
+        items: [
+          "Gestionar el registro y acceso a la plataforma SF Gestor Empresarial",
+          "Prestar los servicios contratados según el plan elegido",
+          "Operar el asistente virtual de reservas vía WhatsApp Business API",
+          "Enviar notificaciones y recordatorios de citas a usuarios finales",
+          "Gestionar la facturación y cobros recurrentes mediante Stripe",
+          "Enviar comunicaciones relacionadas con el servicio (actualizaciones, incidencias)",
+          "Cumplir con obligaciones legales y fiscales aplicables en España"
+        ],
+        p2: "No utilizamos sus datos para publicidad de terceros ni para ninguna finalidad distinta a las indicadas sin su consentimiento previo."
+      },
+      s5: {
+        title: "5. Base legal del tratamiento",
+        items: [
+          "Ejecución de contrato: para prestar el servicio SaaS contratado",
+          "Consentimiento: cuando el usuario se registra voluntariamente en la plataforma",
+          "Interés legítimo: para el funcionamiento del asistente de reservas y citas en nombre del negocio",
+          "Obligación legal: para cumplir con obligaciones fiscales o legales en España"
+        ],
+        p2: "Puede retirar su consentimiento en cualquier momento sin que ello afecte a la licitud del tratamiento previo."
+      },
+      s6: {
+        title: "6. Uso de la API de WhatsApp Business (Meta)",
+        p1: "SF Gestor Empresarial utiliza la API de WhatsApp Business de Meta Platforms, Inc. para enviar y recibir mensajes en nombre de los negocios que usan nuestra plataforma. En relación con este canal:",
+        items: [
+          "Los mensajes de WhatsApp son gestionados conforme a las Políticas de WhatsApp Business y los Términos de la plataforma de Meta.",
+          "Los datos de mensajería no se comparten con terceros no autorizados ni se utilizan para segmentación publicitaria.",
+          "Los usuarios finales pueden solicitar en cualquier momento que el negocio deje de contactarles vía WhatsApp respondiendo STOP o contactando directamente al negocio.",
+          "SFFALCON actúa como proveedor de soluciones tecnológicas (BSP) y no es el originador de los mensajes comerciales: el responsable final ante el usuario es el negocio que contrata el servicio.",
+          "Meta puede procesar datos de mensajería conforme a su propia Política de Privacidad."
+        ]
+      },
+      s7: {
+        title: "7. Transferencias internacionales de datos",
+        p1: "Algunos de nuestros proveedores de servicio pueden procesar datos fuera de la UE:",
+        items: [
+          "Meta Platforms, Inc. (EE. UU.) — API de WhatsApp Business, sujeta al Data Privacy Framework UE-EE. UU.",
+          "Groq, Inc. (EE. UU.) — procesamiento de IA (modelos LLaMA). Datos tratados conforme a las políticas de Groq Cloud.",
+          "Stripe, Inc. (EE. UU.) — pagos, bajo cláusulas contractuales tipo aprobadas por la Comisión Europea.",
+          "Supabase, Inc. — almacenamiento de datos, con opción de servidores en la Unión Europea.",
+          "Resend, Inc. (EE. UU.) — envío de correos transaccionales."
+        ],
+        p2: "En todos los casos exigimos que los proveedores mantengan niveles de protección equivalentes a los exigidos por el RGPD."
+      },
+      s8: {
+        title: "8. Conservación de datos",
+        items: [
+          "Datos de cuenta: durante la vigencia de la suscripción y hasta que solicite su supresión",
+          "Mensajes de WhatsApp: máximo 12 meses desde la última interacción, salvo obligación legal",
+          "Datos de facturación: durante los plazos exigidos por la normativa fiscal española (generalmente 5 años)"
+        ],
+        p2: "Transcurridos dichos plazos, los datos serán eliminados o anonimizados de forma segura."
+      },
+      s9: {
+        title: "9. No venta ni uso comercial de datos",
+        p1: "SFFALCON no vende, alquila ni cede datos personales de sus usuarios a terceros con fines comerciales o publicitarios. Los datos obtenidos a través de la API de WhatsApp Business se utilizan exclusivamente para prestar el servicio de gestión de reservas y no se emplean para crear perfiles de usuario ni para publicidad dirigida."
+      },
+      s10: {
+        title: "10. Derechos del usuario",
+        p1: "Conforme al RGPD, usted tiene derecho a:",
+        items: [
+          "Acceso: conocer qué datos tratamos sobre usted",
+          "Rectificación: corregir datos inexactos o incompletos",
+          "Supresión (\"derecho al olvido\"): solicitar la eliminación de sus datos",
+          "Oposición: oponerse al tratamiento en determinadas circunstancias",
+          "Portabilidad: recibir sus datos en formato estructurado y de uso común",
+          "Limitación: solicitar que suspendamos el tratamiento en ciertos supuestos"
+        ],
+        p2: "Para ejercer cualquiera de estos derechos, envíe un correo a admin@sffalcon.com o llame al +34 604 989 742. Responderemos en el plazo máximo de un mes. Si considera que sus derechos no han sido atendidos, puede presentar una reclamación ante la Agencia Española de Protección de Datos (aepd.es)."
+      },
+      s11: {
+        title: "11. Seguridad de los datos",
+        p1: "SFFALCON implementa medidas técnicas y organizativas apropiadas para proteger sus datos personales contra acceso no autorizado, pérdida o destrucción, incluyendo: cifrado de datos en tránsito (TLS) y en reposo, autenticación segura, control de acceso por roles, y revisiones periódicas de seguridad."
+      },
+      s12: {
+        title: "12. Cookies",
+        p1: "SF Gestor Empresarial utiliza únicamente cookies técnicas estrictamente necesarias para el funcionamiento de la plataforma (sesión de usuario, preferencias de idioma y tema). No utilizamos cookies de publicidad ni de seguimiento de terceros."
+      },
+      s13: {
+        title: "13. Menores de edad",
+        p1: "Nuestros servicios están dirigidos exclusivamente a personas mayores de 14 años (o la edad mínima legal aplicable en su país de residencia). No recopilamos conscientemente datos personales de menores. Si tiene conocimiento de que un menor nos ha proporcionado datos sin consentimiento paterno, contáctenos en admin@sffalcon.com para proceder a su eliminación inmediata."
+      },
+      s14: {
+        title: "14. Cambios en esta política",
+        p1: "SFFALCON se reserva el derecho a actualizar esta Política de Privacidad para adaptarla a cambios legislativos o de servicio. Cualquier modificación relevante será comunicada con al menos 30 días de antelación por correo electrónico y mediante aviso en la plataforma. La fecha de \"Última actualización\" al inicio del documento refleja siempre la versión vigente."
+      },
+      s15: {
+        title: "15. Contacto",
+        p1: "Para cualquier consulta, solicitud o reclamación relacionada con el tratamiento de sus datos:",
+        items: [
+          "Email: admin@sffalcon.com",
+          "Teléfono: +34 604 989 742",
+          "Web corporativa: www.sffalcon.com",
+          "Aplicación: app.sffalcon.com"
+        ],
+        p2: "Nos comprometemos a responder en un plazo máximo de 72 horas laborables."
+      }
     }
   }
 };

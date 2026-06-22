@@ -6,12 +6,14 @@ import AgentCard from './AgentCard';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface SyncAgentProps {
   onAddLog: (log: any) => void;
 }
 
 export default function SyncAgent({ onAddLog }: SyncAgentProps) {
+  const { t } = useLanguage();
   const [isActive, setIsActive] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
   const [lastRun, setLastRun] = useState<string | undefined>(undefined);
@@ -28,11 +30,19 @@ export default function SyncAgent({ onAddLog }: SyncAgentProps) {
   const runSync = async () => {
     setIsRunning(true);
     setIsSyncing(true);
-    onAddLog({ agent: 'Sync', action: 'Conexión', result: 'Iniciando sincronización multicanal...' });
+    onAddLog({ 
+      agent: t('aiAgents.cards.sync.title'), 
+      action: t('aiAgents.cards.logActionConnection'), 
+      result: t('aiAgents.cards.sync.logStart') 
+    });
 
     for (const source of syncSources) {
       setCurrentSync(source.name);
-      onAddLog({ agent: 'Sync', action: 'Sincronizando', result: `Obteniendo datos de ${source.name}...` });
+      onAddLog({ 
+        agent: t('aiAgents.cards.sync.title'), 
+        action: t('aiAgents.cards.logActionSyncing'), 
+        result: t('aiAgents.cards.sync.logFetching').replace('{name}', source.name) 
+      });
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
@@ -40,8 +50,12 @@ export default function SyncAgent({ onAddLog }: SyncAgentProps) {
     setLastRun(now);
     setIsSyncing(false);
     setIsRunning(false);
-    onAddLog({ agent: 'Sync', action: 'Completado', result: 'Todos los canales sincronizados correctamente.' });
-    toast.success('Sincronización finalizada con éxito');
+    onAddLog({ 
+      agent: t('aiAgents.cards.sync.title'), 
+      action: t('aiAgents.cards.logActionCompleted'), 
+      result: t('aiAgents.cards.sync.logCompleted') 
+    });
+    toast.success(t('aiAgents.cards.sync.toastSuccess'));
   };
 
   return (
@@ -49,13 +63,13 @@ export default function SyncAgent({ onAddLog }: SyncAgentProps) {
       <AgentCard 
         icon={Repeat}
         iconColor="#6366F1"
-        title="Recepcionista 24/7"
-        description="Gestiona tus canales de entrada (WhatsApp, Instagram, Email) para que nunca pierdas una consulta o reserva."
+        title={t('aiAgents.cards.sync.title')}
+        description={t('aiAgents.cards.sync.desc')}
         isActive={isActive}
         isRunning={isRunning}
         lastRun={lastRun}
         onToggle={() => setIsActive(!isActive)}
-        onConfigure={() => toast.success('Configuración de Sync abierta')}
+        onConfigure={() => toast.success(t('aiAgents.cards.sync.configOpen'))}
         onRun={runSync}
       />
 
@@ -68,10 +82,10 @@ export default function SyncAgent({ onAddLog }: SyncAgentProps) {
             className="bg-white dark:bg-[#111F3A] rounded-[32px] border border-[#E2E8F0] dark:border-[#1E3A5F] p-8 space-y-6 shadow-xl"
           >
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">Estado de Sincronización</h4>
+              <h4 className="text-sm font-semibold text-slate-900 dark:text-white uppercase tracking-tight">{t('aiAgents.cards.sync.modalTitle')}</h4>
               <div className="flex items-center gap-2 px-3 py-1 bg-blue-500/10 rounded-full">
                 <Loader2 className="w-3 h-3 text-blue-500 animate-spin" />
-                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">En curso</span>
+                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{t('aiAgents.cards.sync.inProgress')}</span>
               </div>
             </div>
 
@@ -98,7 +112,7 @@ export default function SyncAgent({ onAddLog }: SyncAgentProps) {
                       <div>
                         <p className="text-[11px] font-bold text-slate-900 dark:text-white">{source.name}</p>
                         <p className="text-[9px] font-medium text-slate-500 uppercase tracking-tighter">
-                          {isCurrent ? 'Actualizando...' : isPast ? 'Sincronizado' : 'Pendiente'}
+                          {isCurrent ? t('aiAgents.cards.sync.currentStatusSyncing') : isPast ? t('aiAgents.cards.sync.currentStatusSynced') : t('aiAgents.cards.sync.currentStatusPending')}
                         </p>
                       </div>
                     </div>
@@ -111,7 +125,7 @@ export default function SyncAgent({ onAddLog }: SyncAgentProps) {
 
             <div className="pt-4 border-t border-slate-50 dark:border-[#1E3A5F]">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Progreso Global</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('aiAgents.cards.sync.globalProgress')}</span>
                 <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">
                   {Math.round((syncSources.findIndex(s => s.name === currentSync) / syncSources.length) * 100)}%
                 </span>

@@ -27,9 +27,9 @@ export default function DonutChart({ entries, month }: { entries: FinanceEntry[]
   const getTypeLabel = (type: string) => {
     const lower = type.toLowerCase();
     if (["gasto_fijo", "variable", "ingreso", "deuda", "ahorro", "suscripcion"].includes(lower)) {
-      return t(`financesTable.types.${lower}`);
+      return t(`financesTable.types.${lower}` as any);
     }
-    return t(`finances.categories.${getCategoryKey(type)}`, { defaultValue: type });
+    return t(`finances.categories.${getCategoryKey(type)}` as any, { defaultValue: type });
   };
 
   const chartData = useMemo(() => {
@@ -53,7 +53,7 @@ export default function DonutChart({ entries, month }: { entries: FinanceEntry[]
     })).sort((a, b) => b.value - a.value);
   }, [entries, t]);
 
-  const translatedMonth = t('monthSelector.' + month, { defaultValue: month });
+  const translatedMonth = t(('monthSelector.' + month) as any, { defaultValue: month });
 
   return (
     <div className="bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-[16px] md:rounded-[20px] lg:rounded-[24px] p-4 md:p-6 lg:p-8 shadow-sm h-full flex flex-col min-h-[350px] md:min-h-[400px]">
@@ -84,7 +84,7 @@ export default function DonutChart({ entries, month }: { entries: FinanceEntry[]
             </ResponsiveContainer>
           ) : (
             <div className="text-center p-4">
-              <p className="text-xs text-slate-400">{t('donutChart.noData', { month: translatedMonth })}</p>
+              <p className="text-xs text-slate-400">{t('donutChart.noData' as any, { month: translatedMonth })}</p>
             </div>
           )}
           {chartData.length > 0 && (

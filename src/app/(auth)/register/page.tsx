@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { MailCheck, Check, X, Loader2, Home } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 import "./register.css";
 
 const COUNTRIES = [
@@ -26,6 +27,7 @@ const COUNTRIES = [
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useLanguage();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -63,11 +65,11 @@ export default function RegisterPage() {
     const finalBusinessName = businessName;
 
     if (!fullName || !email || !password || !confirmPassword || !finalBusinessName) {
-      toast.error("Por favor, rellena todos los campos");
+      toast.error(t("auth.errorFieldsRequired" as any));
       return;
     }
     if (password !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
+      toast.error(t("auth.errorPasswordMismatch" as any));
       return;
     }
     setLoading(true);
@@ -82,7 +84,7 @@ export default function RegisterPage() {
       }
 
       if (nameExists) {
-        setNameExistsError("Este nombre de usuario ya existe");
+        setNameExistsError(t("auth.errorNameExists" as any));
         setLoading(false);
         return;
       }
@@ -97,7 +99,7 @@ export default function RegisterPage() {
       }
 
       if (emailExists) {
-        setEmailExistsError("Cuenta existente con este correo");
+        setEmailExistsError(t("auth.errorEmailExists" as any));
         setLoading(false);
         return;
       }
@@ -112,7 +114,7 @@ export default function RegisterPage() {
       }
 
       if (businessExists) {
-        setBusinessExistsError("Ya hay un negocio registrado con este nombre");
+        setBusinessExistsError(t("auth.errorBusinessExists" as any));
         setLoading(false);
         return;
       }
@@ -123,7 +125,7 @@ export default function RegisterPage() {
         options: { data: { full_name: fullName } },
       });
       if (authError) throw authError;
-      if (!authData.user) throw new Error("No se pudo crear el usuario");
+      if (!authData.user) throw new Error(t("auth.errorUserCreationFailed" as any));
 
       const apiResponse = await fetch('/api/organization/create', {
         method: 'POST',
@@ -143,21 +145,21 @@ export default function RegisterPage() {
 
       if (!apiResponse.ok) {
         const errorData = await apiResponse.json();
-        throw new Error(errorData.error || "Error al configurar los datos del negocio");
+        throw new Error(errorData.error || t("auth.errorBusinessConfigFailed" as any));
       }
 
       if (authData.session) {
-        toast.success("¡Cuenta creada correctamente!");
+        toast.success(t("auth.successAccountCreated" as any));
         router.replace("/dashboard");
       } else {
-        toast.success("¡Casi listo! Revisa tu email para activar tu cuenta.");
+        toast.success(t("auth.successCheckEmail" as any));
         setUserEmail(email);
         setRegistered(true);
         setLoading(false);
       }
     } catch (error: unknown) {
       console.error("Error en registro:", error);
-      const message = error instanceof Error ? error.message : "Ha ocurrido un error en el registro";
+      const message = error instanceof Error ? error.message : t("auth.errorRegistrationGeneric" as any);
       toast.error(message);
       setLoading(false);
     }
@@ -174,17 +176,17 @@ export default function RegisterPage() {
 
         <div className="reg-left-content">
           <h2 className="reg-headline">
-            El asistente <span className="reg-headline-accent">de reservas y citas que</span><br />
-            nunca pudiste<br />
-            <span className="reg-headline-accent">tener</span>
+            {t("auth.headline.part1" as any)} <span className="reg-headline-accent">{t("auth.headline.accent1" as any)}</span><br />
+            {t("auth.headline.part2" as any)}<br />
+            <span className="reg-headline-accent">{t("auth.headline.accent2" as any)}</span>
           </h2>
 
           <div className="reg-benefits">
             {[
-              "Mientras tú trabajas, él atiende a tus clientes",
-              "Tu cliente escribe — a cualquier hora",
-              "Tu asistente responde — con tu tono",
-              "Tú lo encuentras todo listo",
+              t("auth.benefits.benefit1" as any),
+              t("auth.benefits.benefit2" as any),
+              t("auth.benefits.benefit3" as any),
+              t("auth.benefits.benefit4" as any),
             ].map((text) => (
               <div className="reg-benefit-item" key={text}>
                 <div className="reg-benefit-check">✓</div>
@@ -194,13 +196,13 @@ export default function RegisterPage() {
           </div>
 
           <div className="reg-quote">
-            <p>&quot;Por fin puedo desconectar sin miedo a perder un cliente.&quot;</p>
+            <p>{t("auth.quote" as any)}</p>
           </div>
 
           <div className="reg-marketing-badges">
-            <span className="reg-marketing-badge">Sin tarjeta</span>
-            <span className="reg-marketing-badge">Listo en 5 min</span>
-            <span className="reg-marketing-badge">Hecho en España</span>
+            <span className="reg-marketing-badge">{t("auth.badges.noCard" as any)}</span>
+            <span className="reg-marketing-badge">{t("auth.badges.readyInFive" as any)}</span>
+            <span className="reg-marketing-badge">{t("auth.badges.madeInSpain" as any)}</span>
           </div>
 
           <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '8px', opacity: 0.7 }}>
@@ -215,7 +217,7 @@ export default function RegisterPage() {
       </div>
 
       <div className="reg-right">
-        <Link href="https://www.sffalcon.com" className="auth-home-link" title="Ir a la web principal">
+        <Link href="https://www.sffalcon.com" className="auth-home-link" title={t("auth.goToMainWeb" as any)}>
           <Home size={18} />
         </Link>
         <div style={{ width: '100%', maxWidth: '860px', margin: '0 auto' }}>
@@ -224,47 +226,47 @@ export default function RegisterPage() {
               <div className="reg-success-icon">
                 <MailCheck size={48} color="#818CF8" />
               </div>
-              <h2>¡Revisa tu correo!</h2>
+              <h2>{t("auth.checkEmailTitle" as any)}</h2>
               <p>
-                Hemos enviado un enlace de activación a:
+                {t("auth.activationLinkSent" as any)}
                 <span className="reg-success-email">{userEmail}</span>
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                 <Link href="/login" className="reg-success-link">
-                  IR AL INICIO DE SESIÓN
+                  {t("auth.goToLogin" as any)}
                 </Link>
               </div>
             </div>
           ) : (
             <>
               <div className="reg-content" style={{ textAlign: 'center' }}>
-                <h1 className="reg-title">Crea tu cuenta</h1>
-                <p className="reg-subtitle" style={{ marginBottom: '40px' }}>Empieza hoy mismo tu SF inteligente</p>
+                <h1 className="reg-title">{t("auth.createAccountTitle" as any)}</h1>
+                <p className="reg-subtitle" style={{ marginBottom: '40px' }}>{t("auth.createAccountSubtitle" as any)}</p>
 
                 {/* Step 1 */}
                 <div style={{ marginBottom: '40px' }}>
-                  <p className="reg-step-label">1. Elige tu plan</p>
+                  <p className="reg-step-label">{t("auth.stepChoosePlan" as any)}</p>
                   <div className="reg-plans-grid" style={{
                     gridTemplateColumns: "1fr",
                     maxWidth: '500px',
                     margin: '0 auto'
                   }}>
                     <PlanCard
-                      title="Gestor Empresarial"
+                      title={t("common.sections.principal" as any) === "Principal" ? "Gestor Empresarial" : "Enterprise Manager"} // plan name
                       price="29€/mes"
-                      subtitle="90 días GRATIS · Sin tarjeta · Cancela cuando quieras"
-                      badge="Todo incluido"
+                      subtitle={t("auth.planCardSubtitle" as any)}
+                      badge={t("auth.allIncluded" as any)}
                       features={[
-                        { text: "Clientes y agenda ilimitados", included: true },
-                        { text: "Comunicaciones WhatsApp + Email", included: true },
-                        { text: "IA responde por ti 24/7", included: true },
-                        { text: "Finanzas y facturas", included: true },
-                        { text: "Productos e inventario", included: true },
-                        { text: "Estadísticas y métricas", included: true },
-                        { text: "Equipo y fichajes", included: true },
-                        { text: "Gestor IA en el panel", included: true },
+                        { text: t("auth.planFeatures.feature1" as any), included: true },
+                        { text: t("auth.planFeatures.feature2" as any), included: true },
+                        { text: t("auth.planFeatures.feature3" as any), included: true },
+                        { text: t("auth.planFeatures.feature4" as any), included: true },
+                        { text: t("auth.planFeatures.feature5" as any), included: true },
+                        { text: t("auth.planFeatures.feature6" as any), included: true },
+                        { text: t("auth.planFeatures.feature7" as any), included: true },
+                        { text: t("auth.planFeatures.feature8" as any), included: true },
                       ]}
-                      btnText="EMPEZAR GRATIS 90 DÍAS"
+                      btnText={t("auth.btnStartTrial" as any)}
                       selected={planSeleccionado === "pro"}
                       onClick={() => {
                         setPlanSeleccionado("pro");
@@ -274,7 +276,7 @@ export default function RegisterPage() {
                     />
                   </div>
                   <p style={{ marginTop: '16px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
-                    No se requiere tarjeta de crédito
+                    {t("auth.noCardRequired" as any)}
                   </p>
                 </div>
 
@@ -282,11 +284,11 @@ export default function RegisterPage() {
                 {planSeleccionado && (
                   <div id="formulario-registro" className="reg-form-section visible" style={{ paddingBottom: '200px' }}>
                     <div style={{ padding: '32px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '0', textAlign: 'left' }}>
-                      <p className="reg-step-label">2. Tus datos</p>
+                      <p className="reg-step-label">{t("auth.stepYourData" as any)}</p>
                       <form onSubmit={handleRegister}>
                         <div className="reg-form-grid">
                           <div className="reg-field">
-                            <label className="reg-label">Nombre Completo</label>
+                            <label className="reg-label">{t("auth.fullNameLabel" as any)}</label>
                             <input
                               type="text"
                               value={fullName}
@@ -295,7 +297,7 @@ export default function RegisterPage() {
                                 if (nameExistsError) setNameExistsError("");
                               }}
                               className="reg-input"
-                              placeholder="Tu nombre y apellidos"
+                              placeholder={t("auth.fullNamePlaceholder" as any)}
                             />
                             {nameExistsError && (
                               <p className="reg-error-msg">
@@ -304,7 +306,7 @@ export default function RegisterPage() {
                             )}
                           </div>
                           <div className="reg-field">
-                            <label className="reg-label">Email Personal</label>
+                            <label className="reg-label">{t("auth.personalEmailLabel" as any)}</label>
                             <input
                               type="email"
                               value={email}
@@ -313,7 +315,7 @@ export default function RegisterPage() {
                                 if (emailExistsError) setEmailExistsError("");
                               }}
                               className="reg-input"
-                              placeholder="tu@email.com"
+                              placeholder={t("auth.personalEmailPlaceholder" as any)}
                             />
                             {emailExistsError && (
                               <p className="reg-error-msg">
@@ -325,7 +327,7 @@ export default function RegisterPage() {
 
                         {/* Nombre del Negocio */}
                         <div className="reg-field" style={{ marginBottom: '16px' }}>
-                          <label className="reg-label">Nombre del Negocio (Marca)</label>
+                           <label className="reg-label">{t("auth.businessNameLabel" as any)}</label>
                           <input
                             type="text"
                             value={businessName}
@@ -334,7 +336,7 @@ export default function RegisterPage() {
                               if (businessExistsError) setBusinessExistsError("");
                             }}
                             className="reg-input"
-                            placeholder="Ej: Parque Infantil El Mundo"
+                            placeholder={t("auth.businessNamePlaceholder" as any)}
                             required
                           />
                           {businessExistsError && (
@@ -342,11 +344,11 @@ export default function RegisterPage() {
                               <X className="w-3 h-3" /> {businessExistsError}
                             </p>
                           )}
-                          <p style={{ fontSize: '0.65rem', color: 'rgba(163,179,217,0.4)', marginTop: '4px' }}>Este nombre aparecerá en tus facturas y comunicaciones.</p>
+                          <p style={{ fontSize: '0.65rem', color: 'rgba(163,179,217,0.4)', marginTop: '4px' }}>{t("auth.businessNameHint" as any)}</p>
                         </div>
 
                         <div className="reg-field" style={{ marginBottom: '16px' }}>
-                          <label className="reg-label">Teléfono (WhatsApp)</label>
+                          <label className="reg-label">{t("auth.whatsappLabel" as any)}</label>
                           <input
                             type="tel"
                             value={phone}
@@ -354,16 +356,16 @@ export default function RegisterPage() {
                             className="reg-input"
                             placeholder="+34 600 000 000"
                           />
-                          <p style={{ fontSize: '0.65rem', color: 'rgba(163,179,217,0.4)', marginTop: '4px' }}>Opcional. Tu número de WhatsApp para conectar con clientes.</p>
+                          <p style={{ fontSize: '0.65rem', color: 'rgba(163,179,217,0.4)', marginTop: '4px' }}>{t("auth.whatsappHint" as any)}</p>
                         </div>
                         <div className="reg-form-grid">
                           <div className="reg-field">
-                            <label className="reg-label">Contraseña</label>
-                            <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="reg-input" placeholder="Mínimo 6 caracteres" />
+                            <label className="reg-label">{t("auth.passwordLabel" as any)}</label>
+                            <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="reg-input" placeholder={t("auth.passwordMinPlaceholder" as any)} />
                           </div>
                           <div className="reg-field">
-                            <label className="reg-label">Confirma tu contraseña</label>
-                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="reg-input" placeholder="Repite la contraseña" />
+                            <label className="reg-label">{t("auth.confirmPasswordLabel" as any)}</label>
+                            <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="reg-input" placeholder={t("auth.confirmPasswordPlaceholder" as any)} />
                           </div>
                         </div>
 
@@ -376,7 +378,7 @@ export default function RegisterPage() {
                           {loading ? (
                             <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                           ) : (
-                            <span>FINALIZAR REGISTRO Y EMPEZAR</span>
+                            <span>{t("auth.btnFinishRegistration" as any)}</span>
                           )}
                         </button>
                       </form>
@@ -386,8 +388,8 @@ export default function RegisterPage() {
 
                 <div className="reg-footer-links" style={{ marginTop: '48px', marginBottom: '80px' }}>
                   <p>
-                    ¿Ya tienes cuenta?{" "}
-                    <Link href="/login" style={{ color: '#818CF8', fontWeight: 700 }}>Inicia sesión ahora</Link>
+                    {t("auth.alreadyHaveAccount" as any)}{" "}
+                    <Link href="/login" style={{ color: '#818CF8', fontWeight: 700 }}>{t("auth.loginNow" as any)}</Link>
                   </p>
                 </div>
               </div>

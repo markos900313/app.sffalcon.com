@@ -5,6 +5,7 @@ import { X, Loader2, Users, Trello, Zap, ArrowRightCircle } from 'lucide-react';
 import { Lead } from './types';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface ConvertModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface ConvertModalProps {
 
 export default function ConvertModal({ isOpen, onClose, lead, onSuccess }: ConvertModalProps) {
   const supabase = createClient();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
 
   const handleConvert = async (type: 'cliente' | 'deal' | 'cliente_y_deal') => {
@@ -84,16 +86,16 @@ export default function ConvertModal({ isOpen, onClose, lead, onSuccess }: Conve
       if (updateErr) throw updateErr;
 
       toast.success(
-        type === 'cliente' ? 'Contacto convertido en Cliente' :
-        type === 'deal' ? 'Contacto convertido en Oportunidad' :
-        'Contacto convertido en Cliente y Oportunidad'
+        type === 'cliente' ? t('modals.convert.toastConvertClient') :
+        type === 'deal' ? t('modals.convert.toastConvertDeal') :
+        t('modals.convert.toastConvertBoth')
       );
 
       onSuccess();
       onClose();
     } catch (error: any) {
       console.error('Conversion error:', error);
-      toast.error('Error al convertir contacto: ' + (error.message || 'Error desconocido'));
+      toast.error(t('modals.convert.toastError') + (error.message || 'Error desconocido'));
     } finally {
       setLoading(false);
     }
@@ -112,7 +114,7 @@ export default function ConvertModal({ isOpen, onClose, lead, onSuccess }: Conve
               <ArrowRightCircle className="text-purple-500" size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Convertir Contacto</h3>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{t('modals.convert.title')}</h3>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 truncate max-w-[200px]">{lead.nombre}</p>
             </div>
           </div>
@@ -124,7 +126,7 @@ export default function ConvertModal({ isOpen, onClose, lead, onSuccess }: Conve
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-4">
-            Selecciona el destino para este contacto. La información de contacto y valor estimado se transferirá automáticamente.
+            {t('modals.convert.desc')}
           </p>
 
           <button
@@ -136,8 +138,8 @@ export default function ConvertModal({ isOpen, onClose, lead, onSuccess }: Conve
               <Users size={20} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-black text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Nuevo Cliente</p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-500">Añade este contacto a tu Cartera de Clientes</p>
+              <p className="text-sm font-black text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{t('modals.convert.optionClient')}</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-500">{t('modals.convert.optionClientDesc')}</p>
             </div>
           </button>
 
@@ -150,8 +152,8 @@ export default function ConvertModal({ isOpen, onClose, lead, onSuccess }: Conve
               <Trello size={20} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-black text-slate-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Nuevo Negocio (Pipeline)</p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-500">Crea una oportunidad en el embudo de ventas</p>
+              <p className="text-sm font-black text-slate-800 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{t('modals.convert.optionDeal')}</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-500">{t('modals.convert.optionDealDesc')}</p>
             </div>
           </button>
 
@@ -164,8 +166,8 @@ export default function ConvertModal({ isOpen, onClose, lead, onSuccess }: Conve
               <Zap size={20} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-black text-white">Cliente + Negocio</p>
-              <p className="text-[10px] text-blue-100">Crea ambos registros vinculados automáticamente</p>
+              <p className="text-sm font-black text-white">{t('modals.convert.optionBoth')}</p>
+              <p className="text-[10px] text-blue-100">{t('modals.convert.optionBothDesc')}</p>
             </div>
             {loading && <Loader2 size={20} className="animate-spin text-white" />}
           </button>
@@ -177,7 +179,7 @@ export default function ConvertModal({ isOpen, onClose, lead, onSuccess }: Conve
             onClick={onClose} 
             className="w-full py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors active:scale-95"
           >
-            Mantener como Contacto Comercial
+            {t('modals.convert.keepAsLead')}
           </button>
         </div>
       </div>

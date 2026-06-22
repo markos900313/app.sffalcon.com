@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Search, MoreVertical, Edit2, Eye, Trash2, User, Building2, Phone, Mail, Calendar, TrendingUp, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { Client } from '@/app/dashboard/clients/types';
+import { Client } from '@/app/(dashboard)/dashboard/clients/types';
 
 interface ClientsListProps {
   clients: Client[];

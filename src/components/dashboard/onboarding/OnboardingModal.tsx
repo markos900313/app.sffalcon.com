@@ -1,102 +1,81 @@
 'use client'
 
 import { parseTime } from '@/lib/utils/time'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Stethoscope,
-  GraduationCap,
-  Home,
-  Wrench,
-  Monitor,
-  Scissors,
-  LayoutGrid,
-  ChevronRight,
-  ChevronLeft,
+  X,
   Upload,
-  Clock,
-  Mail,
   Briefcase,
-  Utensils,
   Globe,
   Phone,
   CheckCircle2,
   Info,
-  Laptop,
-  X,
-  Hammer,
-  Zap,
-  QrCode
+  Mail,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/context/OrganizationContext'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
-
-// Sector icons removed - universal architecture
-
-const COUNTRIES = [
-  { code: 'ES', name: 'España', flag: '🇪🇸', currency: 'EUR', symbol: '€' },
-  { code: 'US', name: 'EEUU', flag: '🇺🇸', currency: 'USD', symbol: '$' },
-  { code: 'MX', name: 'México', flag: '🇲🇽', currency: 'MXN', symbol: '$' },
-  { code: 'CO', name: 'Colombia', flag: '🇨🇴', currency: 'COP', symbol: '$' },
-  { code: 'AR', name: 'Argentina', flag: '🇦🇷', currency: 'ARS', symbol: '$' },
-  { code: 'GB', name: 'Reino Unido', flag: '🇬🇧', currency: 'GBP', symbol: '£' },
-  { code: 'FR', name: 'Francia', flag: '🇫🇷', currency: 'EUR', symbol: '€' },
-  { code: 'DE', name: 'Alemania', flag: '🇩🇪', currency: 'EUR', symbol: '€' },
-  { code: 'CU', name: 'Cuba', flag: '🇨🇺', currency: 'CUP', symbol: '$' },
-  { code: 'CL', name: 'Chile', flag: '🇨🇱', currency: 'CLP', symbol: '$' },
-  { code: 'PE', name: 'Perú', flag: '🇵🇪', currency: 'PEN', symbol: 'S/' },
-]
-
-const DAYS = [
-  { id: 1, label: 'L' },
-  { id: 2, label: 'M' },
-  { id: 3, label: 'X' },
-  { id: 4, label: 'J' },
-  { id: 5, label: 'V' },
-  { id: 6, label: 'S' },
-  { id: 7, label: 'D' },
-]
-
-const HOURS = Array.from({ length: 24 }, (_, i) => {
-  return `${i.toString().padStart(2, '0')}:00`
-})
+import { useLanguage } from '@/lib/LanguageContext'
 
 interface OnboardingModalProps {
   onComplete: () => void
   onCancel?: () => void
 }
 
-const PLAN_OPTIONS = [
-  {
-    id: 'pro',
-    name: 'SF Gestor Empresarial',
-    price: '29€',
-    features: [
-      'Clientes y agenda ilimitados',
-      'Comunicaciones WhatsApp + Email',
-      'IA responde por ti 24/7',
-      'Finanzas y facturas',
-      'Productos e inventario',
-      'Estadísticas y métricas',
-      'Equipo y fichajes',
-      'SF IA en el panel'
-    ],
-    badge: 'Todo incluido',
-    highlight: true,
-    subtitle: '90 días GRATIS · Sin tarjeta'
-  }
+const COUNTRIES = [
+  { code: 'ES', flag: '🇪🇸', currency: 'EUR', symbol: '€' },
+  { code: 'US', flag: '🇺🇸', currency: 'USD', symbol: '$' },
+  { code: 'MX', flag: '🇲🇽', currency: 'MXN', symbol: '$' },
+  { code: 'CO', flag: '🇨🇴', currency: 'COP', symbol: '$' },
+  { code: 'AR', flag: '🇦🇷', currency: 'ARS', symbol: '$' },
+  { code: 'GB', flag: '🇬🇧', currency: 'GBP', symbol: '£' },
+  { code: 'FR', flag: '🇫🇷', currency: 'EUR', symbol: '€' },
+  { code: 'DE', flag: '🇩🇪', currency: 'EUR', symbol: '€' },
+  { code: 'CU', flag: '🇨🇺', currency: 'CUP', symbol: '$' },
+  { code: 'CL', flag: '🇨🇱', currency: 'CLP', symbol: '$' },
+  { code: 'PE', flag: '🇵🇪', currency: 'PEN', symbol: 'S/' },
 ]
+
+const HOURS = Array.from({ length: 24 }, (_, i) => {
+  return `${i.toString().padStart(2, '0')}:00`
+})
 
 export default function OnboardingModal({ onComplete, onCancel }: OnboardingModalProps) {
   const { organization, loading: orgLoading } = useOrganization()
+  const { t, language } = useLanguage()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [totalSteps] = useState(8)
   const supabase = createClient()
   const router = useRouter()
+
+  const getCountryName = (code: string) => {
+    switch (code) {
+      case 'ES': return language === 'es' ? 'España' : 'Spain';
+      case 'US': return language === 'es' ? 'EEUU' : 'USA';
+      case 'MX': return language === 'es' ? 'México' : 'Mexico';
+      case 'CO': return language === 'es' ? 'Colombia' : 'Colombia';
+      case 'AR': return language === 'es' ? 'Argentina' : 'Argentina';
+      case 'GB': return language === 'es' ? 'Reino Unido' : 'United Kingdom';
+      case 'FR': return language === 'es' ? 'Francia' : 'France';
+      case 'DE': return language === 'es' ? 'Alemania' : 'Germany';
+      case 'CU': return language === 'es' ? 'Cuba' : 'Cuba';
+      case 'CL': return language === 'es' ? 'Chile' : 'Chile';
+      case 'PE': return language === 'es' ? 'Perú' : 'Peru';
+      default: return '';
+    }
+  }
+
+  const getDayLabel = (id: number) => {
+    const labelsES = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    const labelsEN = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    return language === 'es' ? labelsES[id - 1] : labelsEN[id - 1];
+  }
 
   // Form State
   const [formData, setFormData] = useState({
@@ -114,7 +93,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
     currency: 'EUR',
     businessPhone: organization?.whatsapp_number || '',
     businessEmail: organization?.email_channel || '',
-    sector: '', // Replaces legacy sector column for universal prompt
+    sector: '', 
     logoFile: null as File | null,
     logoUrl: organization?.logo_url || '',
 
@@ -134,6 +113,29 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
     selectedPlan: 'pro'
   })
   const [showHelp, setShowHelp] = useState(false)
+
+  const isUS = formData.countryCode === 'US' || formData.currency === 'USD'
+
+  const PLAN_OPTIONS = [
+    {
+      id: 'pro',
+      name: language === 'es' ? 'SF Gestor Empresarial' : 'SF Business Manager',
+      price: isUS ? '$29' : '29€',
+      features: [
+        language === 'es' ? 'Clientes y agenda ilimitados' : 'Unlimited clients and schedule',
+        language === 'es' ? 'Comunicaciones WhatsApp + Email' : 'WhatsApp + Email communications',
+        language === 'es' ? 'IA responde por ti 24/7' : 'AI responds for you 24/7',
+        language === 'es' ? 'Finanzas y facturas' : 'Finance and invoices',
+        language === 'es' ? 'Productos e inventario' : 'Products and inventory',
+        language === 'es' ? 'Estadísticas y métricas' : 'Statistics and metrics',
+        language === 'es' ? 'Equipo y fichajes' : 'Team and clock-ins',
+        language === 'es' ? 'SF IA en el panel' : 'SF AI in dashboard'
+      ],
+      badge: language === 'es' ? 'Todo incluido' : 'All-in-one',
+      highlight: true,
+      subtitle: language === 'es' ? '90 días GRATIS · Sin tarjeta' : '90 days FREE · No card'
+    }
+  ]
 
   if (orgLoading) {
     return (
@@ -166,7 +168,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('El archivo es demasiado grande (máx 2MB)')
+      toast.error(t('modals.onboarding.logoSizeError'))
       return
     }
     setFormData(prev => ({ ...prev, logoFile: file }))
@@ -177,7 +179,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
     console.log('Completando onboarding...')
 
     if (!organization?.id) {
-      toast.error('Error: organización no encontrada')
+      toast.error(t('modals.onboarding.toastOrgError'))
       console.error('Onboarding Error: No organization.id found')
       return
     }
@@ -186,7 +188,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
     try {
       console.log('Obteniendo usuario...')
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No se encontró el usuario activo')
+      if (!user) throw new Error(t('modals.onboarding.toastUserError'))
 
       // Upload Logo
       let finalLogoUrl = formData.logoUrl
@@ -235,7 +237,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
           name: formData.businessName,
           country: formData.countryCode,
           currency: formData.currency,
-          currency_symbol: selectedCountry.symbol,
+          currency_symbol: selectedCountry.symbol || '$',
           phone: formData.businessPhone,
           email: formData.businessEmail,
           whatsapp_number: formData.businessPhone,
@@ -290,7 +292,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
       if (profileError) throw profileError
 
       console.log('Onboarding completado exitosamente')
-      toast.success('¡Configuración completada! Redirigiendo...')
+      toast.success(t('modals.onboarding.toastCompleteSuccess'))
 
       // Primero llamamos a onComplete para que el componente padre sepa que terminó
       if (onComplete) onComplete()
@@ -301,7 +303,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
 
     } catch (error: any) {
       console.error('Error crítico en onboarding:', error)
-      toast.error('Error al completar la configuración: ' + (error.message || 'Error desconocido'))
+      toast.error(t('modals.onboarding.toastCompleteError') + (error.message || 'Error desconocido'))
     } finally {
       setLoading(false)
     }
@@ -329,7 +331,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
           <button
             onClick={onCancel || onComplete}
             className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all z-20"
-            title="Cerrar"
+            title={t('modals.onboarding.close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -375,8 +377,8 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                     <CheckCircle2 className="w-12 h-12 text-blue-500" />
                   </motion.div>
                   <header>
-                    <h2 className="text-4xl font-bold text-white mb-4">¡Bienvenido a SF Gestor Empresarial!</h2>
-                    <p className="text-xl text-white/40 max-w-md mx-auto">Configura tu asistente empresarial con IA para que empiece a trabajar por ti hoy mismo.</p>
+                    <h2 className="text-4xl font-bold text-white mb-4">{t('modals.onboarding.welcomeTitle')}</h2>
+                    <p className="text-xl text-white/40 max-w-md mx-auto">{t('modals.onboarding.welcomeDesc')}</p>
                   </header>
                 </div>
               )}
@@ -384,8 +386,8 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
               {step === 2 && (
                 <div className="space-y-6">
                   <header>
-                    <h2 className="text-3xl font-bold text-white mb-2">Cuéntanos sobre ti</h2>
-                    <p className="text-white/40">Queremos saber con quién estamos trabajando</p>
+                    <h2 className="text-3xl font-bold text-white mb-2">{t('modals.onboarding.profileTitle')}</h2>
+                    <p className="text-white/40">{t('modals.onboarding.profileDesc')}</p>
                   </header>
 
                   <div className="flex flex-col md:flex-row gap-8 py-4">
@@ -410,12 +412,12 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                           )}
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Foto de perfil</span>
+                      <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{t('modals.onboarding.profilePhoto')}</span>
                     </div>
 
                     <div className="flex-1 space-y-4">
                       <div className="space-y-2">
-                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Nombre Completo</label>
+                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.fullName')}</label>
                         <input
                           value={formData.fullName}
                           onChange={e => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
@@ -425,7 +427,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Cargo</label>
+                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.cargo')}</label>
                           <input
                             value={formData.cargo}
                             onChange={e => setFormData(prev => ({ ...prev, cargo: e.target.value }))}
@@ -434,7 +436,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Teléfono Personal</label>
+                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.personalPhone')}</label>
                           <input
                             value={formData.personalPhone}
                             onChange={e => setFormData(prev => ({ ...prev, personalPhone: e.target.value }))}
@@ -451,14 +453,14 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
               {step === 3 && (
                 <div className="space-y-6">
                   <header>
-                    <h2 className="text-3xl font-bold text-white mb-2">Tu Negocio</h2>
-                    <p className="text-white/40">Configura la identidad corporativa de tu empresa</p>
+                    <h2 className="text-3xl font-bold text-white mb-2">{t('modals.onboarding.businessTitle')}</h2>
+                    <p className="text-white/40">{t('modals.onboarding.businessDesc')}</p>
                   </header>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Nombre del Negocio</label>
+                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.businessName')}</label>
                         <input
                           value={formData.businessName}
                           onChange={e => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
@@ -479,23 +481,23 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                             }}
                             className="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-500 focus:ring-0"
                           />
-                          <span className="text-xs text-white/40">Soy autónomo (usar mi nombre)</span>
+                          <span className="text-xs text-white/40">{t('modals.onboarding.autonomoCheckbox')}</span>
                         </label>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">País</label>
+                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.country')}</label>
                           <select
                             value={formData.countryCode}
                             onChange={e => setFormData(prev => ({ ...prev, countryCode: e.target.value }))}
                             className="w-full bg-[#0f1629] border border-white/10 rounded-xl py-4 px-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none font-medium"
                           >
-                            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.name}</option>)}
+                            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {getCountryName(c.code)}</option>)}
                           </select>
                         </div>
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Moneda</label>
+                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.currency')}</label>
                           <select
                             value={formData.currency}
                             onChange={e => setFormData(prev => ({ ...prev, currency: e.target.value }))}
@@ -510,7 +512,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Actividad / Giro del Negocio</label>
+                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.activity')}</label>
                         <input
                           value={formData.sector}
                           onChange={e => setFormData(prev => ({ ...prev, sector: e.target.value }))}
@@ -523,7 +525,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                     <div className="space-y-6">
                       <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Teléfono del Negocio</label>
+                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.businessPhone')}</label>
                           <input
                             value={formData.businessPhone}
                             onChange={e => setFormData(prev => ({ ...prev, businessPhone: e.target.value }))}
@@ -532,7 +534,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Email Corporativo</label>
+                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.businessEmail')}</label>
                           <input
                             value={formData.businessEmail}
                             onChange={e => setFormData(prev => ({ ...prev, businessEmail: e.target.value }))}
@@ -559,7 +561,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                           </div>
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs font-bold text-white mb-1 uppercase tracking-wider">Logo del Negocio</p>
+                          <p className="text-xs font-bold text-white mb-1 uppercase tracking-wider">{t('modals.onboarding.businessLogo')}</p>
                           <p className="text-[10px] text-white/30">PNG, JPG o SVG (máx 2MB)</p>
                         </div>
                       </div>
@@ -571,32 +573,32 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
               {step === 4 && (
                 <div className="space-y-6">
                   <header>
-                    <h2 className="text-3xl font-bold text-white mb-2">¿Cuándo atiendes?</h2>
-                    <p className="text-white/40">La IA responderá automáticamente fuera de este horario</p>
+                    <h2 className="text-3xl font-bold text-white mb-2">{t('modals.onboarding.scheduleTitle')}</h2>
+                    <p className="text-white/40">{t('modals.onboarding.scheduleDesc')}</p>
                   </header>
 
                   <div className="space-y-8 py-4">
                     <div className="space-y-4">
-                      <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Días laborables</label>
+                      <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.workingDays')}</label>
                       <div className="flex flex-wrap gap-2">
-                        {DAYS.map(day => (
+                        {[1, 2, 3, 4, 5, 6, 7].map(id => (
                           <button
-                            key={day.id}
+                            key={id}
                             type="button"
                             onClick={() => setFormData(prev => ({
                               ...prev,
-                              selectedDays: prev.selectedDays.includes(day.id)
-                                ? prev.selectedDays.filter(d => d !== day.id)
-                                : [...prev.selectedDays, day.id]
+                              selectedDays: prev.selectedDays.includes(id)
+                                ? prev.selectedDays.filter(d => d !== id)
+                                : [...prev.selectedDays, id]
                             }))}
                             className={cn(
                               "w-12 h-12 rounded-xl border-2 font-bold transition-all",
-                              formData.selectedDays.includes(day.id)
+                              formData.selectedDays.includes(id)
                                 ? "bg-blue-500/20 border-blue-500 text-blue-400"
                                 : "bg-white/5 border-white/5 text-white/30 hover:border-white/10"
                             )}
                           >
-                            {day.label}
+                            {getDayLabel(id)}
                           </button>
                         ))}
                       </div>
@@ -604,7 +606,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
 
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-4">
-                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Hora Inicio</label>
+                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.startTime')}</label>
                         <select
                           value={formData.startTime}
                           onChange={e => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
@@ -614,7 +616,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                         </select>
                       </div>
                       <div className="space-y-4">
-                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Hora Fin</label>
+                        <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.endTime')}</label>
                         <select
                           value={formData.endTime}
                           onChange={e => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
@@ -628,7 +630,11 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                     <div className="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-4 flex items-start gap-4">
                       <Info className="w-5 h-5 text-blue-400 shrink-0 mt-1" />
                       <p className="text-sm text-blue-400/80 leading-relaxed font-medium">
-                        Tu IA estará activa fuera de: <span className="text-white font-bold">{formData.selectedDays.map(id => DAYS.find(d => d.id === id)?.label).join(', ')} {formData.startTime} a {formData.endTime}</span>
+                        {t('modals.onboarding.aiActiveNotice')
+                          .replace('{days}', formData.selectedDays.map(id => getDayLabel(id)).join(', '))
+                          .replace('{start}', formData.startTime)
+                          .replace('{end}', formData.endTime)
+                        }
                       </p>
                     </div>
                   </div>
@@ -638,15 +644,15 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
               {step === 5 && (
                 <div className="space-y-6">
                   <header>
-                    <h2 className="text-3xl font-bold text-white mb-2">Personalidad de la IA</h2>
-                    <p className="text-white/40">Define cómo se comunicará SF con tu audiencia</p>
+                    <h2 className="text-3xl font-bold text-white mb-2">{t('modals.onboarding.personalityTitle')}</h2>
+                    <p className="text-white/40">{t('modals.onboarding.personalityDesc')}</p>
                   </header>
 
                   <div className="space-y-8 py-4">
                     <div className="grid grid-cols-2 gap-4">
                       {[
-                        { id: 'amigable', title: 'Cercana y amigable', icon: Phone, example: '¡Hola! Gracias por escribirnos...' },
-                        { id: 'profesional', title: 'Formal y profesional', icon: Briefcase, example: 'Buenos días. En respuesta a su consulta...' }
+                        { id: 'amigable', title: t('modals.onboarding.personalityFriendly'), icon: Phone, example: t('modals.onboarding.personalityFriendlyExample') },
+                        { id: 'profesional', title: t('modals.onboarding.personalityProfessional'), icon: Briefcase, example: t('modals.onboarding.personalityProfessionalExample') }
                       ].map(p => (
                         <button
                           key={p.id}
@@ -667,12 +673,12 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                     </div>
 
                     <div className="space-y-4">
-                      <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Describe tu negocio en 2-3 líneas</label>
+                      <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.businessDescriptionLabel')}</label>
                       <textarea
                         value={formData.description}
                         onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
                         className="w-full bg-white/5 border border-white/5 rounded-2xl p-5 text-white/80 focus:outline-none focus:border-blue-500/50 transition-all font-medium min-h-[120px]"
-                        placeholder="Ej: Somos una clínica dental en Madrid especializada en ortodoncia..."
+                        placeholder={t('modals.onboarding.businessDescriptionPlaceholder')}
                       />
                     </div>
                   </div>
@@ -685,8 +691,8 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                 return (
                   <div className="space-y-6">
                     <header>
-                      <h2 className="text-3xl font-bold text-white mb-2">Canales e Integraciones</h2>
-                      <p className="text-white/40">Conecta tus canales para que la IA pueda responder</p>
+                      <h2 className="text-3xl font-bold text-white mb-2">{t('modals.onboarding.integrationsTitle')}</h2>
+                      <p className="text-white/40">{t('modals.onboarding.integrationsDesc')}</p>
                     </header>
 
                     <div className="space-y-6 py-4">
@@ -698,7 +704,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                             </div>
                             <div>
                               <h3 className="text-sm font-bold text-white">WhatsApp Business</h3>
-                              <p className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">3 formas de conectar</p>
+                              <p className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">{t('modals.onboarding.waOptionTitle')}</p>
                             </div>
                           </div>
                         </div>
@@ -707,10 +713,10 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                           {/* Opción A */}
                           <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
                             <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-bold text-white">Opción A — Mensaje de ausencia</h4>
+                              <h4 className="text-xs font-bold text-white">{t('modals.onboarding.waOptionA')}</h4>
                             </div>
                             <p className="text-[11px] text-white/50 leading-relaxed">
-                              Pon nuestro número centralita en tu mensaje de ausencia de WhatsApp. Tus clientes serán atendidos automáticamente por la IA.
+                              {t('modals.onboarding.waOptionADesc')}
                             </p>
                             <div className="flex items-center gap-2 mt-2">
                               <input
@@ -723,42 +729,43 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                                 type="button"
                                 onClick={() => {
                                   navigator.clipboard.writeText(waLink)
-                                  toast.success("Enlace copiado")
+                                  toast.success(t('modals.onboarding.waCopiedToast'))
                                 }}
                                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[12px] rounded-xl transition-all whitespace-nowrap"
                               >
-                                Copiar
+                                {t('modals.onboarding.waCopyBtn')}
                               </button>
                             </div>
                           </div>
 
                           {/* Opción B */}
                           <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
-                            <h4 className="text-xs font-bold text-white">Opción B — Tu número en Meta</h4>
+                            <h4 className="text-xs font-bold text-white">{t('modals.onboarding.waOptionB')}</h4>
                             <p className="text-[11px] text-white/50 leading-relaxed">
-                              Registra tu número personal en Meta Business API. La IA responderá desde él respetando siempre la ventana de 24 horas desde el último mensaje del cliente.
+                              {t('modals.onboarding.waOptionBDesc')}
                             </p>
                           </div>
 
                           {/* Opción C */}
                           <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
                             <div className="flex items-center justify-between">
-                              <h4 className="text-xs font-bold text-white">Opción C — Número dedicado (recomendado)</h4>
-                              <span className="text-[8px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Recomendado</span>
+                              <h4 className="text-xs font-bold text-white">{t('modals.onboarding.waOptionC')}</h4>
+                              <span className="text-[8px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
+                                {language === 'es' ? 'Recomendado' : 'Recommended'}
+                              </span>
                             </div>
                             <p className="text-[11px] text-white/50 leading-relaxed">
-                              Contrata una SIM nueva exclusiva para el negocio y regístrala en Meta Business API. Máxima profesionalidad, sin mezclar con tu número personal.
+                              {t('modals.onboarding.waOptionCDesc')}
                             </p>
                           </div>
                         </div>
 
                         <p className="text-[10px] text-emerald-400/60 font-medium text-center italic uppercase tracking-wider">
-                          Podrás configurarlo desde Ajustes → Integraciones una vez completes la configuración.
+                          {t('modals.onboarding.waIntegrationHelp')}
                         </p>
 
                         <p className="text-[11px] text-white/30 text-center pt-2">
-                          ¿Necesitas ayuda? Contacta con soporte:{' '}
-                          <span className="text-white/60 font-bold">+34 604 989 742</span>
+                          {t('modals.onboarding.waSupportHelp').replace('{phone}', '+34 604 989 742')}
                         </p>
                       </div>
 
@@ -768,29 +775,25 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                             <Mail className="w-5 h-5 text-blue-400" />
                           </div>
                           <div>
-                            <h3 className="text-sm font-bold text-white">📧 Tu Email en SF</h3>
-                            <p className="text-[10px] text-blue-400 uppercase tracking-widest font-bold">Correo Personalizado</p>
+                            <h3 className="text-sm font-bold text-white">{t('modals.onboarding.emailTitle')}</h3>
+                            <p className="text-[10px] text-blue-400 uppercase tracking-widest font-bold">{t('modals.onboarding.emailDesc')}</p>
                           </div>
                         </div>
                         <p className="text-sm text-white/60 leading-relaxed">
-                          Elige un nombre de usuario y te asignamos una dirección de correo personalizada en <span className="text-white font-bold">@sffalcon.com</span>.
-                          Los emails que recibas ahí llegarán directamente a tu panel y la IA los gestionará.
+                          {t('modals.onboarding.emailExplanation')}
                         </p>
 
                         <div className="bg-blue-400/5 border border-blue-400/10 rounded-xl p-4 space-y-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Guía rápida: Reenvío Gmail</span>
+                            <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">{t('modals.onboarding.emailGuideTitle')}</span>
                           </div>
-                          <p className="text-[11px] text-white/50 leading-relaxed">
-                            Para gestionar tus correos actuales con IA: <br />
-                            1. En Gmail ve a <span className="text-white/70">Configuración &gt; Reenvío y correo POP/IMAP</span>. <br />
-                            2. Haz clic en <span className="text-white/70">"Añadir una dirección de reenvío"</span> y pega tu nueva dirección de sffalcon.com. <br />
-                            3. Una vez confirmado, todos tus correos llegarán directamente a este panel.
-                          </p>
+                          <div className="text-[11px] text-white/50 leading-relaxed whitespace-pre-line">
+                            {t('modals.onboarding.emailGuideDesc')}
+                          </div>
                         </div>
                         
                         <div className="space-y-2">
-                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Tu nombre de usuario</label>
+                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.emailUsernameLabel')}</label>
                           <div className="relative flex items-center">
                             <input
                               value={formData.businessEmail.split('@')[0]}
@@ -799,13 +802,15 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                                 setFormData(prev => ({ ...prev, businessEmail: `${value}@sffalcon.com` }))
                               }}
                               className="w-full bg-white/5 border border-white/5 rounded-xl py-4 pl-4 pr-32 text-white focus:outline-none focus:border-blue-500/50 transition-all font-medium"
-                              placeholder="tunegocio"
+                              placeholder={t('modals.onboarding.emailUsernamePlaceholder')}
                             />
                             <div className="absolute right-4 text-white/30 font-bold pointer-events-none">
                               @sffalcon.com
                             </div>
                           </div>
-                          <p className="text-[10px] text-white/20 italic">Ej: tunegocio@sffalcon.com</p>
+                          <p className="text-[10px] text-white/20 italic">
+                            {language === 'es' ? 'Ej: ' : 'E.g., '}{formData.businessEmail.split('@')[0] || 'yourbusiness'}@sffalcon.com
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -816,8 +821,8 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
               {step === 7 && (
                 <div className="space-y-6">
                   <header>
-                    <h2 className="text-3xl font-bold text-white mb-2">Consentimiento y Acceso</h2>
-                    <p className="text-white/40">Último paso antes de activar tu SF</p>
+                    <h2 className="text-3xl font-bold text-white mb-2">{t('modals.onboarding.consentTitle')}</h2>
+                    <p className="text-white/40">{t('modals.onboarding.consentDesc')}</p>
                   </header>
 
                   <div className="py-6 space-y-8">
@@ -826,9 +831,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                         <Info className="w-6 h-6 text-blue-400" />
                       </div>
                       <p className="text-sm text-white/70 leading-relaxed">
-                        Para ofrecerte el servicio de respuesta automática por WhatsApp e Email, SF necesita acceso a los mensajes que recibes en los canales que configures.
-                        Al continuar autorizas a SF a leer, procesar y responder mensajes en tu nombre según las condiciones de uso.
-                        Eres responsable de informar a tus contactos que pueden estar interactuando con un sistema automatizado.
+                        {t('modals.onboarding.consentExplanation')}
                       </p>
                     </div>
 
@@ -842,7 +845,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                         />
                       </div>
                       <span className="text-sm font-bold text-white/80 group-hover:text-white transition-colors">
-                        Acepto y autorizo el acceso a mis comunicaciones
+                        {t('modals.onboarding.consentCheckbox')}
                       </span>
                     </label>
                   </div>
@@ -876,7 +879,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                           <h3 className="text-xl font-bold text-white">{p.name}</h3>
                           <div className="text-right">
                             <span className="text-2xl font-black text-blue-400">{p.price}</span>
-                            <span className="text-xs font-normal text-white/40 ml-1">/mes</span>
+                            <span className="text-xs font-normal text-white/40 ml-1">{t('modals.subscription.perMonth')}</span>
                             <p className="text-[10px] text-blue-400/80 font-bold uppercase tracking-wider">{p.subtitle}</p>
                           </div>
                         </div>
@@ -892,14 +895,14 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                           "mt-auto w-full py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest text-center transition-all",
                           formData.selectedPlan === p.id ? "bg-blue-600 text-white" : "bg-white/5 text-white/40 group-hover:bg-white/10"
                         )}>
-                          {formData.selectedPlan === p.id ? 'Plan Activo' : 'Elegir Plan'}
+                          {formData.selectedPlan === p.id ? t('modals.onboarding.planActive') : t('modals.onboarding.planSelect')}
                         </div>
                       </button>
                     ))}
                   </div>
 
                   <p className="text-center text-[10px] text-white/20 uppercase tracking-[0.2em] font-medium">
-                    💳 No se requiere tarjeta de crédito para el trial
+                    {t('modals.onboarding.trialNotice')}
                   </p>
                 </div>
               )}
@@ -919,7 +922,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
             )}
           >
             <ChevronLeft className="w-4 h-4" />
-            Anterior
+            {t('modals.onboarding.prevButton')}
           </button>
 
           {step < totalSteps ? (
@@ -929,7 +932,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
               disabled={!isStepValid()}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs md:text-sm uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 shadow-xl shadow-blue-600/20"
             >
-              Siguiente
+              {t('modals.onboarding.nextButton')}
               <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
@@ -943,8 +946,8 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span className="hidden md:inline">COMPLETAR CONFIGURACIÓN</span>
-                  <span className="md:hidden">COMPLETAR</span>
+                  <span className="hidden md:inline">{t('modals.onboarding.completeButton')}</span>
+                  <span className="md:hidden">{t('modals.onboarding.completeButtonShort')}</span>
                   <ChevronRight className="w-5 h-5" />
                 </>
               )}

@@ -47,7 +47,7 @@ export default function SystemSection({ user }: { user: any }) {
           .eq('user_id', authUser.id)
 
         if (convs && convs.length > 0) {
-          const convIds = convs.map(c => c.id)
+          const convIds = convs.map((c: any) => c.id)
           
           await supabase
             .from('messages')

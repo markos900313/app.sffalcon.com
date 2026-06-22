@@ -33,12 +33,15 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
 
 export default function AgentAccountingPage() {
+  const { t, language } = useLanguage();
+
   // View Transitions CSS Injection
   useEffect(() => {
     const style = document.createElement('style');
@@ -124,7 +127,7 @@ export default function AgentAccountingPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de que deseas eliminar este registro?")) return;
+    if (!confirm(t('aiAgents.accounting.toast.confirmDelete'))) return;
     
     try {
       const { error } = await supabase
@@ -135,15 +138,15 @@ export default function AgentAccountingPage() {
       if (error) throw error;
       
       setInvoices(invoices.filter(inv => inv.id !== id));
-      toast.success("Registro eliminado");
+      toast.success(t('aiAgents.accounting.toast.deleteSuccess'));
     } catch (err) {
-      toast.error("Error al eliminar el registro");
+      toast.error(t('aiAgents.accounting.toast.deleteError'));
     }
   };
 
   const handleStartScan = async () => {
     if (!selectedFile) {
-      toast.error("Por favor, selecciona una factura primero");
+      toast.error(t('aiAgents.accounting.toast.selectInvoice'));
       return;
     }
 
@@ -185,16 +188,16 @@ export default function AgentAccountingPage() {
           setScanProgress(100);
           setTimeout(() => {
             setIsScanning(false);
-            toast.success("Factura analizada correctamente");
+            toast.success(t('aiAgents.accounting.toast.scanSuccess'));
           }, 500);
         } catch (e) {
-          throw new Error("La IA no devolvió un formato válido. Prueba con otra imagen.");
+          throw new Error(t('aiAgents.accounting.toast.invalidFormat'));
         }
       } else {
-        throw new Error(result.error || "Respuesta vacía del servidor de IA");
+        throw new Error(result.error || t('aiAgents.accounting.toast.emptyResponse'));
       }
     } catch (err) {
-      toast.error(`Error: ${err instanceof Error ? err.message : 'Error desconocido'}`);
+      toast.error(`Error: ${err instanceof Error ? err.message : 'Error'}`);
       setIsScanning(false);
     }
   };
@@ -205,7 +208,7 @@ export default function AgentAccountingPage() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuario no autenticado");
+      if (!user) throw new Error(t('aiAgents.accounting.toast.notAuthenticated'));
 
       const dateObj = extractedData.date ? new Date(extractedData.date) : new Date();
       const month = dateObj.getMonth() + 1;
@@ -226,13 +229,13 @@ export default function AgentAccountingPage() {
 
       if (error) throw error;
       
-      toast.success("Gasto registrado en contabilidad");
+      toast.success(t('aiAgents.accounting.toast.saveSuccess'));
       setIsUploading(false);
       setSelectedFile(null);
       setExtractedData(null);
       fetchAccountingData();
     } catch (err) {
-      toast.error("Error al guardar el gasto");
+      toast.error(t('aiAgents.accounting.toast.saveError'));
     } finally {
       setLoading(false);
     }
@@ -262,16 +265,20 @@ export default function AgentAccountingPage() {
                  animate={{ rotate: [0, 10, -10, 0] }}
                  transition={{ duration: 4, repeat: Infinity }}
                >
-                <BrainCircuit className="w-8 h-8 text-white" />
+                 <BrainCircuit className="w-8 h-8 text-white" />
                </motion.div>
             </div>
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">Auditoría Contable IA</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">{t('aiAgents.accounting.subtitle')}</span>
                 <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest">v5.2</span>
               </div>
               <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-                 Agente <span className="text-[#1B4FD8]">Contable</span>
+                 {language === 'es' ? (
+                   <>Agente <span className="text-[#1B4FD8]">Contable</span></>
+                 ) : (
+                   <>Accounting <span className="text-[#1B4FD8]">Agent</span></>
+                 )}
               </h2>
             </div>
           </div>
@@ -284,18 +291,18 @@ export default function AgentAccountingPage() {
               className="px-6 py-3 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center gap-2.5 transition-all shadow-lg shadow-blue-500/20"
             >
               <Upload size={14} />
-              Procesar Facturas IA
+              {t('aiAgents.accounting.processInvoices')}
             </motion.button>
             
             <div className="h-10 w-px bg-slate-100 dark:bg-[#1E3A5F] mx-2 hidden lg:block" />
             
             <div className="flex flex-col items-end">
                 <div className="flex items-center gap-2">
-                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Estado:</span>
-                   <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Operativo</span>
+                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t('aiAgents.accounting.statusLabel')}</span>
+                   <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{t('aiAgents.accounting.operative')}</span>
                 </div>
                 <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-0.5">
-                  Visión Artificial Activa
+                  {t('aiAgents.accounting.visionActive')}
                 </p>
             </div>
           </div>
@@ -305,9 +312,9 @@ export default function AgentAccountingPage() {
       <div className="space-y-6 mt-6">
         {/* KPI Grid - SPACIOUS VERSION */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <AIPerfCard title="FOOD COST REAL" value={stats.foodCost} trend="down" icon={<TrendingDown className="text-emerald-500" />} />
-          <AIPerfCard title="GASTOS OPERATIVOS" value={stats.totalExpenses} trend="up" icon={<Euro className="text-rose-500" />} />
-          <AIPerfCard title="AHORRO IA" value={stats.savings} trend="neutral" icon={<Bot className="text-blue-500" />} />
+          <AIPerfCard title={t('aiAgents.accounting.kpis.foodCost')} value={stats.foodCost} trend="down" icon={<TrendingDown className="text-emerald-500" />} />
+          <AIPerfCard title={t('aiAgents.accounting.kpis.operatingExpenses')} value={stats.totalExpenses} trend="up" icon={<Euro className="text-rose-500" />} />
+          <AIPerfCard title={t('aiAgents.accounting.kpis.savings')} value={stats.savings} trend="neutral" icon={<Bot className="text-blue-500" />} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -318,16 +325,16 @@ export default function AgentAccountingPage() {
                 <div>
                   <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
                     <Receipt className="w-5 h-5 text-blue-500" />
-                    Ecosistema de Facturación
+                    {t('aiAgents.accounting.ecosystemTitle')}
                   </h3>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Registros Validados IA</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('aiAgents.accounting.validatedLabel')}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="relative hidden md:block">
                     <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       type="text" 
-                      placeholder="FILTRAR..." 
+                      placeholder={t('aiAgents.accounting.filterPlaceholder')}
                       className="bg-slate-50 dark:bg-[#0D1B35] border border-slate-100 dark:border-[#1E3A5F] rounded-lg py-2 pl-9 pr-3 text-[9px] font-black uppercase tracking-widest focus:ring-1 focus:ring-blue-500 outline-none w-40 transition-all"
                     />
                   </div>
@@ -341,9 +348,9 @@ export default function AgentAccountingPage() {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50/30 dark:bg-[#0D1B35]/30 border-b border-slate-50 dark:border-[#1E3A5F]">
-                      <th className="px-4 md:px-8 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Concepto</th>
-                      <th className="px-4 md:px-8 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Importe</th>
-                      <th className="px-4 md:px-8 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Acciones</th>
+                      <th className="px-4 md:px-8 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.accounting.table.concept')}</th>
+                      <th className="px-4 md:px-8 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.accounting.table.amount')}</th>
+                      <th className="px-4 md:px-8 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">{t('aiAgents.accounting.table.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-[#1E3A5F]">
@@ -361,7 +368,7 @@ export default function AgentAccountingPage() {
                         <td className="px-4 md:px-8 py-4">
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                              <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                             <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">IA Verified</span>
+                             <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">{t('aiAgents.accounting.table.verified')}</span>
                           </div>
                           <div className="mt-1 text-sm font-black text-slate-900 dark:text-white tabular-nums">
                              {inv.amount?.toLocaleString()} €
@@ -380,7 +387,7 @@ export default function AgentAccountingPage() {
                       <tr>
                         <td colSpan={3} className="px-6 py-16 text-center opacity-40">
                            <Receipt size={40} className="mx-auto mb-3 text-slate-400" />
-                           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Sin registros fiscales en el radar</p>
+                           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">{t('aiAgents.accounting.table.noRecords')}</p>
                         </td>
                       </tr>
                     )}
@@ -395,25 +402,25 @@ export default function AgentAccountingPage() {
             <div className="card-premium p-6 md:p-8 bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-[24px] shadow-sm relative overflow-hidden group">
               <h3 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-amber-500" />
-                Insights AuditorIA
+                {t('aiAgents.accounting.insightsTitle')}
               </h3>
               <div className="space-y-3">
                 <InsightCard 
-                  title="Stock Optimizable"
-                  message="Detección de mermas inusuales en suministros. Reducción del 5% posible."
+                  title={t('aiAgents.accounting.insights.stockOptTitle')}
+                  message={t('aiAgents.accounting.insights.stockOptMessage')}
                   type="warning"
                 />
                 <InsightCard 
-                  title="Ahorro Proveedor"
-                  message="Alternativa detectada para suministros con un 12% de ahorro."
+                  title={t('aiAgents.accounting.insights.savingTitle')}
+                  message={t('aiAgents.accounting.insights.savingMessage')}
                   type="success"
                 />
               </div>
               
               <div className="mt-8 pt-6 border-t border-slate-50 dark:border-[#1E3A5F]">
                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Salud Contable</span>
-                    <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">A+ Optimal</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.accounting.accountingHealth')}</span>
+                    <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">{t('aiAgents.accounting.optimalHealth')}</span>
                  </div>
                  <div className="h-1 bg-slate-100 dark:bg-[#0D1B35] rounded-full overflow-hidden">
                     <motion.div 
@@ -429,20 +436,20 @@ export default function AgentAccountingPage() {
               <div className="relative z-10">
                  <h3 className="text-[9px] font-black uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                    <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-                   Predicción Q1
+                   {t('aiAgents.accounting.predictionTitle')}
                  </h3>
                  <p className="text-3xl font-black italic tracking-tighter mb-1.5">
                    {invoices.length > 0 ? (invoices.reduce((acc, curr) => acc + (curr.amount || 0), 0) * 1.05).toLocaleString() : '0'} €
                  </p>
                  <div className="flex items-center gap-2 text-white/70 text-[9px] font-black uppercase mb-8">
                     <TrendingUp size={12} className="text-emerald-400" />
-                    <span>+4.2% proyectado para este mes</span>
+                    <span>{t('aiAgents.accounting.projectedThisMonth')}</span>
                   </div>
                   <button 
                     onClick={() => setShowPredictiveModal(true)}
                     className="w-full py-4 bg-white text-blue-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:shadow-xl transition-all active:scale-95"
                   >
-                     Ver Diagnóstico Completo
+                     {t('aiAgents.accounting.viewFullDiagnostic')}
                   </button>
                </div>
              </div>
@@ -468,8 +475,8 @@ export default function AgentAccountingPage() {
               {/* Header */}
               <div className="flex items-center justify-between px-5 md:px-8 py-4 md:py-5 border-b border-slate-50 dark:border-[#1E3A5F]">
                  <div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">Visión Artificial</h2>
-                    <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mt-1">Sincronización via OCR</p>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter">{t('aiAgents.accounting.ocrModal.title')}</h2>
+                    <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mt-1">{t('aiAgents.accounting.ocrModal.ocrSync')}</p>
                  </div>
                  <button onClick={() => setIsUploading(false)} className="p-2.5 bg-slate-50 dark:bg-[#0D1B35] rounded-xl text-slate-400 hover:text-rose-500 transition-all">
                     <X size={20} />
@@ -486,9 +493,9 @@ export default function AgentAccountingPage() {
                    </div>
                    <div className="text-center">
                       <p className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1.5">
-                        {selectedFile ? selectedFile.name : 'Subir Factura'}
+                        {selectedFile ? selectedFile.name : t('aiAgents.accounting.ocrModal.uploadInvoice')}
                       </p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">PDF, JPG o Captura directa</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('aiAgents.accounting.ocrModal.uploadFormats')}</p>
                    </div>
                 </div>
                 
@@ -505,24 +512,24 @@ export default function AgentAccountingPage() {
                       className="bg-slate-50 dark:bg-[#0D1B35] border border-slate-100 dark:border-[#1E3A5F] rounded-[20px] p-6 shadow-inner"
                     >
                        <div className="flex items-center justify-between mb-6">
-                          <h4 className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Diagnóstico IA Finalizado</h4>
-                          <div className="px-2 py-0.5 bg-emerald-500/10 rounded-full text-[8px] font-black text-emerald-500 uppercase tracking-widest border border-emerald-500/20">Confidence 98%</div>
+                          <h4 className="text-[9px] font-black text-blue-500 uppercase tracking-widest">{t('aiAgents.accounting.ocrModal.diagnosticFinished')}</h4>
+                          <div className="px-2 py-0.5 bg-emerald-500/10 rounded-full text-[8px] font-black text-emerald-500 uppercase tracking-widest border border-emerald-500/20">{t('aiAgents.accounting.ocrModal.confidence')}</div>
                        </div>
                        <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-1">
-                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Concepto</p>
+                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.accounting.ocrModal.concept')}</p>
                              <p className="text-sm font-black text-slate-900 dark:text-white italic tracking-tighter uppercase truncate">{extractedData.concept || extractedData.proveedor}</p>
                           </div>
                           <div className="space-y-1">
-                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Importe</p>
+                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.accounting.ocrModal.amount')}</p>
                              <p className="text-2xl font-black text-blue-500 tabular-nums leading-none">{extractedData.amount || extractedData.total} €</p>
                           </div>
                           <div className="space-y-1">
-                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Optimización detectada en cadena de suministros.</p>
+                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{t('aiAgents.accounting.ocrModal.concept')}</p>
                              <p className="text-xs font-bold text-slate-800 dark:text-white tracking-widest uppercase">{extractedData.nif || '---'}</p>
                           </div>
                           <div className="space-y-1">
-                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Fecha Emitida</p>
+                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.accounting.ocrModal.date')}</p>
                              <p className="text-xs font-bold text-slate-800 dark:text-white">{extractedData.date || '---'}</p>
                           </div>
                        </div>
@@ -537,7 +544,7 @@ export default function AgentAccountingPage() {
                    onClick={() => setIsUploading(false)}
                    className="flex-1 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-[#1E3A5F]/40 rounded-xl transition-all"
                  >
-                   Cancelar
+                   {t('aiAgents.accounting.ocrModal.cancel')}
                  </button>
                  {extractedData ? (
                    <button 
@@ -545,7 +552,7 @@ export default function AgentAccountingPage() {
                      className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2"
                    >
                      <Save size={14} />
-                     Validar & Guardar
+                     {t('aiAgents.accounting.ocrModal.validateSave')}
                    </button>
                  ) : (
                    <button 
@@ -558,7 +565,7 @@ export default function AgentAccountingPage() {
                      ) : (
                         <Zap size={14} className="fill-white" />
                      )}
-                     {isScanning ? ` ऑडिट: ${scanProgress}%` : 'Iniciar Escaneo IA'}
+                     {isScanning ? `${t('aiAgents.accounting.ocrModal.scanning')}: ${scanProgress}%` : t('aiAgents.accounting.ocrModal.startScan')}
                    </button>
                  )}
               </div>
@@ -580,6 +587,7 @@ export default function AgentAccountingPage() {
 
 // STANDARD COMPONENTS
 function AIPerfCard({ title, value, trend, icon }: any) {
+  const { t } = useLanguage();
   return (
     <div className="card-premium bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] p-6 md:p-8 rounded-[24px] flex flex-col justify-between group transition-all hover:bg-slate-50 dark:hover:bg-white/5 shadow-sm relative overflow-hidden min-h-[160px]">
       <div className="flex items-center justify-between mb-5 relative z-10">
@@ -591,7 +599,7 @@ function AIPerfCard({ title, value, trend, icon }: any) {
              trend === 'down' ? 'bg-emerald-500/10 text-emerald-500' : 
              trend === 'up' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500'
            )}>
-             {trend === 'down' ? 'Optimal' : trend === 'up' ? 'Alert' : 'Stable'}
+             {trend === 'down' ? t('aiAgents.accounting.kpis.trendOptimal') : trend === 'up' ? t('aiAgents.accounting.kpis.trendAlert') : t('aiAgents.accounting.kpis.trendStable')}
            </div>
         )}
       </div>
@@ -629,6 +637,7 @@ function InsightCard({ title, message, type }: any) {
 }
 
 function PredictiveModal({ onClose, invoices }: any) {
+  const { t } = useLanguage();
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
       <motion.div 
@@ -648,9 +657,9 @@ function PredictiveModal({ onClose, invoices }: any) {
            <div className="w-16 h-16 rounded-[24px] bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center mx-auto mb-6 border border-blue-200 dark:border-blue-500/20">
               <Activity className="w-8 h-8 text-blue-600 drop-shadow-glow" />
            </div>
-           <h2 className="text-3xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter mb-4">Diagnóstico Predictivo</h2>
+           <h2 className="text-3xl font-black text-slate-900 dark:text-white italic uppercase tracking-tighter mb-4">{t('aiAgents.accounting.predictiveModal.diagnosticTitle')}</h2>
            <p className="text-slate-500 dark:text-slate-400 text-sm font-semibold max-w-xs mx-auto leading-relaxed">
-             Según el análisis de los últimos {invoices.length} movimientos, el sistema IA ha proyectado la siguiente ruta fiscal para tu negocio.
+             {t('aiAgents.accounting.predictiveModal.diagnosticDesc').replace('{count}', invoices.length.toString())}
            </p>
 
            <div className="mt-10 space-y-6">
@@ -660,9 +669,9 @@ function PredictiveModal({ onClose, invoices }: any) {
                        <Sparkles className="w-4.5 h-4.5 text-amber-500" />
                     </div>
                     <div>
-                       <h5 className="text-xs font-black text-slate-900 dark:text-white uppercase italic tracking-tighter mb-1 font-bold">Insumos y Logística</h5>
+                       <h5 className="text-xs font-black text-slate-900 dark:text-white uppercase italic tracking-tighter mb-1 font-bold">{t('aiAgents.accounting.predictiveModal.logisticsTitle')}</h5>
                        <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight font-bold uppercase">
-                          Optimización detectada en cadena de frío. Ahorro latente de <span className="text-emerald-500 font-black">2.1%</span>.
+                          {t('aiAgents.accounting.predictiveModal.logisticsDesc')}
                        </p>
                     </div>
                  </div>
@@ -672,9 +681,9 @@ function PredictiveModal({ onClose, invoices }: any) {
                        <TrendingUp className="w-4.5 h-4.5 text-blue-500" />
                     </div>
                     <div>
-                       <h5 className="text-xs font-black text-slate-900 dark:text-white uppercase italic tracking-tighter mb-1 font-bold">Energía</h5>
+                       <h5 className="text-xs font-black text-slate-900 dark:text-white uppercase italic tracking-tighter mb-1 font-bold">{t('aiAgents.accounting.predictiveModal.energyTitle')}</h5>
                        <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight font-bold uppercase">
-                          Potencial de ahorro: <span className="text-blue-500 font-black">140€/mes</span>.
+                          {t('aiAgents.accounting.predictiveModal.energyDesc')}
                        </p>
                     </div>
                  </div>
@@ -688,7 +697,7 @@ function PredictiveModal({ onClose, invoices }: any) {
             onClick={onClose}
             className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-all active:scale-95"
           >
-            Sincronizar Estrategia Fiscal
+            {t('aiAgents.accounting.predictiveModal.syncStrategy')}
           </button>
         </div>
       </motion.div>

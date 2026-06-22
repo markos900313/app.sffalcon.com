@@ -6,8 +6,9 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 import { useOrganization } from '@/context/OrganizationContext';
-import { getClientCampos } from '@/lib/sectorConfig';
-import { Client } from '@/app/dashboard/clients/types';
+
+
+import { Client } from '@/app/(dashboard)/dashboard/clients/types';
 
 const categoriasPorSector: Record<string, string[]> = {
   restaurante: [

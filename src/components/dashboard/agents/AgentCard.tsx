@@ -3,6 +3,7 @@
 import React from 'react';
 import { LucideIcon, Settings, Play, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface AgentCardProps {
   icon: LucideIcon;
@@ -31,6 +32,8 @@ export default function AgentCard({
   onRun,
   badge
 }: AgentCardProps) {
+  const { t } = useLanguage();
+
   return (
     <div className="bg-white dark:bg-[#111F3A] rounded-[32px] border border-[#E2E8F0] dark:border-[#1E3A5F] shadow-sm overflow-hidden p-6 md:p-8 flex flex-col h-full hover:shadow-md transition-all relative">
       {badge && (
@@ -66,8 +69,8 @@ export default function AgentCard({
 
       <div className="mt-8 space-y-4 pt-6 border-t border-slate-50 dark:border-[#1E3A5F]">
         <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-slate-400">
-          <span>Última ejecución</span>
-          <span className="text-slate-500 dark:text-slate-300">{lastRun || 'Nunca'}</span>
+          <span>{t('aiAgents.cards.lastRun')}</span>
+          <span className="text-slate-500 dark:text-slate-300">{lastRun || t('aiAgents.cards.never')}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -75,7 +78,7 @@ export default function AgentCard({
             onClick={onConfigure}
             className="flex items-center justify-center gap-2 px-3 md:px-4 py-3 rounded-xl border border-slate-100 dark:border-[#1E3A5F] text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-[10px] md:text-xs font-semibold uppercase tracking-widest"
           >
-            <Settings className="w-3.5 h-3.5 md:w-4 md:h-4" /> Configurar
+            <Settings className="w-3.5 h-3.5 md:w-4 md:h-4" /> {t('aiAgents.cards.configure')}
           </button>
           <button 
             onClick={onRun}
@@ -90,7 +93,7 @@ export default function AgentCard({
             ) : (
               <Play className="w-3.5 h-3.5 md:w-4 md:h-4" />
             )}
-            Exec. ahora
+            {t('aiAgents.cards.runNow')}
           </button>
         </div>
       </div>

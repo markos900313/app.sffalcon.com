@@ -17,6 +17,7 @@ import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { useOrganization } from '@/context/OrganizationContext';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -42,6 +43,7 @@ const STATUSES = ['propuesta', 'activo', 'completado', 'cancelado'];
 export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }: ProjectModalProps) {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -98,7 +100,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
+ 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
@@ -125,19 +127,19 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
           .update(payload)
           .eq('id', editProject.id);
         if (error) throw error;
-        toast.success('Proyecto actualizado');
+        toast.success(t('modals.project.toastUpdateSuccess'));
       } else {
         const { error } = await supabase
           .from('projects')
           .insert([payload]);
         if (error) throw error;
-        toast.success('Proyecto creado correctamente');
+        toast.success(t('modals.project.toastCreateSuccess'));
       }
 
       onSuccess();
       onClose();
     } catch (error: any) {
-      toast.error('Error al guardar el proyecto');
+      toast.error(t('modals.project.toastSaveError'));
       console.error(error);
     } finally {
       setLoading(false);
@@ -163,9 +165,9 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
             </div>
             <div>
               <h2 className="text-lg md:text-xl font-semibold text-slate-900 dark:text-white uppercase tracking-tight">
-                {editProject ? 'EDITAR PROYECTO' : 'NUEVO PROYECTO'}
+                {editProject ? t('modals.project.editTitle') : t('modals.project.newTitle')}
               </h2>
-              <p className="hidden sm:block text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400">Define los parámetros del nuevo encargo.</p>
+              <p className="hidden sm:block text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400">{t('modals.project.desc')}</p>
             </div>
           </div>
           <button 
@@ -183,14 +185,14 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
             {/* Nombre */}
             <div className="md:col-span-2 space-y-2">
               <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Briefcase className="w-3.5 h-3.5" /> Nombre del Proyecto
+                <Briefcase className="w-3.5 h-3.5" /> {t('modals.project.nameLabel')}
               </label>
               <input
                 required
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Ej. Diseño Web Corp"
+                placeholder={t('modals.project.namePlaceholder')}
                 className="w-full bg-slate-100/50 dark:bg-[#111F3A] border-none rounded-2xl px-5 py-4 text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1B4FD8]/20 transition-all"
               />
             </div>
@@ -198,33 +200,31 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
             {/* Cliente */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <User className="w-3.5 h-3.5" /> Contacto Vinculado
+                <User className="w-3.5 h-3.5" /> {t('modals.project.clientLabel')}
               </label>
               <select
                 value={formData.client_id}
                 onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
                 className="w-full bg-slate-100/50 dark:bg-[#111F3A] border-none rounded-2xl px-5 py-4 text-base font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-[#1B4FD8]/20 transition-all cursor-pointer bg-[#111F3A]"
               >
-                <option value="" className="bg-[#111F3A] text-white">Sin Contacto / Particular</option>
+                <option value="" className="bg-[#111F3A] text-white">{t('modals.project.clientPlaceholder')}</option>
                 {clients.map(c => (
                   <option key={c.id} value={c.id} className="bg-[#111F3A] text-white">{c.name}</option>
                 ))}
               </select>
             </div>
 
-
-
             {/* Presupuesto */}
             <div className="space-y-2">
               <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <DollarSign className="w-3.5 h-3.5" /> Presupuesto Total
+                <DollarSign className="w-3.5 h-3.5" /> {t('modals.project.budgetLabel')}
               </label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.budget}
                 onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
-                placeholder="0.00€"
+                placeholder="0.00"
                 className="w-full bg-slate-100/50 dark:bg-[#111F3A] border-none rounded-2xl px-5 py-4 text-base font-semibold text-slate-900 dark:text-white focus:ring-1 focus:ring-[#1B4FD8]/20 transition-all"
               />
             </div>
@@ -232,14 +232,14 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
             {/* Cobrado */}
             <div className="space-y-2">
               <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <DollarSign className="w-3.5 h-3.5" /> Cobrado hasta hoy
+                <DollarSign className="w-3.5 h-3.5" /> {t('modals.project.paidLabel')}
               </label>
               <input
                 type="number"
                 step="0.01"
                 value={formData.paid}
                 onChange={(e) => setFormData({ ...formData, paid: e.target.value })}
-                placeholder="0.00€"
+                placeholder="0.00"
                 className="w-full bg-slate-100/50 dark:bg-[#111F3A] border-none rounded-2xl px-5 py-4 text-base font-semibold text-slate-900 dark:text-white focus:ring-1 focus:ring-[#1B4FD8]/20 transition-all"
               />
             </div>
@@ -247,7 +247,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
             {/* Estado */}
             <div className="space-y-2">
               <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5" /> Estado Inicial
+                <FileText className="w-3.5 h-3.5" /> {t('modals.project.statusLabel')}
               </label>
               <select
                 value={formData.status}
@@ -255,7 +255,9 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
                 className="w-full bg-slate-100/50 dark:bg-[#111F3A] border-none rounded-2xl px-5 py-4 text-base font-semibold text-slate-900 dark:text-white uppercase focus:ring-1 focus:ring-[#1B4FD8]/20 transition-all cursor-pointer bg-[#111F3A]"
               >
                 {STATUSES.map(s => (
-                  <option key={s} value={s} className="bg-[#111F3A] text-white">{s}</option>
+                  <option key={s} value={s} className="bg-[#111F3A] text-white">
+                    {t(`modals.project.statuses.${s}`)}
+                  </option>
                 ))}
               </select>
             </div>
@@ -264,7 +266,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
             <div className="md:col-span-2 space-y-4 py-2">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Target className="w-3.5 h-3.5" /> Progreso Real: {formData.progress}%
+                  <Target className="w-3.5 h-3.5" /> {t('modals.project.progressLabel').replace('{progress}', String(formData.progress))}
                 </label>
               </div>
               <input
@@ -280,7 +282,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
             {/* Fechas */}
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5" /> Fecha Inicio
+                <Calendar className="w-3.5 h-3.5" /> {t('modals.project.startDateLabel')}
               </label>
               <input
                 type="date"
@@ -292,7 +294,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5" /> Fin Estimado
+                <Calendar className="w-3.5 h-3.5" /> {t('modals.project.endDateLabel')}
               </label>
               <input
                 type="date"
@@ -302,17 +304,16 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
               />
             </div>
 
-
             {/* Descripción */}
             <div className="md:col-span-2 space-y-2">
               <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5" /> Descripción del Proyecto
+                <FileText className="w-3.5 h-3.5" /> {t('modals.project.descriptionLabel')}
               </label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={2}
-                placeholder="Breve resumen del alcance..."
+                placeholder={t('modals.project.descriptionPlaceholder')}
                 className="w-full bg-slate-100/50 dark:bg-[#111F3A] border-none rounded-2xl px-5 py-3 text-base font-semibold text-slate-900 dark:text-white focus:ring-1 focus:ring-[#1B4FD8]/20 transition-all resize-none"
               />
             </div>
@@ -320,17 +321,16 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
             {/* Notas */}
             <div className="md:col-span-2 space-y-2">
               <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5" /> Notas Internas
+                <FileText className="w-3.5 h-3.5" /> {t('modals.project.notesLabel')}
               </label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={2}
-                placeholder="Notas privadas sobre el cliente o el pago..."
+                placeholder={t('modals.project.notesPlaceholder')}
                 className="w-full bg-slate-100/50 dark:bg-[#111F3A] border-none rounded-2xl px-5 py-3 text-base font-semibold text-slate-900 dark:text-white focus:ring-1 focus:ring-[#1B4FD8]/20 transition-all resize-none"
               />
             </div>
-
 
           </div>
 
@@ -341,7 +341,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
               onClick={onClose}
               className="w-full sm:w-auto flex-1 py-4 px-6 border border-slate-200 dark:border-[#1E3A5F] text-slate-600 dark:text-slate-400 rounded-2xl font-semibold text-sm hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
             >
-              CANCELAR
+              {t('modals.project.cancel')}
             </button>
             <button
               type="submit"
@@ -349,7 +349,7 @@ export default function ProjectModal({ isOpen, onClose, onSuccess, editProject }
               className="w-full sm:w-auto flex-[2] py-4 px-6 bg-[#1B4FD8] text-white rounded-2xl font-semibold text-sm shadow-xl shadow-blue-500/20 hover:bg-[#1642B5] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 uppercase tracking-widest"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-              {editProject ? 'GUARDAR CAMBIOS' : 'CREAR PROYECTO'}
+              {editProject ? t('modals.project.save') : t('modals.project.create')}
             </button>
           </div>
         </form>

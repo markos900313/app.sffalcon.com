@@ -4,7 +4,7 @@ import {
   PieChart, Pie, Cell, Legend, CartesianGrid
 } from 'recharts';
 import { Target, TrendingUp, Users, PieChart as PieIcon, BarChart3, ArrowUpRight } from 'lucide-react';
-import { Client } from '@/app/dashboard/clients/types';
+import { Client } from '@/app/(dashboard)/dashboard/clients/types';
 
 interface ClientsAnalyticsProps {
   clients: Client[];
@@ -18,6 +18,14 @@ interface MonthlyData {
 }
 
 const COLORS = ['#1B4FD8', '#10B981', '#F59E0B', '#64748B', '#8B5CF6'];
+
+const STATUS_LABELS: Record<string, string> = {
+  lead: 'Lead',
+  potencial: 'Potencial',
+  activo: 'Activo',
+  inactivo: 'Inactivo',
+  nuevo: 'Nuevo',
+};
 
 export default function ClientsAnalytics({ clients }: ClientsAnalyticsProps) {
   const stats = useMemo(() => {

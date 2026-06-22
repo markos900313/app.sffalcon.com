@@ -11,11 +11,13 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import ProjectDetail from '@/components/dashboard/projects/ProjectDetail';
 import toast from 'react-hot-toast';
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function ProjectDetailIdPage() {
   const { id } = useParams();
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useLanguage();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,7 +41,7 @@ export default function ProjectDetailIdPage() {
       if (error) throw error;
       setProject(data);
     } catch (error: any) {
-      toast.error('Error al cargar detalle del proyecto');
+      toast.error(t('projectDetail.toast.loadError'));
       router.push('/dashboard/projects');
     } finally {
       setLoading(false);
@@ -51,15 +53,15 @@ export default function ProjectDetailIdPage() {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!confirm('¿Estás seguro de eliminar este proyecto? Esta acción no se puede deshacer.')) return;
+    if (!confirm(t('projectDetail.deleteConfirm'))) return;
     
     try {
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) throw error;
-      toast.success('Proyecto eliminado');
+      toast.success(t('projectDetail.toast.deleted'));
       router.push('/dashboard/projects');
     } catch (error) {
-      toast.error('Error al eliminar');
+      toast.error(t('projectDetail.toast.deleteError'));
     }
   };
 
@@ -83,7 +85,7 @@ export default function ProjectDetailIdPage() {
           <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl group-hover:-translate-x-1 transition-transform">
             <ArrowLeft className="w-4 h-4" />
           </div>
-          VOLVER A PROYECTOS
+          {t('projectDetail.backToProjects')}
         </button>
 
         <div className="flex items-center gap-3">
@@ -91,7 +93,7 @@ export default function ProjectDetailIdPage() {
             onClick={handleDelete}
             className="flex items-center gap-2 px-5 py-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl font-semibold text-xs transition-all uppercase tracking-widest border border-red-100 dark:border-red-500/20"
           >
-            <Trash2 className="w-4 h-4" /> Eliminar Proyecto
+            <Trash2 className="w-4 h-4" /> {t('projectDetail.deleteProject')}
           </button>
         </div>
       </div>

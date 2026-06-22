@@ -440,7 +440,7 @@ export default function ConversationView({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-slate-400 dark:text-[#475569]">
-              {chat.status === 'requires_human' ? t('communications.aiPaused') : t('communications.aiActive')}
+              {(chat.status as string) === 'requires_human' ? t('communications.aiPaused') : t('communications.aiActive')}
             </span>
             <button
               onClick={handleMarkResolved}

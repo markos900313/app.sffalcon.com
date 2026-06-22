@@ -69,7 +69,7 @@ export default function ClientsPage() {
       const thisMonth = now.getMonth();
       const thisYear = now.getFullYear();
 
-      const newClients = (clientsData || []).filter(c => {
+      const newClients = (clientsData || []).filter((c: any) => {
         const d = new Date(c.created_at);
         return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
       }).length;
@@ -116,7 +116,7 @@ export default function ClientsPage() {
                         normalizedSector === 'restaurante';
   
   const isSalud = modules?.grupo === '2_salud';
-  const showPipeline = hasClientPipeline(modules);
+  const showPipeline = (hasClientPipeline as any)(modules);
   const grupoNum = modules?.grupo ? parseInt(modules.grupo.split('_')[0]) : 1;
 
   const tabs: { id: TabType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [

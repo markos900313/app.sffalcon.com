@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { LogIn, LogOut, CheckCircle2 } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function FicharPage() {
   const params = useParams();
   const codigo = params?.codigo as string;
   const supabase = createClient();
+  const { t, language } = useLanguage();
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +23,8 @@ export default function FicharPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [successType, setSuccessType] = useState<'entrada' | 'salida' | null>(null);
 
+  const activeLocale = language === 'en' ? enUS : es;
+
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -29,7 +33,7 @@ export default function FicharPage() {
   useEffect(() => {
     async function loadStaff() {
       if (!codigo) {
-        setError("Código no válido");
+        setError(t('ficharCodigo.invalidCode'));
         setLoading(false);
         return;
       }
@@ -41,7 +45,7 @@ export default function FicharPage() {
         .single();
         
       if (error || !data) {
-        setError("Código no válido");
+        setError(t('ficharCodigo.invalidCode'));
       } else {
         setStaff(data);
       }
@@ -69,7 +73,8 @@ export default function FicharPage() {
       if (error) throw error;
       
       const timeStr = format(new Date(), 'HH:mm');
-      setSuccessMessage(`${tipo.toUpperCase()} registrada · ${timeStr}`);
+      const typeLabel = tipo === 'entrada' ? t('ficharCodigo.successTypes.entrada') : t('ficharCodigo.successTypes.salida');
+      setSuccessMessage(t('ficharCodigo.clockSuccess', { tipo: typeLabel, time: timeStr }));
       setSuccessType(tipo);
       
       // Bloquear 5 segundos
@@ -81,12 +86,12 @@ export default function FicharPage() {
       
     } catch (err) {
       console.error(err);
-      alert("Error al registrar el fichaje. Inténtelo de nuevo.");
+      alert(t('ficharCodigo.toastError'));
       setIsSubmitting(false);
     }
   };
 
-  if (loading) return <div className="flex h-screen items-center justify-center p-4 bg-[var(--background)]"><div className="text-xl font-bold animate-pulse text-[var(--foreground)]">Cargando...</div></div>;
+  if (loading) return <div className="flex h-screen items-center justify-center p-4 bg-[var(--background)]"><div className="text-xl font-bold animate-pulse text-[var(--foreground)]">{t('ficharCodigo.loading')}</div></div>;
   if (error) return <div className="flex h-screen items-center justify-center p-4 bg-[var(--background)]"><div className="text-2xl font-bold text-red-500">{error}</div></div>;
 
   return (
@@ -96,18 +101,18 @@ export default function FicharPage() {
         {/* Header Logo/Title */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-br from-blue-500 to-indigo-600 tracking-tight">SF</h1>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Portal del Empleado</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('ficharCodigo.employeePortal')}</p>
         </div>
 
         {/* Info */}
         <div className="card-premium rounded-3xl p-8 w-full text-center border border-slate-200 dark:border-[#1E3A5F] shadow-2xl shadow-blue-500/5 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-600" />
-          <h2 className="text-2xl font-black mb-2 text-slate-900 dark:text-white">Hola, {staff.full_name}</h2>
+          <h2 className="text-2xl font-black mb-2 text-slate-900 dark:text-white">{t('ficharCodigo.hello', { name: staff.full_name })}</h2>
           <div className="text-5xl font-black text-[#1B4FD8] dark:text-blue-400 mt-4 tracking-tighter">
             {format(time, "HH:mm:ss")}
           </div>
           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-3">
-            {format(time, "EEEE, d 'de' MMMM", { locale: es })}
+            {format(time, t('ficharCodigo.dateFormat'), { locale: activeLocale })}
           </div>
         </div>
 
@@ -135,7 +140,7 @@ export default function FicharPage() {
                 ${isSubmitting ? 'bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-[#1B4FD8] hover:bg-blue-700 shadow-lg shadow-blue-500/20 active:scale-95'}`}
             >
               <LogIn className="w-8 h-8" />
-              ENTRADA
+              {t('ficharCodigo.clockInBtn')}
             </button>
             
             <button
@@ -145,7 +150,7 @@ export default function FicharPage() {
                 ${isSubmitting ? 'bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 shadow-lg shadow-rose-500/20 active:scale-95'}`}
             >
               <LogOut className="w-8 h-8" />
-              SALIDA
+              {t('ficharCodigo.clockOutBtn')}
             </button>
           </div>
         )}

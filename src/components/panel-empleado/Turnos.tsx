@@ -24,9 +24,10 @@ import {
   subMonths,
   isSameMonth
 } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/LanguageContext";
 
 interface TurnosProps {
   staff: any;
@@ -40,6 +41,8 @@ const SHIFT_TYPES: any = {
 };
 
 export default function Turnos({ staff }: TurnosProps) {
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'en' ? enUS : es;
   const supabase = createClient();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [shifts, setShifts] = useState<any[]>([]);
@@ -102,7 +105,6 @@ export default function Turnos({ staff }: TurnosProps) {
   const getShiftsForDay = (day: Date) => {
     return shifts.filter(s => isSameDay(parseISO(s.fecha), day));
   };
-
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       
@@ -111,10 +113,10 @@ export default function Turnos({ staff }: TurnosProps) {
         <div>
           <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
             <CalendarDays className="text-[#1B4FD8]" />
-            Planificación de Turnos
+            {t('employeePanel.turnos.title')}
           </h2>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-             Consulta tus horarios asignados
+             {t('employeePanel.turnos.subtitle')}
           </p>
         </div>
 
@@ -126,14 +128,14 @@ export default function Turnos({ staff }: TurnosProps) {
                 "px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
                 view === 'week' ? "bg-[#1B4FD8] text-white shadow-lg shadow-blue-500/20" : "text-slate-400 hover:text-slate-900"
               )}
-            >Semana</button>
+            >{t('employeePanel.turnos.week')}</button>
             <button 
               onClick={() => setView('month')}
               className={cn(
                 "px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all",
                 view === 'month' ? "bg-[#1B4FD8] text-white shadow-lg shadow-blue-500/20" : "text-slate-400 hover:text-slate-900"
               )}
-            >Mes</button>
+            >{t('employeePanel.turnos.month')}</button>
           </div>
 
           <div className="flex items-center gap-3">
@@ -146,8 +148,8 @@ export default function Turnos({ staff }: TurnosProps) {
             <div className="text-center min-w-[140px]">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white leading-none">
                 {view === 'week' 
-                  ? `${format(start, "d MMM")} — ${format(end, "d MMM, yyyy", { locale: es })}`
-                  : format(currentDate, "MMMM yyyy", { locale: es })
+                  ? `${format(start, language === 'en' ? "MMM d" : "d MMM")} — ${format(end, language === 'en' ? "MMM d, yyyy" : "d MMM, yyyy", { locale: dateLocale })}`
+                  : format(currentDate, "MMMM yyyy", { locale: dateLocale })
                 }
               </span>
             </div>
@@ -179,7 +181,7 @@ export default function Turnos({ staff }: TurnosProps) {
                 )}
               >
                 <p className={cn("text-[9px] font-black uppercase tracking-wider mb-1", isToday ? "text-blue-500" : "text-slate-400")}>
-                  {format(day, "EEEE", { locale: es })}
+                  {format(day, "EEEE", { locale: dateLocale })}
                 </p>
                 <p className={cn("text-2xl font-black mb-4", isToday ? "text-blue-600" : "text-slate-900 dark:text-white")}>
                   {format(day, "d")}
@@ -188,11 +190,12 @@ export default function Turnos({ staff }: TurnosProps) {
                   <div className="mt-auto space-y-3">
                     {dayShifts.map((shift, sIdx) => {
                       const shiftType = SHIFT_TYPES[shift.tipo] || SHIFT_TYPES.morning;
+                      const shiftLabel = t(`employeePanel.turnos.types.${shift.tipo}` as any) || shiftType.label;
                       return (
                         <div key={shift.id} className={cn("p-4 rounded-2xl border space-y-2", shiftType.bg, shiftType.border)}>
                           <div className="flex items-center gap-1.5">
                             <div className={cn("w-1.5 h-1.5 rounded-full", shiftType.color)} />
-                            <span className={cn("text-[9px] font-black uppercase tracking-widest", shiftType.text)}>{shiftType.label}</span>
+                            <span className={cn("text-[9px] font-black uppercase tracking-widest", shiftType.text)}>{shiftLabel}</span>
                           </div>
                           <div className="space-y-2">
                             <p className="text-[11px] font-black tabular-nums">{shift.hora_inicio} — {shift.hora_fin}</p>
@@ -208,7 +211,7 @@ export default function Turnos({ staff }: TurnosProps) {
                     })}
                   </div>
                 ) : (
-                  <div className="mt-auto h-16 flex items-center justify-center border border-dashed border-slate-200 dark:border-white/5 rounded-2xl text-[9px] font-black text-slate-300 uppercase italic">Libre</div>
+                  <div className="mt-auto h-16 flex items-center justify-center border border-dashed border-slate-200 dark:border-white/5 rounded-2xl text-[9px] font-black text-slate-300 uppercase italic">{t('employeePanel.turnos.free')}</div>
                 )}
               </div>
             );
@@ -220,7 +223,7 @@ export default function Turnos({ staff }: TurnosProps) {
            {/* Desktop Grid */}
            <div className="hidden md:block card-premium bg-white dark:bg-[#111F3A] rounded-[32px] border border-slate-200 dark:border-[#1E3A5F] overflow-hidden">
               <div className="grid grid-cols-7 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5">
-                {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => (
+                {(language === 'en' ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] : ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']).map(d => (
                   <div key={d} className="py-4 text-center text-[9px] font-black uppercase tracking-widest text-slate-400">{d}</div>
                 ))}
               </div>
@@ -239,13 +242,14 @@ export default function Turnos({ staff }: TurnosProps) {
                         <p className={cn("text-xs font-black", isToday ? "text-blue-500" : "text-slate-400")}>{format(day, 'd')}</p>
                         {dayShifts.map(shift => {
                           const shiftType = SHIFT_TYPES[shift.tipo] || SHIFT_TYPES.morning;
+                          const shiftLabel = t(`employeePanel.turnos.types.${shift.tipo}` as any) || shiftType.label;
                           return (
                             <div key={shift.id} className={cn("mt-2 p-2 rounded-xl border flex flex-col gap-1", shiftType.bg, shiftType.border)}>
-                               <span className={cn("text-[7px] font-black uppercase truncate", shiftType.text)}>{shiftType.label}</span>
+                               <span className={cn("text-[7px] font-black uppercase truncate", shiftType.text)}>{shiftLabel}</span>
                                <span className="text-[9px] font-black tabular-nums">{shift.hora_inicio}</span>
                                {shift.tipo === 'split' && shift.hora_inicio_2 && (
                                  <span className="text-[9px] font-black tabular-nums border-t border-dashed border-emerald-500/30 pt-1 mt-1">{shift.hora_inicio_2}</span>
-                               )}
+                                )}
                             </div>
                           );
                         })}
@@ -269,16 +273,17 @@ export default function Turnos({ staff }: TurnosProps) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="text-center w-10">
-                          <p className="text-[9px] font-black uppercase opacity-60">{format(day, 'EEE')}</p>
+                          <p className="text-[9px] font-black uppercase opacity-60">{format(day, 'EEE', { locale: dateLocale })}</p>
                           <p className="text-lg font-black">{format(day, 'd')}</p>
                         </div>
                         <div className="h-8 w-px bg-current opacity-10" />
                         <div className="flex flex-col gap-2">
                           {dayShifts.map(shift => {
                             const shiftType = SHIFT_TYPES[shift.tipo] || SHIFT_TYPES.morning;
+                            const shiftLabel = t(`employeePanel.turnos.types.${shift.tipo}` as any) || shiftType.label;
                             return (
                               <div key={shift.id}>
-                                <p className="text-[10px] font-black uppercase tracking-widest">{shiftType.label}</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest">{shiftLabel}</p>
                                 <p className="text-[10px] font-bold opacity-70">{shift.hora_inicio} — {shift.hora_fin}</p>
                                 {shift.tipo === 'split' && shift.hora_inicio_2 && (
                                   <>
@@ -290,7 +295,7 @@ export default function Turnos({ staff }: TurnosProps) {
                             );
                           })}
                           {dayShifts.length === 0 && (
-                            <p className="text-[10px] font-black uppercase opacity-30 italic">Libre</p>
+                            <p className="text-[10px] font-black uppercase opacity-30 italic">{t('employeePanel.turnos.free')}</p>
                           )}
                         </div>
                       </div>
@@ -309,9 +314,9 @@ export default function Turnos({ staff }: TurnosProps) {
            <Info size={20} />
          </div>
          <div>
-            <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">Aviso de Gestión</h4>
+            <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">{t('employeePanel.turnos.noticeTitle')}</h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
-              Los turnos son solo de lectura. Si necesitas realizar un cambio o notas algún error en tu planificación, por favor contacta directamente con tu responsable o administrador.
+              {t('employeePanel.turnos.noticeDesc')}
             </p>
          </div>
       </div>

@@ -27,7 +27,7 @@ interface Invoice {
   id: string;
   invoice_number: string;
   total: number;
-  status: 'paid' | 'pending' | 'overdue' | 'draft' | 'cancelada' | 'borrador' | 'pagada';
+  status: 'paid' | 'pending' | 'overdue' | 'draft' | 'cancelada' | 'borrador' | 'pagada' | 'pendiente';
   issue_date: string;
   created_at: string;
   paid_date?: string;

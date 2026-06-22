@@ -7,11 +7,13 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, Loader2, Home } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageContext";
 import "../auth-pages.css";
 
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useLanguage();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,20 +23,20 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Por favor, rellena todos los campos");
+      toast.error(t("auth.errorFieldsRequired" as any));
       return;
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       if (error.message.includes('Invalid login credentials')) {
-        toast.error("Contraseña incorrecta. Inténtalo de nuevo.");
+        toast.error(t("auth.errorIncorrectPassword" as any));
       } else if (error.message.includes('Email not found') || error.message.includes('User not found')) {
-        toast.error("No existe ninguna cuenta con ese email.");
+        toast.error(t("auth.errorEmailNotFound" as any));
       } else if (error.message.includes('Email not confirmed')) {
-        toast.error("Confirma tu email antes de entrar. Revisa tu bandeja de entrada.");
+        toast.error(t("auth.errorEmailNotConfirmed" as any));
       } else {
-        toast.error("Error al iniciar sesión. Inténtalo de nuevo.");
+        toast.error(t("auth.errorLoginFailed" as any));
       }
       setLoading(false);
       return;
@@ -68,17 +70,17 @@ export default function LoginPage() {
 
         <div className="auth-left-content">
           <h2 className="auth-headline">
-            El asistente <span className="auth-headline-accent">de reservas y citas que</span><br />
-            nunca pudiste<br />
-            <span className="auth-headline-accent">tener</span>
+            {t("auth.headline.part1" as any)} <span className="auth-headline-accent">{t("auth.headline.accent1" as any)}</span><br />
+            {t("auth.headline.part2" as any)}<br />
+            <span className="auth-headline-accent">{t("auth.headline.accent2" as any)}</span>
           </h2>
 
           <div className="auth-benefits">
             {[
-              "Mientras tú trabajas, él atiende a tus clientes",
-              "Tu cliente escribe — a cualquier hora",
-              "Tu asistente responde — con tu tono",
-              "Tú lo encuentras todo listo",
+              t("auth.benefits.benefit1" as any),
+              t("auth.benefits.benefit2" as any),
+              t("auth.benefits.benefit3" as any),
+              t("auth.benefits.benefit4" as any),
             ].map((text) => (
               <div className="auth-benefit-item" key={text}>
                 <div className="auth-benefit-check">✓</div>
@@ -88,13 +90,13 @@ export default function LoginPage() {
           </div>
 
           <div className="auth-quote">
-            <p>&quot;Por fin puedo desconectar sin miedo a perder un cliente.&quot;</p>
+            <p>{t("auth.quote" as any)}</p>
           </div>
 
           <div className="auth-marketing-badges">
-            <span className="auth-marketing-badge">Sin tarjeta</span>
-            <span className="auth-marketing-badge">Listo en 5 min</span>
-            <span className="auth-marketing-badge">Hecho en España</span>
+            <span className="auth-marketing-badge">{t("auth.badges.noCard" as any)}</span>
+            <span className="auth-marketing-badge">{t("auth.badges.readyInFive" as any)}</span>
+            <span className="auth-marketing-badge">{t("auth.badges.madeInSpain" as any)}</span>
           </div>
 
           <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '8px', opacity: 0.7 }}>
@@ -111,19 +113,19 @@ export default function LoginPage() {
 
       {/* ── RIGHT PANEL ── */}
       <div className="auth-right login-right">
-        <Link href="https://www.sffalcon.com" className="auth-home-link" title="Ir a la web principal">
+        <Link href="https://www.sffalcon.com" className="auth-home-link" title={t("auth.goToMainWeb" as any)}>
           <Home size={18} />
         </Link>
 
 
 
         <div className="auth-card auth-card--compact">
-          <h1 className="auth-card-title">Bienvenido de nuevo</h1>
-          <p className="auth-card-subtitle">Introduce tus credenciales para acceder a la consola.</p>
+          <h1 className="auth-card-title">{t("auth.welcomeTitle" as any)}</h1>
+          <p className="auth-card-subtitle">{t("auth.welcomeSubtitle" as any)}</p>
 
           <form onSubmit={handleLogin}>
             <div className="auth-field">
-              <label className="auth-label">Correo Electrónico</label>
+              <label className="auth-label">{t("auth.emailLabel" as any)}</label>
               <div className="auth-input-wrap">
                 <input
                   type="email"
@@ -138,7 +140,7 @@ export default function LoginPage() {
             </div>
 
             <div className="auth-field">
-              <label className="auth-label">Contraseña</label>
+              <label className="auth-label">{t("auth.passwordLabel" as any)}</label>
               <div className="auth-input-wrap">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -160,25 +162,25 @@ export default function LoginPage() {
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin mx-auto" />
               ) : (
-                "ACCEDER AL PANEL"
+                t("auth.loginButton" as any)
               )}
             </button>
           </form>
 
-          <Link href="/reset-password" className="auth-forgot">¿He olvidado mi clave?</Link>
+          <Link href="/reset-password" className="auth-forgot">{t("auth.forgotPassword" as any)}</Link>
 
           <hr className="auth-divider" />
 
           <p className="auth-register-line">
-            ¿Aún no tienes cuenta?{" "}
-            <Link href="/register">Comienza gratis ahora</Link>
+            {t("auth.noAccount" as any)}{" "}
+            <Link href="/register">{t("auth.registerNow" as any)}</Link>
           </p>
 
           <div className="auth-card-footer">
             © 2026 SF &nbsp;•&nbsp;{" "}
-            <Link href="/legal">LEGAL</Link>{" "}
+            <Link href="/legal">{t("auth.legal" as any)}</Link>{" "}
             &nbsp;•&nbsp;{" "}
-            <Link href="/privacidad">PRIVACIDAD</Link>
+            <Link href="/privacidad">{t("auth.privacy" as any)}</Link>
           </div>
         </div>
       </div>

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
@@ -29,6 +30,7 @@ import { motion } from "framer-motion";
 export default function AgentFollowupPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t, language } = useLanguage();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -118,9 +120,9 @@ export default function AgentFollowupPage() {
           config: newConfig,
           updated_at: new Date().toISOString()
         });
-      toast.success("Preferencia actualizada");
+      toast.success(t('aiAgents.followup.toast.savePreferenceSuccess'));
     } catch (err) {
-      toast.error("Error al guardar preferencia");
+      toast.error(t('aiAgents.followup.toast.savePreferenceError'));
       setActiveCampaigns(activeCampaigns); // Rollback
     }
   };
@@ -144,11 +146,15 @@ export default function AgentFollowupPage() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-500">Inteligencia de Retención</span>
-                <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">Autónomo</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-500">{t('aiAgents.followup.subtitle')}</span>
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">{t('aiAgents.followup.autonomous')}</span>
               </div>
               <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-                 Seguimiento <span className="text-emerald-500">IA</span>
+                 {language === 'es' ? (
+                   <>Seguimiento <span className="text-emerald-500">IA</span></>
+                 ) : (
+                   <>AI <span className="text-emerald-500">Follow-up</span></>
+                 )}
               </h1>
             </div>
           </div>
@@ -157,13 +163,13 @@ export default function AgentFollowupPage() {
           <div className="flex items-center gap-4 bg-slate-50 dark:bg-white/5 px-6 py-3 rounded-2xl border border-slate-100 dark:border-white/5">
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-              <span className="text-[10px] font-black text-slate-600 dark:text-emerald-400 uppercase tracking-widest italic leading-none pt-0.5">IA Autónoma Activa</span>
+              <span className="text-[10px] font-black text-slate-600 dark:text-emerald-400 uppercase tracking-widest italic leading-none pt-0.5">{t('aiAgents.followup.autonomousActive')}</span>
             </div>
             <div className="w-px h-5 bg-slate-200 dark:bg-white/10 mx-1" />
             <button 
               onClick={fetchFollowupData}
               className="p-1.5 hover:bg-white dark:hover:bg-white/10 rounded-lg transition-all text-slate-400 hover:text-emerald-500"
-              title="Actualizar Datos"
+              title={t('aiAgents.followup.refreshTooltip')}
             >
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             </button>
@@ -172,7 +178,7 @@ export default function AgentFollowupPage() {
           {/* Right: Master KPIs */}
           <div className="flex items-center gap-8 bg-white/50 dark:bg-white/5 px-8 py-2.5 rounded-2xl border border-slate-100 dark:border-white/5">
             <div className="flex flex-col items-center">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Reseñas</span>
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.followup.kpis.reviews')}</span>
               <div className="flex items-center gap-1.5 mt-1">
                 <span className="text-xl font-black text-slate-900 dark:text-white leading-none">
                    +{realStats.reviews}
@@ -182,14 +188,14 @@ export default function AgentFollowupPage() {
             </div>
             <div className="h-6 w-px bg-slate-200 dark:bg-white/10" />
             <div className="flex flex-col items-center">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Recuperados</span>
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.followup.kpis.recovered')}</span>
               <span className="text-xl font-black text-slate-900 dark:text-white leading-none mt-1">
                  {realStats.recovered}
               </span>
             </div>
             <div className="h-6 w-px bg-slate-200 dark:bg-white/10" />
             <div className="flex flex-col items-center">
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Ahorro</span>
+              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('aiAgents.followup.kpis.savings')}</span>
               <div className="flex items-center gap-1 mt-1">
                 <span className="text-xl font-black text-emerald-500 leading-none">
                    {realStats.ahorro}
@@ -210,28 +216,28 @@ export default function AgentFollowupPage() {
               
               <h3 className="font-black text-[var(--text-primary)] mb-6 flex items-center gap-2.5 text-base uppercase tracking-tight">
                 <Zap className="w-5 h-5 text-amber-400" />
-                Estrategias de Fidelización
+                {t('aiAgents.followup.strategiesTitle')}
               </h3>
               
               <div className="space-y-5">
                  <CampaignToggle 
                    icon={<Star size={24} className="text-amber-500" />}
-                   title="Solicitud de Reseñas"
-                   description="Envío inteligente de feedback tras experiencias positivas."
+                   title={t('aiAgents.followup.strategies.reviewsTitle')}
+                   description={t('aiAgents.followup.strategies.reviewsDesc')}
                    checked={activeCampaigns.reviews}
                    onChange={() => handleToggle('reviews')}
                  />
                  <CampaignToggle 
                    icon={<Gift size={24} className="text-rose-500" />}
-                   title="Regalo de Cumpleaños"
-                   description="Automatización de cortesías 5 días antes de la fecha."
+                   title={t('aiAgents.followup.strategies.birthdayTitle')}
+                   description={t('aiAgents.followup.strategies.birthdayDesc')}
                    checked={activeCampaigns.birthday}
                    onChange={() => handleToggle('birthday')}
                  />
                  <CampaignToggle 
                    icon={<History size={24} className="text-blue-500" />}
-                   title="IA Win-Back"
-                   description="Protocolo de rescate para contactos inactivos > 45 días."
+                   title={t('aiAgents.followup.strategies.winbackTitle')}
+                   description={t('aiAgents.followup.strategies.winbackDesc')}
                    checked={activeCampaigns.winback}
                    onChange={() => handleToggle('winback')}
                  />
@@ -242,8 +248,8 @@ export default function AgentFollowupPage() {
                     <div className="flex items-center gap-4">
                        <CheckCircle2 className="text-emerald-500 w-6 h-6" />
                        <div>
-                          <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.2em] leading-none mb-1.5">Optimización de Retención Lista</p>
-                          <p className="text-xs text-slate-500 font-medium">IA funcionando al 100% de eficiencia operativa</p>
+                          <p className="text-[12px] font-black text-emerald-500 uppercase tracking-[0.2em] leading-none mb-1.5">{t('aiAgents.followup.retentionReadyTitle')}</p>
+                          <p className="text-xs text-slate-500 font-medium">{t('aiAgents.followup.retentionReadyDesc')}</p>
                        </div>
                     </div>
                     <TrendingUp className="text-emerald-500/30 w-6 h-6" />
@@ -255,11 +261,11 @@ export default function AgentFollowupPage() {
               <div className="flex items-center justify-between mb-8">
                 <h3 className="font-black text-[var(--text-primary)] uppercase tracking-widest text-xs flex items-center gap-3">
                   <History className="w-5 h-5 text-blue-500" />
-                  Historial de Interacciones Reales
+                  {t('aiAgents.followup.historyTitle')}
                 </h3>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-500 text-[10px] font-black uppercase tracking-widest">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                  Live Sync
+                  {t('aiAgents.followup.historySync')}
                 </div>
               </div>
               
@@ -268,7 +274,7 @@ export default function AgentFollowupPage() {
                   {interactions.map((it) => (
                     <div key={it.id} className="py-4 flex items-center justify-between">
                       <div>
-                        <p className="text-xs font-bold">{it.details?.client || "Anónimo"}</p>
+                        <p className="text-xs font-bold">{it.details?.client || t('aiAgents.followup.anonymous')}</p>
                         <p className="text-[10px] text-slate-500">{it.details?.message || "Mensaje enviado"}</p>
                       </div>
                       <span className="text-[9px] font-mono opacity-50">{new Date(it.created_at).toLocaleTimeString()}</span>
@@ -280,8 +286,8 @@ export default function AgentFollowupPage() {
                   <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center mb-6">
                     <Clock className="w-8 h-8 text-slate-400" />
                   </div>
-                  <p className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest">Sin Actividad Hoy</p>
-                  <p className="text-xs mt-2 text-slate-500">Esperando primeras interacciones del día</p>
+                  <p className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest">{t('aiAgents.followup.noActivityTitle')}</p>
+                  <p className="text-xs mt-2 text-slate-500">{t('aiAgents.followup.noActivityDesc')}</p>
                 </div>
               )}
             </div>
@@ -297,14 +303,14 @@ export default function AgentFollowupPage() {
                     <div className="w-8 h-8 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
                       <Zap size={14} className="text-blue-300" />
                     </div>
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-blue-300">Insights IA</h4>
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-blue-300">{t('aiAgents.followup.insights.title')}</h4>
                   </div>
                   <p className="text-sm font-bold leading-relaxed mb-6 italic opacity-90">
-                    "Hemos detectado que el 65% de tus clientes recurrentes prefieren WhatsApp para feedback. Recomiendo priorizar este canal para campañas de Win-Back."
+                     {t('aiAgents.followup.insights.message')}
                   </p>
                   <div className="flex items-center gap-3">
                      <div className="h-0.5 flex-1 bg-white/10" />
-                     <span className="text-[10px] font-black uppercase tracking-widest opacity-60">IA Alpha-One v4.2</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest opacity-60">{t('aiAgents.followup.insights.version')}</span>
                   </div>
                </div>
             </div>
@@ -313,39 +319,43 @@ export default function AgentFollowupPage() {
                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
                   <TrendingUp size={100} />
                </div>
-               <h3 className="font-black text-[var(--text-primary)] mb-6 uppercase tracking-[0.2em] text-[10px]">Canales de Fidelización</h3>
+               <h3 className="font-black text-[var(--text-primary)] mb-6 uppercase tracking-[0.2em] text-[10px]">{t('aiAgents.followup.fidelizationChannels')}</h3>
                <div className="space-y-4">
-                 <ChannelStatus icon={<Mail size={16} />} label="Email Marketing Pro" active />
-                 <ChannelStatus icon={<MessageSquare size={16} />} label="WhatsApp Automation" active />
+                 <ChannelStatus icon={<Mail size={16} />} label={t('aiAgents.followup.channels.email')} active />
+                 <ChannelStatus icon={<MessageSquare size={16} />} label={t('aiAgents.followup.channels.whatsapp')} active />
                </div>
             </div>
 
             <div className="card-premium bg-white dark:bg-[#111F3A] border border-emerald-500/10 p-6 md:p-8 rounded-[32px] shadow-xl border-t-4 border-t-emerald-500 relative">
                <h3 className="font-black text-emerald-500 mb-4 text-[10px] uppercase tracking-[0.2em] flex items-center gap-2">
                   <TrendingUp className="w-4 h-4" />
-                  Retención Trimestral
+                  {t('aiAgents.followup.quarterlyRetention')}
                </h3>
                <p className="text-xs text-[var(--text-secondary)] mb-6 leading-relaxed font-medium">
-                 Tu tasa de retorno ha experimentado un crecimiento real del <strong className="text-emerald-400 font-bold text-xl leading-none">+18.4%</strong>.
+                  {language === 'es' ? (
+                    <>Tu tasa de retorno ha experimentado un crecimiento real del <strong className="text-emerald-400 font-bold text-xl leading-none">+18.4%</strong>.</>
+                  ) : (
+                    <>Your return rate has experienced a real growth of <strong className="text-emerald-400 font-bold text-xl leading-none">+18.4%</strong>.</>
+                  )}
                </p>
                <div className="space-y-3">
                   <div className="group/bar">
-                    <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
-                      <span>Loyalty Score</span>
-                      <span className="text-emerald-500">82%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
-                      <div className="h-full bg-emerald-500 w-[82%] group-hover:brightness-125 transition-all" />
-                    </div>
+                     <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
+                       <span>{t('aiAgents.followup.scores.loyalty')}</span>
+                       <span className="text-emerald-500">82%</span>
+                     </div>
+                     <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
+                       <div className="h-full bg-emerald-500 w-[82%] group-hover:brightness-125 transition-all" />
+                     </div>
                   </div>
                   <div className="group/bar">
-                    <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
-                      <span>Recuperación</span>
-                      <span className="text-blue-500">65%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
-                      <div className="h-full bg-blue-500 w-[65%] group-hover:brightness-125 transition-all" />
-                    </div>
+                     <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
+                       <span>{t('aiAgents.followup.scores.recovery')}</span>
+                       <span className="text-blue-500">65%</span>
+                     </div>
+                     <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/5">
+                       <div className="h-full bg-blue-500 w-[65%] group-hover:brightness-125 transition-all" />
+                     </div>
                   </div>
                </div>
             </div>

@@ -58,7 +58,7 @@ export default function Topbar() {
 
     if (data) {
       setNotifications(data);
-      setUnreadCount(data.filter(n => !n.read).length);
+      setUnreadCount(data.filter((n: any) => !n.read).length);
     }
   };
 
