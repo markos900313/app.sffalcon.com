@@ -18,6 +18,7 @@ import { useOrganization } from '@/context/OrganizationContext';
 import { getModuleEnabled } from '@/lib/sectorConfig';
 import { format, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface InvoiceModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ interface InvoiceModalProps {
 export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }: InvoiceModalProps) {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   
   const modules = organization?.sector_config;
@@ -103,7 +105,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.client_id || !formData.concept || !formData.base_amount) {
-      toast.error("Por favor completa los campos obligatorios");
+      toast.error(t('modals.invoice.toastFieldsRequired'));
       return;
     }
 
@@ -122,7 +124,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
           body: JSON.stringify({ id: invoiceToEdit.id, ...payload })
         });
         if (!res.ok) throw new Error();
-        toast.success("Factura actualizada correctamente");
+        toast.success(t('modals.invoice.toastUpdateSuccess'));
       } else {
         const res = await fetch('/api/invoices', {
           method: 'POST',
@@ -130,7 +132,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
           body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error();
-        toast.success("Factura creada correctamente");
+        toast.success(t('modals.invoice.toastCreateSuccess'));
       }
       setTimeout(() => {
         onSaved();
@@ -138,7 +140,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
       }, 300);
     } catch (error) {
       console.error(error);
-      toast.error("Error al guardar la factura");
+      toast.error(t('modals.invoice.toastSaveError'));
     } finally {
       setLoading(false);
     }
@@ -152,9 +154,9 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
           <div>
             <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-[#1B4FD8]" />
-              {invoiceToEdit ? `Editar Factura ${invoiceToEdit.invoice_number || ''}` : "Nueva Factura"}
+              {invoiceToEdit ? t('modals.invoice.editTitle', { number: invoiceToEdit.invoice_number || '' }) : t('modals.invoice.newTitle')}
             </h2>
-            <p className="hidden sm:block text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">Configura los detalles de facturación para tu contacto.</p>
+            <p className="hidden sm:block text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">{t('modals.invoice.desc')}</p>
           </div>
           <button 
             onClick={onClose}
@@ -171,7 +173,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
               
               {/* Cliente */}
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">CONTACTO RECEPTOR*</label>
+                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.clientLabel')}</label>
                 <div className="relative">
                   <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <select
@@ -180,7 +182,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
                     required
                     className="w-full pl-10 pr-10 py-3 bg-[#F8FAFC] dark:bg-[#162040] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-slate-900 dark:text-white appearance-none cursor-pointer bg-[#111F3A]"
                   >
-                    <option value="" className="bg-[#111F3A] text-white">Selecciona un contacto...</option>
+                    <option value="" className="bg-[#111F3A] text-white">{t('modals.invoice.clientPlaceholder')}</option>
                     {clients.map(c => (
                       <option key={c.id} value={c.id} className="bg-[#111F3A] text-white">{c.name}</option>
                     ))}
@@ -192,7 +194,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
               {/* Proyecto */}
               {hasProjects && (
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">PROYECTO / ENTIDAD ASOCIADA</label>
+                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.projectLabel')}</label>
                   <div className="relative">
                     <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <select
@@ -201,7 +203,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
                       className="w-full pl-10 pr-10 py-3 bg-[#F8FAFC] dark:bg-[#162040] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-slate-900 dark:text-white appearance-none cursor-pointer disabled:opacity-50 bg-[#111F3A]"
                       disabled={!formData.client_id}
                     >
-                      <option value="" className="bg-[#111F3A] text-white">Ningún proyecto asignado</option>
+                      <option value="" className="bg-[#111F3A] text-white">{t('modals.invoice.projectPlaceholder')}</option>
                       {filteredProjects.map(p => (
                         <option key={p.id} value={p.id} className="bg-[#111F3A] text-white">{p.name}</option>
                       ))}
@@ -213,7 +215,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
 
               {/* Concepto */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">CONCEPTO DE FACTURACIÓN*</label>
+                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.conceptLabel')}</label>
                 <div className="relative">
                   <Type className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
@@ -223,8 +225,8 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
                     required
                     placeholder={
                       organization?.sector_config?.grupo === 'P1_restauracion' || organization?.sector_config?.grupo === '4_hosteleria'
-                        ? "Reserva de Mesa / Catering / Evento"
-                        : (!hasProjects ? "Ej. Servicio realizado, Consulta, Tratamiento..." : "Ej: Diseño de página web corporativa")
+                        ? t('modals.invoice.conceptPlaceholderRestaurant')
+                        : (!hasProjects ? t('modals.invoice.conceptPlaceholderDefault') : t('modals.invoice.conceptPlaceholderWeb'))
                     }
                     className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] dark:bg-[#162040] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-slate-900 dark:text-white"
                   />
@@ -233,7 +235,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
 
               {/* Importe Base */}
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">IMPORTE BASE (€)*</label>
+                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.baseAmountLabel')}</label>
                 <div className="relative">
                   <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
@@ -252,7 +254,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
               {/* IVA y Total */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">IVA (%)</label>
+                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.taxRateLabel')}</label>
                   <div className="relative">
                     <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
@@ -267,7 +269,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">TOTAL ESTIMADO (€)</label>
+                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.totalLabel')}</label>
                   <div className="relative">
                     <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
                     <input
@@ -282,7 +284,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
 
               {/* Fecha Emisión */}
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">FECHA EMISIÓN*</label>
+                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.issueDateLabel')}</label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
@@ -297,7 +299,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
 
               {/* Fecha Vencimiento */}
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">VENCIMIENTO*</label>
+                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.dueDateLabel')}</label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
@@ -312,14 +314,14 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
 
               {/* Notas */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">NOTAS ADICIONALES</label>
+                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.notesLabel')}</label>
                 <div className="relative">
                   <StickyNote className="absolute left-3 top-4 w-4 h-4 text-slate-400" />
                   <textarea
                     value={formData.notes}
                     onChange={e => setFormData({ ...formData, notes: e.target.value })}
                     rows={3}
-                    placeholder="Información de pago, comentarios internos..."
+                    placeholder={t('modals.invoice.notesPlaceholder')}
                     className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] dark:bg-[#162040] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-slate-900 dark:text-white resize-none"
                   />
                 </div>
@@ -336,7 +338,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
             onClick={onClose}
             className="w-full sm:w-auto px-6 py-3 md:py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-all border border-slate-200 dark:border-white/10"
           >
-            CANCELAR
+            {t('modals.invoice.cancel')}
           </button>
           <button
             type="submit"
@@ -351,10 +353,10 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
             {loading ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                GUARDANDO...
+                {t('modals.invoice.saving')}
               </>
             ) : (
-              invoiceToEdit ? 'GUARDAR CAMBIOS' : 'CREAR FACTURA'
+              invoiceToEdit ? t('modals.invoice.saveChanges') : t('modals.invoice.createInvoice')
             )}
           </button>
         </div>

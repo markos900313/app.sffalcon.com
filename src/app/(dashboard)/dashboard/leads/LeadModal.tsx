@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, UserPlus, Save, Globe, MessageCircle, Mail, PenLine, Handshake, Share2 } from 'lucide-react';
+import { X, Loader2, UserPlus, Save } from 'lucide-react';
 import { Lead, LeadEstado, LeadTemperatura, LeadOrigen } from './types';
 import { createClient } from '@/lib/supabase/client';
 import { useOrganization } from '@/context/OrganizationContext';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface LeadModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface LeadModalProps {
 export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModalProps) {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<Lead>>({
     nombre: '',
@@ -75,20 +77,20 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
           .update(payload)
           .eq('id', lead.id);
         if (error) throw error;
-        toast.success('Contacto actualizado con éxito');
+        toast.success(t('modals.lead.toastUpdateSuccess'));
       } else {
         const { error } = await supabase
           .from('leads')
           .insert([payload]);
         if (error) throw error;
-        toast.success('Contacto guardado con éxito');
+        toast.success(t('modals.lead.toastSaveSuccess'));
       }
 
       onSuccess();
       onClose();
     } catch (error: any) {
       console.error('Error saving lead:', error);
-      toast.error(error.message || 'Error al guardar el contacto');
+      toast.error(error.message || t('modals.lead.toastSaveError'));
     } finally {
       setLoading(false);
     }
@@ -108,9 +110,9 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                {lead ? 'Editar Contacto Comercial' : 'Nuevo Contacto Comercial'}
+                {lead ? t('modals.lead.editTitle') : t('modals.lead.newTitle')}
               </h3>
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1">INFORMACIÓN DEL CONTACTO</p>
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mt-1">{t('modals.lead.subtitle')}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-[#1E3A5F] rounded-full transition-colors">
@@ -124,12 +126,12 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
             
             {/* Nombre */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Nombre Completo *</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.nameLabel')}</label>
               <input
                 type="text"
                 required
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold"
-                placeholder="Ej: Juan Pérez"
+                placeholder={t('modals.lead.namePlaceholder')}
                 value={formData.nombre}
                 onChange={e => setFormData({ ...formData, nombre: e.target.value })}
               />
@@ -137,11 +139,11 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
 
             {/* Empresa */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Empresa</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.companyLabel')}</label>
               <input
                 type="text"
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold"
-                placeholder="Nombre de la empresa"
+                placeholder={t('modals.lead.companyPlaceholder')}
                 value={formData.empresa || ''}
                 onChange={e => setFormData({ ...formData, empresa: e.target.value })}
               />
@@ -149,11 +151,11 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
 
             {/* Email */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Email Corporativo</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.emailLabel')}</label>
               <input
                 type="email"
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold"
-                placeholder="correo@empresa.com"
+                placeholder={t('modals.lead.emailPlaceholder')}
                 value={formData.email || ''}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
               />
@@ -161,11 +163,11 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
 
             {/* Teléfono */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Teléfono Directo</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.phoneLabel')}</label>
               <input
                 type="text"
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold"
-                placeholder="+34 600 000 000"
+                placeholder={t('modals.lead.phonePlaceholder')}
                 value={formData.telefono || ''}
                 onChange={e => setFormData({ ...formData, telefono: e.target.value })}
               />
@@ -173,11 +175,11 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
 
             {/* Cargo */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Cargo</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.positionLabel')}</label>
               <input
                 type="text"
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold"
-                placeholder="Ej: director de marketing"
+                placeholder={t('modals.lead.positionPlaceholder')}
                 value={formData.cargo || ''}
                 onChange={e => setFormData({ ...formData, cargo: e.target.value })}
               />
@@ -185,7 +187,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
 
             {/* Valor Estimado */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Valor Estimado</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.valueLabel')}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -199,38 +201,38 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
 
             {/* Temperatura */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Temperatura</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.temperatureLabel')}</label>
               <select
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold appearance-none cursor-pointer dark:text-white dark:[&>option]:bg-[#111F3A]"
                 value={formData.temperatura}
                 onChange={e => setFormData({ ...formData, temperatura: e.target.value as LeadTemperatura })}
               >
-                <option value="frio" className="bg-[#111F3A] text-white">Frío (Explorando)</option>
-                <option value="tibio" className="bg-[#111F3A] text-white">Tibio (Interesado)</option>
-                <option value="caliente" className="bg-[#111F3A] text-white">Caliente (Listo)</option>
+                <option value="frio" className="bg-[#111F3A] text-white">{t('modals.lead.temperatures.frio')}</option>
+                <option value="tibio" className="bg-[#111F3A] text-white">{t('modals.lead.temperatures.tibio')}</option>
+                <option value="caliente" className="bg-[#111F3A] text-white">{t('modals.lead.temperatures.caliente')}</option>
               </select>
             </div>
 
             {/* Origen */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Origen del Contacto</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.sourceLabel')}</label>
               <select
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold appearance-none cursor-pointer dark:text-white dark:[&>option]:bg-[#111F3A]"
                 value={formData.origen}
                 onChange={e => setFormData({ ...formData, origen: e.target.value as LeadOrigen })}
               >
-                <option value="web" className="bg-[#111F3A] text-white">Web</option>
-                <option value="whatsapp" className="bg-[#111F3A] text-white">WhatsApp</option>
-                <option value="email" className="bg-[#111F3A] text-white">Email</option>
-                <option value="manual" className="bg-[#111F3A] text-white">Manual</option>
-                <option value="referido" className="bg-[#111F3A] text-white">Referido</option>
-                <option value="redes_sociales" className="bg-[#111F3A] text-white">Redes Sociales</option>
+                <option value="web" className="bg-[#111F3A] text-white">{t('modals.lead.sources.web')}</option>
+                <option value="whatsapp" className="bg-[#111F3A] text-white">{t('modals.lead.sources.whatsapp')}</option>
+                <option value="email" className="bg-[#111F3A] text-white">{t('modals.lead.sources.email')}</option>
+                <option value="manual" className="bg-[#111F3A] text-white">{t('modals.lead.sources.manual')}</option>
+                <option value="referido" className="bg-[#111F3A] text-white">{t('modals.lead.sources.referido')}</option>
+                <option value="redes_sociales" className="bg-[#111F3A] text-white">{t('modals.lead.sources.redes_sociales')}</option>
               </select>
             </div>
 
             {/* Fecha Seguimiento */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Próximo Seguimiento</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.nextFollowupLabel')}</label>
               <input
                 type="date"
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold"
@@ -241,27 +243,27 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
 
             {/* Estado */}
             <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Estado Actual</label>
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.statusLabel')}</label>
               <select
                 className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold appearance-none cursor-pointer dark:text-white dark:[&>option]:bg-[#111F3A]"
                 value={formData.estado}
                 onChange={e => setFormData({ ...formData, estado: e.target.value as LeadEstado })}
               >
-                <option value="nuevo" className="bg-[#111F3A] text-white">Nuevo</option>
-                <option value="contactado" className="bg-[#111F3A] text-white">Contactado</option>
-                <option value="cualificado" className="bg-[#111F3A] text-white">Cualificado</option>
-                <option value="descartado" className="bg-[#111F3A] text-white">Descartado</option>
-                <option value="convertido" className="bg-[#111F3A] text-white">Convertido</option>
+                <option value="nuevo" className="bg-[#111F3A] text-white">{t('modals.lead.statuses.nuevo')}</option>
+                <option value="contactado" className="bg-[#111F3A] text-white">{t('modals.lead.statuses.contactado')}</option>
+                <option value="cualificado" className="bg-[#111F3A] text-white">{t('modals.lead.statuses.cualificado')}</option>
+                <option value="descartado" className="bg-[#111F3A] text-white">{t('modals.lead.statuses.descartado')}</option>
+                <option value="convertido" className="bg-[#111F3A] text-white">{t('modals.lead.statuses.convertido')}</option>
               </select>
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Observaciones</label>
+            <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.lead.notesLabel')}</label>
             <textarea
               rows={3}
               className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all text-xs sm:text-sm font-bold resize-none"
-              placeholder="Notas clave sobre el contacto..."
+              placeholder={t('modals.lead.notesPlaceholder')}
               value={formData.notas || ''}
               onChange={e => setFormData({ ...formData, notas: e.target.value })}
             />
@@ -274,7 +276,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
             onClick={onClose}
             className="w-full sm:w-auto order-2 sm:order-1 px-8 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 dark:hover:text-white transition-all active:scale-95"
           >
-            Cancelar
+            {t('modals.lead.cancel')}
           </button>
           <button
             form="lead-form"
@@ -283,7 +285,7 @@ export default function LeadModal({ isOpen, onClose, lead, onSuccess }: LeadModa
             className="w-full sm:w-auto order-1 sm:order-2 px-10 py-3 bg-[#1B4FD8] hover:bg-blue-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-            {lead ? 'Actualizar Contacto' : 'Guardar Contacto'}
+            {lead ? t('modals.lead.update') : t('modals.lead.save')}
           </button>
         </div>
       </div>

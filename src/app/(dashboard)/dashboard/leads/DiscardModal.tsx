@@ -5,6 +5,7 @@ import { X, Loader2, XCircle, Trash2 } from 'lucide-react';
 import { Lead } from './types';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface DiscardModalProps {
   isOpen: boolean;
@@ -22,8 +23,18 @@ const MOTIVOS = [
   'Otro'
 ];
 
+const MOTIVOS_MAPPING: Record<string, string> = {
+  'No interesado': 'modals.lead.discard.reasons.no_interesado',
+  'Sin presupuesto': 'modals.lead.discard.reasons.sin_presupuesto',
+  'Competencia': 'modals.lead.discard.reasons.competencia',
+  'No responde': 'modals.lead.discard.reasons.no_responde',
+  'Duplicado': 'modals.lead.discard.reasons.duplicado',
+  'Otro': 'modals.lead.discard.reasons.otro'
+};
+
 export default function DiscardModal({ isOpen, onClose, lead, onSuccess }: DiscardModalProps) {
   const supabase = createClient();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [motivo, setMotivo] = useState(MOTIVOS[0]);
   const [otroMotivo, setOtroMotivo] = useState('');
@@ -44,12 +55,12 @@ export default function DiscardModal({ isOpen, onClose, lead, onSuccess }: Disca
 
       if (error) throw error;
 
-      toast.success('Contacto descartado con éxito');
+      toast.success(t('modals.lead.discard.toastSuccess'));
       onSuccess();
       onClose();
     } catch (error: any) {
       console.error('Discard error:', error);
-      toast.error('Error al descartar contacto');
+      toast.error(t('modals.lead.discard.toastError'));
     } finally {
       setLoading(false);
     }
@@ -68,7 +79,7 @@ export default function DiscardModal({ isOpen, onClose, lead, onSuccess }: Disca
               <XCircle className="text-red-500" size={24} />
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Descartar Contacto</h3>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{t('modals.lead.discard.title')}</h3>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 truncate max-w-[150px]">{lead.nombre}</p>
             </div>
           </div>
@@ -80,7 +91,7 @@ export default function DiscardModal({ isOpen, onClose, lead, onSuccess }: Disca
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-            Por favor, indica el motivo por el cual este contacto no puede continuar en el proceso comercial.
+            {t('modals.lead.discard.desc')}
           </p>
 
           <div className="grid grid-cols-1 gap-2">
@@ -101,7 +112,7 @@ export default function DiscardModal({ isOpen, onClose, lead, onSuccess }: Disca
                   onChange={() => setMotivo(m)}
                 />
                 <span className={`text-sm font-bold ${motivo === m ? 'text-red-700 dark:text-red-400' : 'text-slate-600 dark:text-slate-400'}`}>
-                  {m}
+                  {t(MOTIVOS_MAPPING[m] ?? m)}
                 </span>
               </label>
             ))}
@@ -110,7 +121,7 @@ export default function DiscardModal({ isOpen, onClose, lead, onSuccess }: Disca
           {motivo === 'Otro' && (
             <textarea
               className="w-full bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-red-500/10 transition-all text-sm font-bold resize-none"
-              placeholder="Especifica el motivo..."
+              placeholder={t('modals.lead.discard.otherPlaceholder')}
               rows={2}
               value={otroMotivo}
               onChange={e => setOtroMotivo(e.target.value)}
@@ -126,13 +137,13 @@ export default function DiscardModal({ isOpen, onClose, lead, onSuccess }: Disca
             className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-red-500/20 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-            Confirmar Descarte
+            {t('modals.lead.discard.confirm')}
           </button>
           <button
             onClick={onClose}
             className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-600 transition-colors active:scale-95"
           >
-            Cancelar
+            {t('modals.lead.discard.cancel')}
           </button>
         </div>
       </div>

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, CheckCircle, ArrowLeft, Loader2, Home } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, ArrowLeft, Loader2, Home, Languages } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import "../auth-pages.css";
 
@@ -14,7 +14,7 @@ function UpdatePasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -184,6 +184,16 @@ function UpdatePasswordContent() {
 
       {/* ── RIGHT PANEL ── */}
       <div className="auth-right">
+        <button
+          onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
+          className="auth-lang-link"
+          title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+        >
+          <Languages size={18} />
+          <span style={{ marginLeft: '6px', fontSize: '11px', fontWeight: 'bold' }}>
+            {language === 'es' ? 'EN' : 'ES'}
+          </span>
+        </button>
         <Link href="https://www.sffalcon.com" className="auth-home-link" title={t("auth.goToMainWeb" as any)}>
           <Home size={18} />
         </Link>

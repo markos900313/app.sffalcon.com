@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { MailCheck, Check, X, Loader2, Home } from "lucide-react";
+import { MailCheck, Check, X, Loader2, Home, Languages } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import "./register.css";
 
@@ -27,7 +27,7 @@ const COUNTRIES = [
 export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -217,6 +217,16 @@ export default function RegisterPage() {
       </div>
 
       <div className="reg-right">
+        <button
+          onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
+          className="auth-lang-link"
+          title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+        >
+          <Languages size={18} />
+          <span style={{ marginLeft: '6px', fontSize: '11px', fontWeight: 'bold' }}>
+            {language === 'es' ? 'EN' : 'ES'}
+          </span>
+        </button>
         <Link href="https://www.sffalcon.com" className="auth-home-link" title={t("auth.goToMainWeb" as any)}>
           <Home size={18} />
         </Link>

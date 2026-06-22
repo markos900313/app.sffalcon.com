@@ -4,7 +4,7 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { CheckCircle, ArrowLeft, Loader2, AlertCircle, Home } from "lucide-react";
+import { CheckCircle, ArrowLeft, Loader2, AlertCircle, Home, Languages } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/lib/LanguageContext";
 import "../auth-pages.css";
@@ -113,7 +113,7 @@ function ResetPasswordForm() {
 }
 
 export default function ResetPasswordPage() {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
 
   return (
     <div className="auth-root wide-left">
@@ -169,6 +169,16 @@ export default function ResetPasswordPage() {
 
       {/* ── RIGHT PANEL ── */}
       <div className="auth-right">
+        <button
+          onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
+          className="auth-lang-link"
+          title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+        >
+          <Languages size={18} />
+          <span style={{ marginLeft: '6px', fontSize: '11px', fontWeight: 'bold' }}>
+            {language === 'es' ? 'EN' : 'ES'}
+          </span>
+        </button>
         <Link href="https://www.sffalcon.com" className="auth-home-link" title={t("auth.goToMainWeb" as any)}>
           <Home size={18} />
         </Link>
