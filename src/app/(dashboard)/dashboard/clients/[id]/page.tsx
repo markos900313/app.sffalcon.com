@@ -47,7 +47,7 @@ export default function ClientDetailPage() {
   const { id } = useParams();
   const supabase = createClient();
   const { t, language } = useLanguage();
-  const activeLang = language || 'es';
+  const activeLang = language === 'en' ? 'en' : 'es';
   const [client, setClient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [comms, setComms] = useState<any[]>([]);
@@ -222,7 +222,6 @@ export default function ClientDetailPage() {
   );
 
   const daysSinceCreated = Math.floor((new Date().getTime() - new Date(client.created_at).getTime()) / (1000 * 60 * 60 * 24));
-  const activeLang = language === 'en' ? 'en' : 'es';
 
   return (
     <DashboardPageContainer>
