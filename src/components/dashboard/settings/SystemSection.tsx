@@ -4,22 +4,19 @@ import React, { useState } from "react";
 import { Cpu, Trash2, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function SystemSection({ user }: { user: any }) {
+  const { t } = useLanguage();
   const orgId = user ? `SFF-${user.id.slice(0, 4).toUpperCase()}` : "SFF-0000";
-  const environment = process.env.NODE_ENV === 'production' ? 'Producción' : 'Desarrollo';
+  const environment = process.env.NODE_ENV === 'production' ? t('production') : t('development');
 
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
   const handleClearData = async () => {
     const confirmed = window.confirm(
-      '¿Estás seguro? Esto borrará:\n\n' +
-      '• Configuración local del navegador\n' +
-      '• Historial de conversaciones con la IA\n' +
-      '• Todos los contactos y mensajes ' +
-      'de Comunicaciones\n\n' +
-      'Esta acción no se puede deshacer.'
+      t('confirmClearDataAlert')
     )
 
     if (!confirmed) return
@@ -70,7 +67,7 @@ export default function SystemSection({ user }: { user: any }) {
       localStorage.clear()
       sessionStorage.clear()
 
-      toast.success('Todos los datos han sido eliminados')
+      toast.success(t('allDataDeletedSuccess'))
 
       setTimeout(() => {
         window.location.reload()
@@ -78,7 +75,7 @@ export default function SystemSection({ user }: { user: any }) {
 
     } catch (error) {
       console.error('Error al borrar datos:', error)
-      toast.error('Error al borrar los datos')
+      toast.error(t('errorDeletingDataToast'))
     } finally {
       setLoading(false)
     }
@@ -89,24 +86,24 @@ export default function SystemSection({ user }: { user: any }) {
       <div className="flex items-center gap-3 mb-8">
         <Cpu className="w-5 h-5 text-[#1B4FD8]" />
         <h3 className="text-[16px] font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
-          Sistema
+          {t('sistema')}
         </h3>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        <SystemInfo label="Versión" value="v1.0.0 Beta" />
-        <SystemInfo label="ID Organización" value={orgId} />
-        <SystemInfo label="Entorno" value={environment} />
+        <SystemInfo label={t('version')} value="v1.0.0 Beta" />
+        <SystemInfo label={t('idOrganizacion')} value={orgId} />
+        <SystemInfo label={t('entorno')} value={environment} />
       </div>
 
       <div className="pt-8 border-t border-[#E2E8F0] dark:border-[#1E3A5F]">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 p-5 bg-red-50/30 dark:bg-red-950/10 rounded-xl border border-red-100 dark:border-red-900/30 transition-all">
           <div className="text-center sm:text-left">
             <h4 className="text-[14px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] mb-1">
-              Zona de peligro
+              {t('zonaPeligro')}
             </h4>
             <p className="text-[12px] text-[#64748B] dark:text-[#94A3B8] font-normal">
-              Elimina la configuración local, el historial de chats con la IA y todos los contactos de Comunicaciones.
+              {t('eliminaDatosPeligroDesc')}
             </p>
           </div>
           <button
@@ -117,12 +114,12 @@ export default function SystemSection({ user }: { user: any }) {
             {loading ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                Borrando datos...
+                {t('borrandoDatos')}
               </>
             ) : (
               <>
                 <Trash2 className="w-4 h-4" />
-                Borrar todos los datos
+                {t('borrarTodosDatos')}
               </>
             )}
           </button>

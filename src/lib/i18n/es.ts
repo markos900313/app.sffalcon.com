@@ -2659,5 +2659,136 @@ export const es = {
   ayuda: "Ayuda",
   ajustes: "Ajustes",
   nuevasNotificaciones: "{count} nuevas",
-  planProActivo: "Plan PRO Activo · Te quedan {days} días de tu periodo actual."
+  planProActivo: "Plan PRO Activo · Te quedan {days} días de tu periodo actual.",
+
+  tuPlanActual: 'Tu Plan Actual',
+  actualizarPlan: 'Actualizar Plan',
+  planPro: 'Plan Pro',
+  tuTrialExpira: 'Tu periodo de prueba expira en {days} días',
+  trialExpirado: 'Tu periodo de prueba ha expirado',
+  continuarConPro: 'Continuar con Pro',
+  accesoPremium: 'Acceso a todas las funciones premium',
+  cancelarSuscripcion: 'Cancelar suscripción',
+  gestionarPlan: 'Gestionar Plan',
+
+  // ProfileSection
+  perfilActualizado: 'Perfil actualizado',
+  errorGuardarPerfil: 'Error al guardar perfil',
+  configuracionPerfil: 'Configuración de Perfil',
+  cambiarFoto: 'CAMBIAR FOTO',
+  nombreCompletoLabel: 'Nombre completo',
+  cargo: 'Cargo',
+  empresa: 'Empresa',
+  zonaHoraria: 'Zona horaria',
+  guardarCambios: 'Guardar Cambios',
+  emailLabel: 'Email',
+
+  // SecuritySection
+  introduceContrasenaActual: 'Introduce tu contraseña actual',
+  nuevaContrasenaMinLength: 'La nueva contraseña debe tener al menos 8 caracteres',
+  contrasenasNoCoinciden: 'Las contraseñas no coinciden',
+  contrasenaActualizada: 'Contraseña actualizada',
+  confirmCerrarSesionesGlobal: '¿Estás seguro de que quieres cerrar sesión en todos los dispositivos?',
+  seguridad: 'Seguridad',
+  cambiarContrasena: 'Cambiar contraseña',
+  actualizaContrasenaDesc: 'Actualiza tu contraseña regularmente para mayor seguridad.',
+  cambiarAhora: 'Cambiar ahora',
+  actual: 'Actual',
+  nueva: 'Nueva',
+  confirmar: 'Confirmar',
+  actualizar: 'Actualizar',
+  sesionActual: 'SESIÓN ACTUAL',
+  windowsPC: 'Windows PC',
+  navegadorWeb: 'Navegador Web',
+  navegador: 'Navegador',
+  activa: 'Activa',
+  iniciadaEl: 'Iniciada el {date}',
+  cerrarTodasSesiones: 'Cerrar todas las sesiones',
+
+  // AutoReplySection
+  autoReplyEnabledToast: 'Respuesta automática activada',
+  autoReplyDisabledToast: 'Desactivada',
+  errorActualizar: 'Error al actualizar',
+  horarioGuardadoCorrectamente: '✅ Horario guardado correctamente',
+  errorGuardarHorario: 'Error al guardar horario',
+  automatizacionComunicaciones: 'Automatización de Comunicaciones',
+  respuestaAutomaticaFueraHorario: 'Respuesta automática fuera de horario',
+  sfIaGestionaraEmails: 'SF IA gestionará tus emails corporativos de forma autónoma.',
+  horarioTrabajo: 'Horario de trabajo',
+  deHour: 'De',
+  aHour: 'a',
+  diasLaborales: 'Días laborales',
+  fueraDeHorarioExplicacion: 'Fuera de este horario SF IA responderá automáticamente.',
+  activaRespuestaAutomaticaExplicacion: 'Activa la respuesta automática para que SF IA responda fuera de tu horario.',
+  guardarHorario: 'GUARDAR HORARIO',
+  dayMondayShort: 'L',
+  dayTuesdayShort: 'M',
+  dayWednesdayShort: 'X',
+  dayThursdayShort: 'J',
+  dayFridayShort: 'V',
+  daySaturdayShort: 'S',
+  daySundayShort: 'D',
+
+  // SystemSection
+  production: 'Producción',
+  development: 'Desarrollo',
+  confirmClearDataAlert: '¿Estás seguro? Esto borrará:\n\n• Configuración local del navegador\n• Historial de conversaciones con la IA\n• Todos los contactos y mensajes de Comunicaciones\n\nEsta acción no se puede deshacer.',
+  allDataDeletedSuccess: 'Todos los datos han sido eliminados',
+  errorDeletingDataToast: 'Error al borrar los datos',
+  sistema: 'Sistema',
+  entorno: 'Entorno',
+  zonaPeligro: 'Zona de peligro',
+  eliminaDatosPeligroDesc: 'Elimina la configuración local, el historial de chats con la IA y todos los contactos de Comunicaciones.',
+  borrandoDatos: 'Borrando datos...',
+  borrarTodosDatos: 'Borrar todos los datos',
+
+  // NotificationsSection
+  preferenciaActualizada: 'Preferencia actualizada',
+  errorGuardarPreferencia: 'Error al guardar preferencia',
+  alertasSistema: 'Alertas de sistema',
+  alertasSistemaDesc: 'Notificaciones críticas sobre el estado del servidor.',
+  nuevosContactos: 'Nuevos Contactos',
+  nuevosContactosDesc: 'Aviso inmediato cuando entra un nuevo contacto.',
+  resumenSemanal: 'Resumen Semanal',
+  resumenSemanalDesc: 'Reporte de actividad enviado por email los lunes.',
+  mensajesNuevos: 'Mensajes nuevos',
+  mensajesNuevosDesc: 'Notificaciones push al recibir comunicaciones.',
+
+  // AppearanceSection
+  colorAcentoActualizado: 'Color de acento actualizado',
+  errorGuardarColorAcento: 'Error al guardar color de acento',
+  apariencia: 'Apariencia',
+  modoVisualizacion: 'Modo de visualización',
+  claro: 'Claro',
+  oscuro: 'Oscuro',
+  colorAzul: 'azul',
+  colorVerde: 'verde',
+  colorRojo: 'rojo',
+  colorAmbar: 'ámbar',
+  colorVioleta: 'violeta',
+
+  // PlanGate
+  planGate: {
+    trialExpiredTitle: 'Prueba gratuita finalizada',
+    planUnavailableTitle: 'Funcionalidad no disponible en tu plan',
+    trialExpiredDesc: 'Tu período de prueba ha terminado. Elige un plan para seguir gestionando tu negocio con total libertad.',
+    planRequiredDesc: 'El módulo de {module} requiere un plan superior para ser utilizado.',
+    back: 'Volver',
+    viewPlans: 'Ver planes',
+    modules: {
+      projects: 'Proyectos',
+      finances: 'Finanzas',
+      invoices: 'Facturación',
+      agents: 'Agentes IA',
+      analytics: 'Analytics'
+    }
+  },
+
+  // MapPicker
+  coordenadasNoDisponibles: 'Coordenadas no disponibles',
+  ubicacionSeleccionada: 'Ubicación seleccionada',
+
+  // api-settings
+  apiSettingsIntegracionGlobal: 'Integración Global',
+  apiSettingsIntegracionGlobalDesc: 'Sincroniza tus datos con cualquier system POS o automatiza procesos vía Zapier.'
 };

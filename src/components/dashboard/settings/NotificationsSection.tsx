@@ -5,9 +5,11 @@ import { Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { updateNotificationSetting } from "@/lib/supabase/queries/profile";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function NotificationsSection({ initialSettings, user }: { initialSettings: any, user: any }) {
   const [settings, setSettings] = useState(initialSettings);
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (initialSettings) setSettings(initialSettings);
@@ -19,9 +21,9 @@ export default function NotificationsSection({ initialSettings, user }: { initia
     
     try {
       await updateNotificationSetting(user.id, field, value);
-      toast.success("Preferencia actualizada");
+      toast.success(t('preferenciaActualizada'));
     } catch (error) {
-      toast.error("Error al guardar preferencia");
+      toast.error(t('errorGuardarPreferencia'));
       // Rollback
       setSettings(settings);
     }
@@ -32,32 +34,32 @@ export default function NotificationsSection({ initialSettings, user }: { initia
       <div className="flex items-center gap-3 mb-8">
         <Bell className="w-5 h-5 text-[#1B4FD8]" />
         <h3 className="text-[16px] font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
-          Notificaciones
+          {t('notificaciones')}
         </h3>
       </div>
 
       <div className="space-y-6 divide-y divide-gray-50 dark:divide-[#1E3A5F]">
         <ToggleItem 
-          title="Alertas de sistema" 
-          description="Notificaciones críticas sobre el estado del servidor." 
+          title={t('alertasSistema')} 
+          description={t('alertasSistemaDesc')} 
           enabled={settings?.system_alerts}
           onToggle={(val) => handleToggle('system_alerts', val)}
         />
         <ToggleItem 
-          title="Nuevos Contactos" 
-          description="Aviso inmediato cuando entra un nuevo contacto." 
+          title={t('nuevosContactos')} 
+          description={t('nuevosContactosDesc')} 
           enabled={settings?.new_leads}
           onToggle={(val) => handleToggle('new_leads', val)}
         />
         <ToggleItem 
-          title="Resumen Semanal" 
-          description="Reporte de actividad enviado por email los lunes." 
+          title={t('resumenSemanal')} 
+          description={t('resumenSemanalDesc')} 
           enabled={settings?.weekly_summary}
           onToggle={(val) => handleToggle('weekly_summary', val)}
         />
         <ToggleItem 
-          title="Mensajes nuevos" 
-          description="Notificaciones push al recibir comunicaciones." 
+          title={t('mensajesNuevos')} 
+          description={t('mensajesNuevosDesc')} 
           enabled={settings?.new_messages}
           onToggle={(val) => handleToggle('new_messages', val)}
         />

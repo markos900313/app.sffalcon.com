@@ -5,6 +5,7 @@ import { Lock, Crown } from 'lucide-react';
 import Link from 'next/link';
 import { usePlan } from '@/hooks/usePlan';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface PlanGateProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ const MODULE_NAMES: Record<string, string> = {
 };
 
 export const PlanGate = ({ children, module }: PlanGateProps) => {
+  const { t } = useLanguage();
   // 🛡️ MODO AUDITORÍA TOTAL: Saltamos la validación de acceso.
   // El usuario necesita analizar todo el contenido para decidir qué dejar.
   return <>{children}</>;
@@ -27,6 +29,13 @@ export const PlanGate = ({ children, module }: PlanGateProps) => {
   // Código original comentado para referencia rápida en la reversion posterior
   /*
   const { hasAccess, loading, isTrialExpired } = usePlan();
+  const MODULE_NAMES: Record<string, string> = {
+    projects: t('planGate.modules.projects'),
+    finances: t('planGate.modules.finances'),
+    invoices: t('planGate.modules.invoices'),
+    agents: t('planGate.modules.agents'),
+    analytics: t('planGate.modules.analytics'),
+  };
 
   if (loading) {
     return (
@@ -52,13 +61,13 @@ export const PlanGate = ({ children, module }: PlanGateProps) => {
         </div>
         
         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
-          {isTrialExpired ? 'Prueba gratuita finalizada' : 'Funcionalidad no disponible en tu plan'}
+          {isTrialExpired ? t('planGate.trialExpiredTitle') : t('planGate.planUnavailableTitle')}
         </h3>
         
         <p className="text-slate-500 dark:text-[#94A3B8] mb-8 leading-relaxed">
           {isTrialExpired 
-            ? 'Tu período de prueba ha terminado. Elige un plan para seguir gestionando tu negocio con total libertad.'
-            : `El módulo de ${MODULE_NAMES[module] || module} requiere un plan superior para ser utilizado.`
+            ? t('planGate.trialExpiredDesc')
+            : t('planGate.planRequiredDesc', { module: MODULE_NAMES[module] || module })
           }
         </p>
 
@@ -67,14 +76,14 @@ export const PlanGate = ({ children, module }: PlanGateProps) => {
             href="/dashboard/settings"
             className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-slate-200 dark:border-[#1E3A5F] text-slate-600 dark:text-[#94A3B8] hover:bg-slate-50 dark:hover:bg-[#162040] transition-all font-medium text-sm"
           >
-            Volver
+            {t('planGate.back')}
           </Link>
           <Link
             href="/dashboard/settings"
             className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#1B4FD8] text-white hover:bg-[#1640B0] transition-all font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
           >
             <Crown className="w-4 h-4" />
-            Ver planes
+            {t('planGate.viewPlans')}
           </Link>
         </div>
       </div>

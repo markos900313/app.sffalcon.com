@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, Circle } from 'react-leaflet';
 import L from 'leaflet';
+import { useLanguage } from "@/lib/LanguageContext";
 
 // Corregir iconos de Leaflet en Next.js
 // @ts-ignore
@@ -21,6 +22,7 @@ interface MapPickerProps {
 }
 
 export default function MapPicker({ lat, lng, radius, onLocationSelect }: MapPickerProps) {
+  const { t } = useLanguage();
   const latNum = typeof lat === 'string' ? parseFloat(lat) : lat;
   const lngNum = typeof lng === 'string' ? parseFloat(lng) : lng;
 
@@ -29,7 +31,7 @@ export default function MapPicker({ lat, lng, radius, onLocationSelect }: MapPic
       <div className="h-[300px] bg-slate-100 dark:bg-slate-800 
         rounded-2xl flex items-center justify-center">
         <p className="text-xs text-slate-400 font-bold uppercase 
-          tracking-widest">Coordenadas no disponibles</p>
+          tracking-widest">{t('coordenadasNoDisponibles')}</p>
       </div>
     );
   }
@@ -63,9 +65,9 @@ export default function MapPicker({ lat, lng, radius, onLocationSelect }: MapPic
         headers: { 'User-Agent': 'SoporteFacil/1.0' }
       });
       const data = await res.json();
-      onLocationSelect(newLat, newLng, data.display_name || "Ubicación seleccionada");
+      onLocationSelect(newLat, newLng, data.display_name || t('ubicacionSeleccionada'));
     } catch (err) {
-      onLocationSelect(newLat, newLng, "Ubicación seleccionada");
+      onLocationSelect(newLat, newLng, t('ubicacionSeleccionada'));
     }
   };
 

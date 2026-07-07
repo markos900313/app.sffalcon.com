@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { es } from './i18n/es';
 import { en } from './i18n/en';
 import { TranslationKeys } from './i18n/types';
+import { createClient } from "@/lib/supabase/client";
 
 export type Language = 'es' | 'en';
 
@@ -27,21 +28,78 @@ export const LanguageContext = createContext<LanguageContextType>({
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('es');
 
-  // Load language preference from localStorage on mount
+  // Load language preference from Supabase profiles (with localStorage fallbacks) on mount
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('asistente_language');
-    if (savedLanguage === 'en' || savedLanguage === 'es') {
-      setLanguageState(savedLanguage);
+    const supabase = createClient();
+    let isMounted = true;
+
+    async function loadLanguage() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('language')
+            .eq('id', user.id)
+            .single();
+
+          if (!error && profile?.language && (profile.language === 'en' || profile.language === 'es')) {
+            if (isMounted) {
+              setLanguageState(profile.language as Language);
+              localStorage.setItem('asistente_language', profile.language);
+              localStorage.setItem('sf_employee_lang', profile.language);
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Error loading language from Supabase profiles:', err);
+      }
+
+      // Fallbacks (either no auth or query error)
+      if (isMounted) {
+        const savedLanguage = localStorage.getItem('asistente_language') || localStorage.getItem('sf_employee_lang');
+        if (savedLanguage === 'en' || savedLanguage === 'es') {
+          setLanguageState(savedLanguage);
+        }
+      }
     }
+
+    loadLanguage();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const setLanguage = (newLanguage: Language) => {
     setLanguageState(newLanguage);
     try {
       localStorage.setItem('asistente_language', newLanguage);
+      localStorage.setItem('sf_employee_lang', newLanguage);
     } catch (e) {
       console.error('Error saving language preference to localStorage:', e);
     }
+
+    // Persist to database asynchronously in the background
+    const supabase = createClient();
+    async function persistLang() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ language: newLanguage })
+            .eq('id', user.id);
+          if (error) {
+            console.error('Error persisting language preference to profiles table:', error);
+          }
+        }
+      } catch (err) {
+        console.error('Error getting user for language persistence:', err);
+      }
+    }
+    persistLang();
   };
 
   const t = (key: TranslationKeys | (string & {}), options?: TOptions): string => {

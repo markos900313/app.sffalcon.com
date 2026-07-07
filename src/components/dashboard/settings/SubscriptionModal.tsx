@@ -2,11 +2,12 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Check } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/context/OrganizationContext'
 import { useLanguage } from '@/lib/LanguageContext'
+import { cn } from '@/lib/utils'
 
 interface SubscriptionModalProps {
   isOpen: boolean
@@ -31,9 +32,22 @@ const BENEFITS_EN = [
 
 export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
   const [loading, setLoading] = useState(false)
+  const [trialStatus, setTrialStatus] = useState<any>(null)
   const { organization } = useOrganization()
   const { t, language } = useLanguage()
   const supabase = createClient()
+
+  useEffect(() => {
+    if (!organization?.id || !isOpen) return
+    fetch('/api/trial/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ organizationId: organization.id })
+    })
+    .then(r => r.json())
+    .then(data => setTrialStatus(data))
+    .catch(err => console.error('Error checking trial status:', err))
+  }, [organization?.id, isOpen])
 
   const isUS = organization?.country === 'US' || organization?.currency === 'USD'
   const priceStr = isUS ? '$29' : '29€'
@@ -92,7 +106,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
             {/* Header */}
             <div className="px-6 py-5 border-b border-slate-100 dark:border-[#1E3A5F] flex items-center justify-between">
               <h2 className="text-[17px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight">
-                {t('modals.subscription.title')}
+                {t('actualizarPlan')}
               </h2>
               <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-[#1E3A5F] rounded-full transition-colors text-slate-400">
                 <X className="w-5 h-5" />
@@ -101,17 +115,30 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
 
             {/* Content */}
             <div className="p-6 space-y-6">
+              {trialStatus && trialStatus.status !== 'active' && (
+                <div className={cn(
+                  "p-3.5 rounded-xl border text-xs font-semibold text-center leading-relaxed",
+                  trialStatus.status === 'expired' 
+                    ? "bg-red-500/10 border-red-500/20 text-red-500 dark:text-red-400" 
+                    : "bg-orange-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400"
+                )}>
+                  {trialStatus.status === 'expired' 
+                    ? t('trialExpirado') 
+                    : t('tuTrialExpira', { days: trialStatus.daysLeft ?? 0 })}
+                </div>
+              )}
+
               <div className="space-y-3">
                 <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.1em]">
-                  {t('modals.subscription.selectedPlan')}
+                  {t('tuPlanActual')}
                 </label>
                 <div className="bg-slate-50 dark:bg-[#0D1B35] border border-slate-200 dark:border-[#1E3A5F] rounded-xl p-5 flex items-center justify-between group transition-all duration-300 hover:border-slate-300 dark:hover:border-white/20">
                   <div className="space-y-1">
                     <p className="text-[15px] font-bold text-[#0F172A] dark:text-[#F1F5F9]">
-                      {t('modals.subscription.planName')}
+                      {t('planPro')}
                     </p>
                     <p className="text-[12px] text-slate-500 dark:text-slate-400">
-                      {t('modals.subscription.planDesc')}
+                      {t('accesoPremium')}
                     </p>
                   </div>
                   <div className="text-right">
@@ -150,7 +177,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                 onClick={onClose}
                 className="w-full sm:w-auto order-2 sm:order-1 text-[14px] font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors px-4 py-2 uppercase tracking-tight"
               >
-                {t('modals.subscription.cancel')}
+                {t('cancelarSuscripcion')}
               </button>
 
               <button
@@ -161,7 +188,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  t('modals.subscription.confirm')
+                  t(organization?.plan === 'pro' ? 'gestionarPlan' : 'continuarConPro')
                 )}
               </button>
             </div>

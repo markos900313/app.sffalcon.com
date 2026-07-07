@@ -2659,5 +2659,136 @@ export const en = {
   ayuda: "Help",
   ajustes: "Settings",
   nuevasNotificaciones: "{count} new",
-  planProActivo: "PRO Plan Active · {days} days remaining in your current period."
+  planProActivo: "PRO Plan Active · {days} days remaining in your current period.",
+
+  tuPlanActual: 'Your Current Plan',
+  actualizarPlan: 'Upgrade Plan',
+  planPro: 'Pro Plan',
+  tuTrialExpira: 'Your trial period expires in {days} days',
+  trialExpirado: 'Your trial period has expired',
+  continuarConPro: 'Continue with Pro',
+  accesoPremium: 'Access to all premium features',
+  cancelarSuscripcion: 'Cancel subscription',
+  gestionarPlan: 'Manage Plan',
+
+  // ProfileSection
+  perfilActualizado: 'Profile updated',
+  errorGuardarPerfil: 'Error saving profile',
+  configuracionPerfil: 'Profile Settings',
+  cambiarFoto: 'CHANGE PHOTO',
+  nombreCompletoLabel: 'Full name',
+  cargo: 'Position',
+  empresa: 'Company',
+  zonaHoraria: 'Time zone',
+  guardarCambios: 'Save Changes',
+  emailLabel: 'Email',
+
+  // SecuritySection
+  introduceContrasenaActual: 'Enter your current password',
+  nuevaContrasenaMinLength: 'The new password must be at least 8 characters long',
+  contrasenasNoCoinciden: 'Passwords do not match',
+  contrasenaActualizada: 'Password updated',
+  confirmCerrarSesionesGlobal: 'Are you sure you want to log out of all devices?',
+  seguridad: 'Security',
+  cambiarContrasena: 'Change password',
+  actualizaContrasenaDesc: 'Update your password regularly for better security.',
+  cambiarAhora: 'Change now',
+  actual: 'Current',
+  nueva: 'New',
+  confirmar: 'Confirm',
+  actualizar: 'Update',
+  sesionActual: 'CURRENT SESSION',
+  windowsPC: 'Windows PC',
+  navegadorWeb: 'Web Browser',
+  navegador: 'Browser',
+  activa: 'Active',
+  iniciadaEl: 'Started on {date}',
+  cerrarTodasSesiones: 'Log out of all sessions',
+
+  // AutoReplySection
+  autoReplyEnabledToast: 'Auto reply enabled',
+  autoReplyDisabledToast: 'Disabled',
+  errorActualizar: 'Error updating settings',
+  horarioGuardadoCorrectamente: '✅ Business hours saved successfully',
+  errorGuardarHorario: 'Error saving business hours',
+  automatizacionComunicaciones: 'Communications Automation',
+  respuestaAutomaticaFueraHorario: 'Off-hours auto-reply',
+  sfIaGestionaraEmails: 'SF AI will manage your corporate emails autonomously.',
+  horarioTrabajo: 'Working hours',
+  deHour: 'From',
+  aHour: 'to',
+  diasLaborales: 'Working days',
+  fueraDeHorarioExplicacion: 'Outside these hours, SF AI will reply automatically.',
+  activaRespuestaAutomaticaExplicacion: 'Activate auto-reply for SF AI to respond outside your business hours.',
+  guardarHorario: 'SAVE HOURS',
+  dayMondayShort: 'M',
+  dayTuesdayShort: 'T',
+  dayWednesdayShort: 'W',
+  dayThursdayShort: 'T',
+  dayFridayShort: 'F',
+  daySaturdayShort: 'S',
+  daySundayShort: 'S',
+
+  // SystemSection
+  production: 'Production',
+  development: 'Development',
+  confirmClearDataAlert: 'Are you sure? This will delete:\n\n• Local browser configuration\n• AI conversation history\n• All Communications contacts and messages\n\nThis action cannot be undone.',
+  allDataDeletedSuccess: 'All data has been deleted',
+  errorDeletingDataToast: 'Error deleting data',
+  sistema: 'System',
+  entorno: 'Environment',
+  zonaPeligro: 'Danger zone',
+  eliminaDatosPeligroDesc: 'Deletes local settings, AI chat history, and all Communications contacts.',
+  borrandoDatos: 'Deleting data...',
+  borrarTodosDatos: 'Delete all data',
+
+  // NotificationsSection
+  preferenciaActualizada: 'Preference updated',
+  errorGuardarPreferencia: 'Error saving preference',
+  alertasSistema: 'System alerts',
+  alertasSistemaDesc: 'Critical notifications about server status.',
+  nuevosContactos: 'New Contacts',
+  nuevosContactosDesc: 'Immediate notification when a new contact enters.',
+  resumenSemanal: 'Weekly Summary',
+  resumenSemanalDesc: 'Activity report sent by email on Mondays.',
+  mensajesNuevos: 'New messages',
+  mensajesNuevosDesc: 'Push notifications upon receiving communications.',
+
+  // AppearanceSection
+  colorAcentoActualizado: 'Accent color updated',
+  errorGuardarColorAcento: 'Error saving accent color',
+  apariencia: 'Appearance',
+  modoVisualizacion: 'Display mode',
+  claro: 'Light',
+  oscuro: 'Dark',
+  colorAzul: 'blue',
+  colorVerde: 'green',
+  colorRojo: 'red',
+  colorAmbar: 'amber',
+  colorVioleta: 'violet',
+
+  // PlanGate
+  planGate: {
+    trialExpiredTitle: 'Free trial ended',
+    planUnavailableTitle: 'Feature not available in your plan',
+    trialExpiredDesc: 'Your trial period has ended. Choose a plan to continue managing your business with total freedom.',
+    planRequiredDesc: 'The {module} module requires a higher plan to be used.',
+    back: 'Back',
+    viewPlans: 'View plans',
+    modules: {
+      projects: 'Projects',
+      finances: 'Finances',
+      invoices: 'Invoicing',
+      agents: 'AI Agents',
+      analytics: 'Analytics'
+    }
+  },
+
+  // MapPicker
+  coordenadasNoDisponibles: 'Coordinates not available',
+  ubicacionSeleccionada: 'Location selected',
+
+  // api-settings
+  apiSettingsIntegracionGlobal: 'Global Integration',
+  apiSettingsIntegracionGlobalDesc: 'Sync your data with any POS system or automate processes via Zapier.'
 };

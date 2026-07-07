@@ -6,16 +6,18 @@ import { cn } from "@/lib/utils";
 import { useTheme } from '@/lib/ThemeContext';
 import { updateProfile } from "@/lib/supabase/queries/profile";
 import toast from "react-hot-toast";
+import { useLanguage } from "@/lib/LanguageContext";
 
 const accentColors = [
-  { hex: "#1B4FD8", name: "azul" },
-  { hex: "#10B981", name: "verde" },
-  { hex: "#EF4444", name: "rojo" },
-  { hex: "#F59E0B", name: "ámbar" },
-  { hex: "#8B5CF6", name: "violeta" },
+  { hex: "#1B4FD8", name: "colorAzul" },
+  { hex: "#10B981", name: "colorVerde" },
+  { hex: "#EF4444", name: "colorRojo" },
+  { hex: "#F59E0B", name: "colorAmbar" },
+  { hex: "#8B5CF6", name: "colorVioleta" },
 ];
 
 export default function AppearanceSection({ profile, user }: { profile: any, user: any }) {
+  const { t } = useLanguage();
   return null;
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -41,9 +43,9 @@ export default function AppearanceSection({ profile, user }: { profile: any, use
     try {
       await updateProfile(user.id, { accent_color: color });
       localStorage.setItem('asistente_accent', color);
-      toast.success("Color de acento actualizado");
+      toast.success(t('colorAcentoActualizado'));
     } catch (error) {
-      toast.error("Error al guardar color de acento");
+      toast.error(t('errorGuardarColorAcento'));
     }
   };
 
@@ -56,7 +58,7 @@ export default function AppearanceSection({ profile, user }: { profile: any, use
       <div className="flex items-center gap-3 mb-8">
         <Palette className="w-5 h-5 text-[#1B4FD8]" />
         <h3 className="text-[16px] font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
-          Apariencia
+          {t('apariencia')}
         </h3>
       </div>
 
@@ -64,12 +66,12 @@ export default function AppearanceSection({ profile, user }: { profile: any, use
         {/* Theme Selector */}
         <div className="space-y-4">
           <h4 className="text-[11px] font-medium text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.08em] ml-1">
-            Modo de visualización
+            {t('modoVisualizacion')}
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <ThemeCard
               id="claro"
-              label="Claro"
+              label={t('claro')}
               active={theme === "light"}
               onClick={() => handleSetTheme("light")}
               previewClass="bg-white border-gray-100"
@@ -77,7 +79,7 @@ export default function AppearanceSection({ profile, user }: { profile: any, use
             />
             <ThemeCard
               id="oscuro"
-              label="Oscuro"
+              label={t('oscuro')}
               active={theme === "dark"}
               onClick={() => handleSetTheme("dark")}
               previewClass="bg-[#0F172A] border-slate-800"

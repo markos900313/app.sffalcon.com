@@ -22,7 +22,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 export default function MiWebPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [syncWithAI, setSyncWithAI] = useState(false);
@@ -91,7 +91,7 @@ export default function MiWebPage() {
           formData.web_url ? `Web: ${formData.web_url}` : '',
           formData.instagram_url ? `Instagram: ${formData.instagram_url}` : '',
           formData.facebook_url ? `Facebook: ${formData.facebook_url}` : '',
-          formData.google_maps_url ? `Ubicación: ${formData.google_maps_url}` : ''
+          formData.google_maps_url ? `${language === 'en' ? 'Location' : 'Ubicación'}: ${formData.google_maps_url}` : ''
         ].filter(Boolean).join('\n');
 
         await supabase

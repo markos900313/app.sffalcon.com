@@ -34,10 +34,10 @@ interface TurnosProps {
 }
 
 const SHIFT_TYPES: any = {
-  morning: { label: 'Mañana', color: 'bg-amber-500', text: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  afternoon: { label: 'Tarde', color: 'bg-orange-500', text: 'text-orange-600', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
-  split: { label: 'Partido', color: 'bg-emerald-500', text: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  finde: { label: 'Finde', color: 'bg-violet-500', text: 'text-violet-600', bg: 'bg-violet-500/10', border: 'border-violet-500/20' },
+  morning: { label: 'Morning', color: 'bg-amber-500', text: 'text-amber-600', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  afternoon: { label: 'Afternoon', color: 'bg-orange-500', text: 'text-orange-600', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
+  split: { label: 'Split', color: 'bg-emerald-500', text: 'text-emerald-600', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+  finde: { label: 'Weekend', color: 'bg-violet-500', text: 'text-violet-600', bg: 'bg-violet-500/10', border: 'border-violet-500/20' },
 };
 
 export default function Turnos({ staff }: TurnosProps) {

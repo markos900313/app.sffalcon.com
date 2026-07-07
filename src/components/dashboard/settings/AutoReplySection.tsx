@@ -6,10 +6,12 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 import { useOrganization } from "@/context/OrganizationContext";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function AutoReplySection({ user }: { user: any }) {
   const { organization } = useOrganization();
   const supabase = createClient();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
@@ -55,9 +57,9 @@ export default function AutoReplySection({ user }: { user: any }) {
         ai_whatsapp_enabled: enabled,
         updated_at: new Date().toISOString()
       }).eq('id', organization.id);
-      toast.success(enabled ? "Respuesta automática activada" : "Desactivada");
+      toast.success(enabled ? t('autoReplyEnabledToast') : t('autoReplyDisabledToast'));
     } catch (e) {
-      toast.error("Error al actualizar");
+      toast.error(t('errorActualizar'));
     } finally {
       setSaving(false);
     }
@@ -78,10 +80,10 @@ export default function AutoReplySection({ user }: { user: any }) {
         .eq('id', organization.id);
 
       if (error) throw error;
-      toast.success("✅ Horario guardado correctamente");
+      toast.success(t('horarioGuardadoCorrectamente'));
     } catch (error) {
       console.error("Error saving schedule:", error);
-      toast.error("Error al guardar horario");
+      toast.error(t('errorGuardarHorario'));
     } finally {
       setSaving(false);
     }
@@ -102,13 +104,13 @@ export default function AutoReplySection({ user }: { user: any }) {
   const parseHour = (val: string) => parseInt(val.split(':')[0], 10);
 
   const days = [
-    { label: "L", value: 1 },
-    { label: "M", value: 2 },
-    { label: "X", value: 3 },
-    { label: "J", value: 4 },
-    { label: "V", value: 5 },
-    { label: "S", value: 6 },
-    { label: "D", value: 0 }
+    { label: t('dayMondayShort'), value: 1 },
+    { label: t('dayTuesdayShort'), value: 2 },
+    { label: t('dayWednesdayShort'), value: 3 },
+    { label: t('dayThursdayShort'), value: 4 },
+    { label: t('dayFridayShort'), value: 5 },
+    { label: t('daySaturdayShort'), value: 6 },
+    { label: t('daySundayShort'), value: 0 }
   ];
 
   return (
@@ -116,7 +118,7 @@ export default function AutoReplySection({ user }: { user: any }) {
       <div className="flex items-center gap-3 mb-8">
         <Bot className="w-5 h-5 text-[#1B4FD8]" />
         <h3 className="text-[16px] font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
-          Automatización de Comunicaciones
+          {t('automatizacionComunicaciones')}
         </h3>
       </div>
 
@@ -125,10 +127,10 @@ export default function AutoReplySection({ user }: { user: any }) {
         <div className="flex items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-[#0D1B35] rounded-xl border border-slate-100 dark:border-[#1E3A5F]">
           <div className="space-y-1">
             <h4 className="text-[14px] font-semibold text-[#0F172A] dark:text-[#F1F5F9]">
-              Respuesta automática fuera de horario
+              {t('respuestaAutomaticaFueraHorario')}
             </h4>
             <p className="text-[12px] text-[#64748B] dark:text-[#94A3B8]">
-              SF IA gestionará tus emails corporativos de forma autónoma.
+              {t('sfIaGestionaraEmails')}
             </p>
           </div>
           <button
@@ -153,13 +155,13 @@ export default function AutoReplySection({ user }: { user: any }) {
            <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-[#1B4FD8]" />
               <span className="text-[13px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] uppercase tracking-wider">
-                Horario de trabajo
+                {t('horarioTrabajo')}
               </span>
            </div>
 
            <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#0D1B35] px-4 py-2 rounded-xl border border-slate-100 dark:border-[#1E3A5F]">
-                 <span className="text-[12px] text-[#64748B] dark:text-[#94A3B8]">De</span>
+                 <span className="text-[12px] text-[#64748B] dark:text-[#94A3B8]">{t('deHour')}</span>
                  <input 
                    type="time" 
                    value={formatHour(settings.working_hours_start)}
@@ -169,7 +171,7 @@ export default function AutoReplySection({ user }: { user: any }) {
               </div>
 
               <div className="flex items-center gap-3 bg-slate-50 dark:bg-[#0D1B35] px-4 py-2 rounded-xl border border-slate-100 dark:border-[#1E3A5F]">
-                 <span className="text-[12px] text-[#64748B] dark:text-[#94A3B8]">a</span>
+                 <span className="text-[12px] text-[#64748B] dark:text-[#94A3B8]">{t('aHour')}</span>
                  <input 
                    type="time" 
                    value={formatHour(settings.working_hours_end)}
@@ -182,7 +184,7 @@ export default function AutoReplySection({ user }: { user: any }) {
            <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[#1B4FD8]" />
-                <span className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase">Días laborales</span>
+                <span className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase">{t('diasLaborales')}</span>
               </div>
               <div className="flex gap-2">
                 {days.map(day => (
@@ -216,8 +218,8 @@ export default function AutoReplySection({ user }: { user: any }) {
                 settings.auto_reply_enabled ? "text-[#1B4FD8]" : "text-[#64748B] dark:text-[#94A3B8]"
               )}>
                 {settings.auto_reply_enabled 
-                  ? "Fuera de este horario SF IA responderá automáticamente."
-                  : "Activa la respuesta automática para que SF IA responda fuera de tu horario."
+                  ? t('fueraDeHorarioExplicacion')
+                  : t('activaRespuestaAutomaticaExplicacion')
                 }
               </p>
            </div>
@@ -227,7 +229,7 @@ export default function AutoReplySection({ user }: { user: any }) {
              disabled={saving}
              className="w-full h-11 bg-[#1B4FD8] hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-[13px] font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95"
            >
-             {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : "GUARDAR HORARIO"}
+             {saving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : t('guardarHorario')}
            </button>
         </div>
       </div>

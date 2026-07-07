@@ -267,9 +267,9 @@ export default function ApiSettingsPage() {
 
           <div className="lg:col-span-4 space-y-6">
             <div className="card-premium bg-white dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] p-6 md:p-8 rounded-2xl shadow-xl relative overflow-hidden group">
-              <h3 className="font-bold text-[var(--text-primary)] mb-2 relative z-10">Integración Global</h3>
+              <h3 className="font-bold text-[var(--text-primary)] mb-2 relative z-10">{t('apiSettingsIntegracionGlobal')}</h3>
               <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-4 relative z-10">
-                Sincroniza tus datos con cualquier system POS o automatiza procesos vía Zapier.
+                {t('apiSettingsIntegracionGlobalDesc')}
               </p>
               <div className="flex flex-wrap gap-2 relative z-10">
                 <span className="px-2 py-1 bg-white/5 rounded-md text-[9px] font-bold uppercase tracking-widest text-[var(--text-secondary)] border border-[var(--border-card)]">REST</span>
