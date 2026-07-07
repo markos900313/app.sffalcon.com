@@ -8,7 +8,8 @@ import {
   Palmtree,
   ChevronRight,
   X,
-  LayoutDashboard
+  LayoutDashboard,
+  Languages
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -23,7 +24,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeSection, setActiveSection }: SidebarProps) {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const router = useRouter();
   const supabase = createClient();
   const { isOpen, setIsOpen } = useSidebar();
@@ -116,6 +117,23 @@ export default function Sidebar({ activeSection, setActiveSection }: SidebarProp
           </div>
         ))}
       </nav>
+
+      {/* PIE DE PÁGINA FIJO - AJUSTES */}
+      <div className="p-4 border-t border-[var(--border-sidebar)]">
+        <button
+          onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
+          className={cn(
+            "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11 w-full mb-1",
+            "text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5"
+          )}
+          title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+        >
+          <Languages className="w-5 h-5 transition-transform group-hover:scale-110 shrink-0" />
+          <span className="text-[13px] font-medium tracking-tight truncate">
+            {language === 'es' ? 'EN' : 'ES'}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }

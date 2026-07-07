@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 import { useOrganization } from '@/context/OrganizationContext';
+import { useLanguage } from '@/lib/LanguageContext';
 
 
 import { Client } from '@/app/(dashboard)/dashboard/clients/types';
@@ -45,6 +46,7 @@ interface ClientModalProps {
 export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: ClientModalProps) {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState<Client>({
@@ -79,12 +81,12 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name) return toast.error('El nombre es obligatorio');
+    if (!formData.name) return toast.error(t('nombreObligatorio'));
 
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No se encontró el usuario');
+      if (!user) throw new Error(t('noUser'));
 
       const dataToSave = {
         name: formData.name,
@@ -108,19 +110,19 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
           .update(dataToSave)
           .eq('id', editClient.id);
         if (error) throw error;
-        toast.success('Contacto actualizado');
+        toast.success(t('contactoActualizado'));
       } else {
         const { error } = await supabase
           .from('clients')
           .insert([dataToSave]);
         if (error) throw error;
-        toast.success('Contacto añadido');
+        toast.success(t('contactoAnadido'));
       }
 
       onSuccess();
       onClose();
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Error al guardar';
+      const msg = error instanceof Error ? error.message : t('errorGuardar');
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -137,10 +139,10 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
           <div>
             <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <User className="w-5 h-5 text-[#1B4FD8]" />
-              {editClient ? 'Editar Contacto' : 'Nuevo Contacto'}
+              {editClient ? t('editarContacto') : t('nuevoContacto')}
             </h2>
             <p className="hidden sm:block text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Completa los datos del contacto para su gestión.
+              {t('datosContacto')}
             </p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-white/5 rounded-full transition-colors">
@@ -153,7 +155,7 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Nombre */}
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">NOMBRE COMPLETO*</label>
+              <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('nombreCompleto')}*</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
@@ -162,14 +164,14 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] dark:bg-[#111F3A] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-slate-900 dark:text-white"
-                  placeholder="Ej. Juan Pérez"
+                  placeholder={t('ejemploNombre')}
                 />
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">EMAIL</label>
+              <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('emailLabel')}</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
@@ -177,14 +179,14 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
                   value={formData.email || ''}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] dark:bg-[#111F3A] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-slate-900 dark:text-white"
-                  placeholder="contacto@ejemplo.com"
+                  placeholder={t('emailPlaceholder')}
                 />
               </div>
             </div>
 
             {/* Teléfono */}
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">TELÉFONO</label>
+              <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('telefono')}</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
@@ -199,17 +201,17 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
 
             {/* Estado */}
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">ESTADO</label>
+              <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('estado')}</label>
               <div className="relative">
                 <select
                   value={formData.status || 'nuevo'}
                   onChange={(e) => setFormData({...formData, status: e.target.value})}
                   className="w-full px-4 py-3 bg-[#F8FAFC] dark:bg-[#111F3A] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-slate-900 dark:text-white appearance-none cursor-pointer bg-[#111F3A]"
                 >
-                  <option value="nuevo" className="bg-[#111F3A] text-white">Nuevo</option>
-                  <option value="habitual" className="bg-[#111F3A] text-white">Habitual</option>
-                  <option value="vip" className="bg-[#111F3A] text-white">VIP</option>
-                  <option value="inactivo" className="bg-[#111F3A] text-white">Inactivo</option>
+                  <option value="nuevo" className="bg-[#111F3A] text-white">{t('estadoNuevo')}</option>
+                  <option value="habitual" className="bg-[#111F3A] text-white">{t('estadoHabitual')}</option>
+                  <option value="vip" className="bg-[#111F3A] text-white">{t('estadoVip')}</option>
+                  <option value="inactivo" className="bg-[#111F3A] text-white">{t('estadoInactivo')}</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>
@@ -218,14 +220,14 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
 
           {/* Notas */}
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">NOTAS Y OBSERVACIONES</label>
+            <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('notasObservaciones')}</label>
             <div className="relative">
               <FileText className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
               <textarea
                 value={formData.notes || ''}
                 onChange={(e) => setFormData({...formData, notes: e.target.value})}
                 className="w-full pl-10 pr-4 py-3 bg-[#F8FAFC] dark:bg-[#111F3A] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-slate-900 dark:text-white min-h-[120px] resize-none"
-                placeholder="Detalles relevantes del contacto..."
+                placeholder={t('detallesRelevantes')}
               />
             </div>
           </div>
@@ -237,7 +239,7 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
             onClick={onClose}
             className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
           >
-            Cancelar
+            {t('cancelar')}
           </button>
           <button
             onClick={handleSubmit}
@@ -248,7 +250,7 @@ export default function ClientModal({ isOpen, onClose, onSuccess, editClient }: 
               loading && "opacity-50 cursor-not-allowed scale-95"
             )}
           >
-            {loading ? 'Guardando...' : (editClient ? 'Actualizar Contacto' : 'Guardar Contacto')}
+            {loading ? t('guardando') : (editClient ? t('actualizarContacto') : t('guardarContacto'))}
           </button>
         </div>
       </div>

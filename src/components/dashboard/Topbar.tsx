@@ -8,10 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import TrialBanner from '@/components/dashboard/trial/TrialBanner';
 import { format } from "date-fns";
+import { useLanguage } from "@/lib/LanguageContext";
 
 export default function Topbar() {
   const { isOpen, setIsOpen } = useSidebar();
   const { organization } = useOrganization();
+  const { t } = useLanguage();
   const [mounted, setMounted] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -128,7 +130,7 @@ export default function Topbar() {
               setShowHelp(false);
             }}
             className={`topbar-icon p-2 transition-all h-9 w-9 md:h-10 md:w-10 flex items-center justify-center rounded-xl border border-transparent ${showNotifications ? 'bg-slate-50 dark:bg-white/5 text-[#0F172A] dark:text-white' : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'}`}
-            title="Notificaciones"
+            title={t('notificaciones')}
           >
             <Bell className="w-4 h-4 md:w-5 md:h-5" />
             {unreadCount > 0 && (
@@ -142,10 +144,10 @@ export default function Topbar() {
           {showNotifications && (
             <div className="dropdown-content fixed md:absolute top-[64px] md:top-full left-4 right-4 md:left-auto md:right-0 mt-2 w-auto md:w-80 max-w-[calc(100vw-32px)] bg-[#111F3A] border border-[#1E3A5F] rounded-2xl shadow-2xl overflow-hidden z-[200] animate-in fade-in slide-in-from-top-1">
               <div className="p-4 border-b border-[#1E3A5F] flex items-center justify-between">
-                <span className="text-white text-sm font-bold">Notificaciones</span>
+                <span className="text-white text-sm font-bold">{t('notificaciones')}</span>
                 {unreadCount > 0 && (
                   <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded-full border border-red-500/30">
-                    {unreadCount} nuevas
+                    {t('nuevasNotificaciones', { count: unreadCount })}
                   </span>
                 )}
               </div>
@@ -153,7 +155,7 @@ export default function Topbar() {
                 {notifications.length === 0 ? (
                   <div className="p-8 flex flex-col items-center justify-center gap-3 opacity-20">
                     <Bell className="w-10 h-10 text-white" />
-                    <span className="text-white text-xs">Sin notificaciones</span>
+                    <span className="text-white text-xs">{t('sinNotificaciones')}</span>
                   </div>
                 ) : (
                   <div className="divide-y divide-[#1E3A5F]/50">
@@ -187,7 +189,7 @@ export default function Topbar() {
                     onClick={handleClearNotifications}
                     className="w-full text-red-500 text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-opacity"
                   >
-                    Limpiar notificaciones
+                    {t('limpiarNotificaciones')}
                   </button>
                 </div>
               )}
@@ -203,7 +205,7 @@ export default function Topbar() {
               setShowNotifications(false);
             }}
             className={`topbar-icon p-2 transition-all h-9 w-9 md:h-10 md:w-10 flex items-center justify-center rounded-xl border border-transparent ${showHelp ? 'bg-slate-50 dark:bg-white/5 text-[#0F172A] dark:text-white' : 'text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5'}`}
-            title="Ayuda"
+            title={t('ayuda')}
           >
             <HelpCircle className="w-4 h-4 md:w-5 md:h-5" />
           </button>
@@ -212,8 +214,8 @@ export default function Topbar() {
           {showHelp && (
             <div className="dropdown-content fixed md:absolute top-[64px] md:top-full left-4 right-4 md:left-auto md:right-0 mt-2 w-auto md:w-72 max-w-[calc(100vw-32px)] bg-[#111F3A] border border-[#1E3A5F] rounded-2xl shadow-2xl overflow-hidden z-[200] animate-in fade-in slide-in-from-top-1">
               <div className="p-4 border-b border-[#1E3A5F]">
-                <span className="text-white text-sm font-bold block">¿Necesitas ayuda?</span>
-                <p className="text-slate-400 text-xs mt-1">Contacta con soporte directamente:</p>
+                <span className="text-white text-sm font-bold block">{t('necesitasAyuda')}</span>
+                <p className="text-slate-400 text-xs mt-1">{t('contactaSoporte')}</p>
               </div>
               <div className="p-3 flex flex-col gap-2">
                 <a
@@ -225,7 +227,7 @@ export default function Topbar() {
                   <MessageCircle className="w-5 h-5 text-green-500" />
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-xs font-bold truncate">+34 604 989 742</p>
-                    <p className="text-green-500/60 text-[10px]">WhatsApp Soporte</p>
+                    <p className="text-green-500/60 text-[10px]">{t('whatsappSoporte')}</p>
                   </div>
                 </a>
                 <a
@@ -235,7 +237,7 @@ export default function Topbar() {
                   <Mail className="w-5 h-5 text-blue-500" />
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-xs font-bold truncate">soporte@sffalcon.com</p>
-                    <p className="text-blue-500/60 text-[10px]">Correo Electrónico</p>
+                    <p className="text-blue-500/60 text-[10px]">{t('correoElectronico')}</p>
                   </div>
                 </a>
               </div>
@@ -246,7 +248,7 @@ export default function Topbar() {
         <Link
           href="/dashboard/settings"
           className="topbar-icon p-2 text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 rounded-xl transition-all h-9 w-9 md:h-10 md:w-10 flex items-center justify-center border border-transparent hover:border-slate-200 dark:hover:border-white/10"
-          title="Ajustes"
+          title={t('ajustes')}
         >
           <Settings className="w-4 h-4 md:w-5 md:h-5" />
         </Link>
