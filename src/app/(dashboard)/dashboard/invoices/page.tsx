@@ -39,7 +39,7 @@ interface Invoice {
 }
 
 export default function InvoicesPage() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const supabase = createClient();
   const { organization } = useOrganization();
   const symbol = organization?.currency_symbol || '€';
@@ -188,7 +188,7 @@ export default function InvoicesPage() {
         city: organization?.city || undefined,
         email: organization?.email || undefined,
         phone: organization?.phone || undefined
-      });
+      }, language);
       toast.success(t('invoices.toast.pdfGenerated' as any));
     } catch (e) {
       toast.error(t('invoices.toast.pdfError' as any));
@@ -212,7 +212,7 @@ export default function InvoicesPage() {
         city: organization?.city || undefined,
         email: organization?.email || undefined,
         phone: organization?.phone || undefined
-      });
+      }, language);
 
       const res = await fetch('/api/invoices/send', {
         method: 'POST',

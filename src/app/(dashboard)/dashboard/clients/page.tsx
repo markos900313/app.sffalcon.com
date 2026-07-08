@@ -42,17 +42,16 @@ export default function ClientsPage() {
 
   const fetchClients = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!organization?.id) return;
 
       const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
-        .select('*')
-        .eq('user_id', user.id)
+        .select('*, appointments(count)')
+        .eq('organization_id', organization.id)
         .order('created_at', { ascending: false });
 
       if (clientsError) throw clientsError;
-      setClients(clientsData || []);
+      setClients((clientsData as any) || []);
 
       // Fetch appointments for metrics
       const startOfMonth = new Date();
@@ -62,14 +61,15 @@ export default function ClientsPage() {
       const { data: apptsData } = await supabase
         .from('appointments')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('organization_id', organization.id)
         .gte('date', startOfMonth.toISOString().split('T')[0]);
 
       const now = new Date();
       const thisMonth = now.getMonth();
       const thisYear = now.getFullYear();
 
-      const newClients = (clientsData || []).filter((c: any) => {
+      const newClients = ((clientsData as any) || []).filter((c: any) => {
+        if (!c.created_at) return false;
         const d = new Date(c.created_at);
         return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
       }).length;
@@ -85,7 +85,7 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, t]);
+  }, [supabase, t, organization?.id]);
 
   useEffect(() => {
     fetchClients();

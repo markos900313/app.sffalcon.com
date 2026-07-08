@@ -64,7 +64,7 @@ export default function AcceptEstimatePage({ params }: { params: { token: string
       // 2. Fetch organization info (public query)
       const { data: org, error: orgErr } = await supabase
         .from('organizations')
-        .select('name, logo_url, email, whatsapp_number')
+        .select('name, logo_url')
         .eq('id', est.organization_id)
         .single();
 
@@ -182,7 +182,7 @@ export default function AcceptEstimatePage({ params }: { params: { token: string
               </div>
             )}
             <div>
-              <h2 className="text-lg font-bold text-white leading-tight">{organization?.name || "Mi Empresa"}</h2>
+              <h2 className="text-lg font-bold text-white leading-tight">{organization?.name}</h2>
               {organization?.email && (
                 <p className="text-xs text-slate-400 mt-1">{organization.email}</p>
               )}

@@ -51,13 +51,62 @@ export function sanitizeForPDF(text: string): string {
     .trim();
 }
 
-export const generateEstimatePDF = (estimate: any, action: 'download' | 'blob' | 'base64' = 'download', orgData?: { name?: string; nif?: string; address?: string; city?: string; email?: string; phone?: string; }): Promise<any> => {
+export const generateEstimatePDF = (
+  estimate: any, 
+  action: 'download' | 'blob' | 'base64' = 'download', 
+  orgData?: { name?: string; nif?: string; address?: string; city?: string; email?: string; phone?: string; },
+  language: 'es' | 'en' = 'es'
+): Promise<any> => {
   return new Promise((resolve, reject) => {
     try {
       const doc = new jsPDF();
       
       const isAccepted = estimate.status === 'accepted';
       const isRejected = estimate.status === 'rejected';
+
+      const L = language === 'en' ? {
+        title: 'ESTIMATE',
+        estimateNum: 'Estimate No.',
+        client: 'Estimate for:',
+        description: 'Description',
+        qty: 'Qty',
+        unitPrice: 'Unit Price',
+        total: 'Total',
+        subtotal: 'Subtotal',
+        tax: 'VAT',
+        grandTotal: 'ESTIMATE TOTAL:',
+        notes: 'Notes / Conditions:',
+        validUntil: 'Estimate valid until',
+        page: 'Page',
+        accepted: 'ACCEPTED',
+        rejected: 'REJECTED',
+        issueDate: 'Issue Date',
+        unknownClient: 'Unknown Customer',
+        qtyHeader: 'Quantity',
+        unitPriceHeader: 'Unit Price',
+        conceptGeneral: 'General Concept'
+      } : {
+        title: 'PRESUPUESTO',
+        estimateNum: 'Presupuesto Nº',
+        client: 'Presupuesto para:',
+        description: 'Descripción',
+        qty: 'Cant.',
+        unitPrice: 'Precio Unit.',
+        total: 'Total',
+        subtotal: 'Subtotal',
+        tax: 'IVA',
+        grandTotal: 'TOTAL PRESUPUESTO:',
+        notes: 'Notas / Condiciones:',
+        validUntil: 'Presupuesto válido hasta',
+        page: 'Página',
+        accepted: 'ACEPTADO',
+        rejected: 'RECHAZADO',
+        issueDate: 'Fecha Emisión',
+        unknownClient: 'Cliente Desconocido',
+        qtyHeader: 'Cantidad',
+        unitPriceHeader: 'Precio Unitario',
+        conceptGeneral: 'Concepto general'
+      };
 
       // Header SF
       let yEmisor = 25;
@@ -96,13 +145,13 @@ export const generateEstimatePDF = (estimate: any, action: 'download' | 'blob' |
       doc.setFontSize(26);
       if (isAccepted) {
         doc.setTextColor(34, 197, 94); // Green 500
-        doc.text("ACEPTADO", 140, 25);
+        doc.text(L.accepted, 140, 25);
       } else if (isRejected) {
         doc.setTextColor(239, 68, 68); // Red 500
-        doc.text("RECHAZADO", 130, 25);
+        doc.text(L.rejected, 130, 25);
       } else {
         doc.setTextColor(15, 23, 42); // slate 900
-        doc.text("PRESUPUESTO", 130, 25);
+        doc.text(L.title, 130, 25);
       }
 
       // Estimate Info
@@ -112,9 +161,9 @@ export const generateEstimatePDF = (estimate: any, action: 'download' | 'blob' |
       const issueDate = estimate.created_at ? format(parseISO(estimate.created_at), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
       const validUntil = estimate.valid_until || format(new Date(), 'yyyy-MM-dd');
 
-      doc.text(`Numero: ${estimateNum}`, 145, 34);
-      doc.text(`Fecha Emision: ${format(parseISO(issueDate), 'dd/MM/yyyy')}`, 145, 39);
-      doc.text(`Valido hasta: ${format(parseISO(validUntil), 'dd/MM/yyyy')}`, 145, 44);
+      doc.text(`${L.estimateNum}: ${estimateNum}`, 145, 34);
+      doc.text(`${L.issueDate}: ${format(parseISO(issueDate), 'dd/MM/yyyy')}`, 145, 39);
+      doc.text(`${L.validUntil}: ${format(parseISO(validUntil), 'dd/MM/yyyy')}`, 145, 44);
 
       // Separator line
       doc.setDrawColor(226, 232, 240); // Slate 200
@@ -122,10 +171,10 @@ export const generateEstimatePDF = (estimate: any, action: 'download' | 'blob' |
 
       // Client Data
       doc.setFont("helvetica", "bold");
-      doc.text("Presupuesto para:", 14, 62);
+      doc.text(L.client, 14, 62);
       
       doc.setFont("helvetica", "normal");
-      doc.text(sanitizeForPDF(estimate.customer_name || "Cliente Desconocido"), 14, 68);
+      doc.text(sanitizeForPDF(estimate.customer_name || L.unknownClient), 14, 68);
       if (estimate.customer_email) {
         doc.text(sanitizeForPDF(estimate.customer_email), 14, 73);
       }
@@ -137,7 +186,7 @@ export const generateEstimatePDF = (estimate: any, action: 'download' | 'blob' |
       }
 
       // Items Table
-      const headers = [['Descripcion', 'Cantidad', 'Precio Unitario', 'Total']];
+      const headers = [[L.description, L.qtyHeader, L.unitPriceHeader, L.total]];
       const tableData = (estimate.items || []).map((item: any) => [
         sanitizeForPDF(item.description || 'Servicio'),
         item.quantity || 1,
@@ -148,7 +197,7 @@ export const generateEstimatePDF = (estimate: any, action: 'download' | 'blob' |
       autoTable(doc, {
         startY: 95,
         head: headers,
-        body: tableData.length > 0 ? tableData : [['Concepto general', '1', `${Number(estimate.subtotal || 0).toFixed(2)} EUR`, `${Number(estimate.subtotal || 0).toFixed(2)} EUR`]],
+        body: tableData.length > 0 ? tableData : [[L.conceptGeneral, '1', `${Number(estimate.subtotal || 0).toFixed(2)} EUR`, `${Number(estimate.subtotal || 0).toFixed(2)} EUR`]],
         theme: 'striped',
         headStyles: { fillColor: [27, 79, 216], textColor: [255, 255, 255] },
         styles: { fontSize: 10, cellPadding: 6 },
@@ -165,21 +214,21 @@ export const generateEstimatePDF = (estimate: any, action: 'download' | 'blob' |
       doc.setFont("helvetica", "bold");
       
       doc.setFontSize(10);
-      doc.text("Subtotal:", 120, finalY + 10);
+      doc.text(`${L.subtotal}:`, 120, finalY + 10);
       doc.text(`${Number(estimate.subtotal || 0).toFixed(2)} EUR`, 165, finalY + 10);
       
-      doc.text(`IVA (${estimate.tax_rate || 21}%):`, 120, finalY + 17);
+      doc.text(`${L.tax} (${estimate.tax_rate || 21}%):`, 120, finalY + 17);
       doc.text(`${Number(estimate.tax_amount || 0).toFixed(2)} EUR`, 165, finalY + 17);
 
       doc.setFontSize(12);
-      doc.text("TOTAL PRESUPUESTO:", 120, finalY + 25);
+      doc.text(L.grandTotal, 120, finalY + 25);
       doc.text(`${Number(estimate.total || 0).toFixed(2)} EUR`, 165, finalY + 25);
 
       // Notes
       if (estimate.notes) {
         doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
-        doc.text("Notas / Condiciones:", 14, finalY + 40);
+        doc.text(L.notes, 14, finalY + 40);
         doc.setFont("helvetica", "normal");
         const splitNotes = doc.splitTextToSize(sanitizeForPDF(estimate.notes), 180);
         doc.text(splitNotes, 14, finalY + 45);
@@ -188,7 +237,7 @@ export const generateEstimatePDF = (estimate: any, action: 'download' | 'blob' |
       // Footer
       doc.setFontSize(9);
       doc.setTextColor(148, 163, 184); // Slate 400
-      doc.text(`Presupuesto valido hasta ${format(parseISO(validUntil), 'dd/MM/yyyy')}`, 105, 280, { align: "center" });
+      doc.text(`${L.validUntil} ${format(parseISO(validUntil), 'dd/MM/yyyy')}`, 105, 280, { align: "center" });
 
       if (action === 'download') {
         doc.save(`Presupuesto_${estimateNum}.pdf`);
@@ -260,6 +309,12 @@ export default function EstimatesPage() {
       toastConvertError: "Error al convertir a factura",
       deleteConfirm: "¿Eliminar el presupuesto {num} definitivamente?",
       convertConfirm: "¿Convertir el presupuesto {num} a factura?",
+      titlePdf: "Ver PDF / Descargar",
+      titleEmail: "Enviar por Email",
+      titleConvert: "Convertir a Factura",
+      titleEdit: "Editar",
+      titleDelete: "Eliminar",
+      activeLabel: "ACTIVOS",
     },
     en: {
       title: "Estimates",
@@ -268,7 +323,7 @@ export default function EstimatesPage() {
       newEstimate: "New Estimate",
       listTab: "List View",
       analyticsTab: "Analytics",
-      kpiTotal: "Total Estimated",
+      kpiTotal: "Total Quoted",
       kpiPending: "Pending Approval",
       kpiAccepted: "Accepted this month",
       searchPlaceholder: "Search by number or customer...",
@@ -297,6 +352,12 @@ export default function EstimatesPage() {
       toastConvertError: "Error converting to invoice",
       deleteConfirm: "Delete estimate {num} permanently?",
       convertConfirm: "Convert estimate {num} to invoice?",
+      titlePdf: "View PDF / Download",
+      titleEmail: "Send by Email",
+      titleConvert: "Convert to Invoice",
+      titleEdit: "Edit",
+      titleDelete: "Delete",
+      activeLabel: "ACTIVE",
     }
   };
 
@@ -447,7 +508,7 @@ export default function EstimatesPage() {
         city: organization?.city || undefined,
         email: organization?.email || undefined,
         phone: organization?.phone || undefined
-      });
+      }, language);
       toast.success(currentT.toastPdfSuccess);
     } catch (e) {
       toast.error(currentT.toastPdfError);
@@ -471,7 +532,7 @@ export default function EstimatesPage() {
         city: organization?.city || undefined,
         email: organization?.email || undefined,
         phone: organization?.phone || undefined
-      });
+      }, language);
 
       const res = await fetch('/api/estimates/send', {
         method: 'POST',
@@ -612,7 +673,7 @@ export default function EstimatesPage() {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-1">
                   <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1B4FD8]">{currentT.title.toUpperCase()}</span>
-                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">ACTIVOS</span>
+                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">{currentT.activeLabel}</span>
                 </div>
                 <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
                   {currentT.controlOf} <span className="text-[#1B4FD8]">{currentT.title}</span>
@@ -800,7 +861,7 @@ export default function EstimatesPage() {
                                 <button
                                   onClick={() => handleViewPDF(est)}
                                   disabled={actionLoading === `pdf-${est.id}`}
-                                  title="Ver PDF / Descargar"
+                                  title={currentT.titlePdf}
                                   className="p-1 md:p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-blue-500/20"
                                 >
                                   {actionLoading === `pdf-${est.id}` ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
@@ -810,7 +871,7 @@ export default function EstimatesPage() {
                                 <button
                                   onClick={() => handleSendEmail(est)}
                                   disabled={actionLoading === `mail-${est.id}`}
-                                  title="Enviar por Email"
+                                  title={currentT.titleEmail}
                                   className="p-1 md:p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                                 >
                                   {actionLoading === `mail-${est.id}` ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
@@ -821,7 +882,7 @@ export default function EstimatesPage() {
                                   <button
                                     onClick={() => handleConvertToInvoice(est)}
                                     disabled={actionLoading === `convert-${est.id}`}
-                                    title="Convertir a Factura"
+                                    title={currentT.titleConvert}
                                     className="p-1 md:p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-500/10 rounded-lg transition-colors border border-transparent hover:border-green-200 dark:hover:border-green-500/20"
                                   >
                                     {actionLoading === `convert-${est.id}` ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
@@ -831,7 +892,7 @@ export default function EstimatesPage() {
                                 {/* Edit */}
                                 <button
                                   onClick={() => handleEdit(est)}
-                                  title="Editar"
+                                  title={currentT.titleEdit}
                                   className="p-1 md:p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                                 >
                                   <Pencil className="w-4 h-4" />
@@ -841,7 +902,7 @@ export default function EstimatesPage() {
                                 <button
                                   onClick={() => handleDelete(est.id, est.estimate_number)}
                                   disabled={actionLoading === `del-${est.id}`}
-                                  title="Eliminar"
+                                  title={currentT.titleDelete}
                                   className="p-1 md:p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-500/20"
                                 >
                                   {actionLoading === `del-${est.id}` ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -857,7 +918,7 @@ export default function EstimatesPage() {
               </div>
             </div>
           ) : (
-            <EstimatesAnalytics estimates={estimates} symbol={symbol} />
+            <EstimatesAnalytics estimates={estimates} symbol={symbol} language={language} />
           )}
         </div>
       </DashboardPageContainer>
@@ -874,7 +935,7 @@ export default function EstimatesPage() {
   );
 }
 
-function EstimatesAnalytics({ estimates, symbol }: { estimates: Estimate[], symbol: string }) {
+function EstimatesAnalytics({ estimates, symbol, language }: { estimates: Estimate[], symbol: string, language: string }) {
   const totalDraft = estimates.filter(e => e.status === 'draft').reduce((acc, e) => acc + Number(e.total || 0), 0);
   const totalSent = estimates.filter(e => e.status === 'sent').reduce((acc, e) => acc + Number(e.total || 0), 0);
   const totalAccepted = estimates.filter(e => e.status === 'accepted').reduce((acc, e) => acc + Number(e.total || 0), 0);
@@ -888,16 +949,40 @@ function EstimatesAnalytics({ estimates, symbol }: { estimates: Estimate[], symb
     return Math.round((value / total) * 100);
   };
 
+  const T = language === 'en' ? {
+    distByStatus: "Distribution by Status",
+    conversionRate: "Conversion Rate",
+    acceptedOfTotal: "Accepted Estimates of Total",
+    acceptedLabel: "Accepted",
+    totalIssuedLabel: "Total Issued",
+    draft: "Draft",
+    sent: "Sent",
+    accepted: "Accepted",
+    rejected: "Rejected",
+    expired: "Expired",
+  } : {
+    distByStatus: "Distribución por Estado",
+    conversionRate: "Tasa de Conversión",
+    acceptedOfTotal: "Presupuestos Aceptados del Total",
+    acceptedLabel: "Aceptados",
+    totalIssuedLabel: "Total Emitidos",
+    draft: "Borrador",
+    sent: "Enviado",
+    accepted: "Aceptado",
+    rejected: "Rechazado",
+    expired: "Expirado",
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-500">
       <div className="card-premium card-finanzas p-6 md:p-8 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-3xl space-y-6">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase tracking-wider">Distribución por Estado</h3>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase tracking-wider">{T.distByStatus}</h3>
         
         <div className="space-y-4">
           {/* Aceptado */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-bold">
-              <span className="text-green-600 dark:text-green-400 uppercase">Aceptados ({getPercentage(totalAccepted)}%)</span>
+              <span className="text-green-600 dark:text-green-400 uppercase">{T.accepted} ({getPercentage(totalAccepted)}%)</span>
               <span className="text-slate-700 dark:text-slate-200">{totalAccepted.toLocaleString('es-ES', { minimumFractionDigits: 2 })} {symbol}</span>
             </div>
             <div className="w-full bg-slate-100 dark:bg-white/5 h-2.5 rounded-full overflow-hidden">
@@ -908,7 +993,7 @@ function EstimatesAnalytics({ estimates, symbol }: { estimates: Estimate[], symb
           {/* Enviados */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-bold">
-              <span className="text-blue-600 dark:text-blue-400 uppercase">Enviados ({getPercentage(totalSent)}%)</span>
+              <span className="text-blue-600 dark:text-blue-400 uppercase">{T.sent} ({getPercentage(totalSent)}%)</span>
               <span className="text-slate-700 dark:text-slate-200">{totalSent.toLocaleString('es-ES', { minimumFractionDigits: 2 })} {symbol}</span>
             </div>
             <div className="w-full bg-slate-100 dark:bg-white/5 h-2.5 rounded-full overflow-hidden">
@@ -919,7 +1004,7 @@ function EstimatesAnalytics({ estimates, symbol }: { estimates: Estimate[], symb
           {/* Borradores */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-bold">
-              <span className="text-slate-500 dark:text-slate-400 uppercase">Borrador ({getPercentage(totalDraft)}%)</span>
+              <span className="text-slate-500 dark:text-slate-400 uppercase">{T.draft} ({getPercentage(totalDraft)}%)</span>
               <span className="text-slate-700 dark:text-slate-200">{totalDraft.toLocaleString('es-ES', { minimumFractionDigits: 2 })} {symbol}</span>
             </div>
             <div className="w-full bg-slate-100 dark:bg-white/5 h-2.5 rounded-full overflow-hidden">
@@ -930,7 +1015,7 @@ function EstimatesAnalytics({ estimates, symbol }: { estimates: Estimate[], symb
           {/* Rechazados */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-bold">
-              <span className="text-red-600 dark:text-red-400 uppercase">Rechazados ({getPercentage(totalRejected)}%)</span>
+              <span className="text-red-600 dark:text-red-400 uppercase">{T.rejected} ({getPercentage(totalRejected)}%)</span>
               <span className="text-slate-700 dark:text-slate-200">{totalRejected.toLocaleString('es-ES', { minimumFractionDigits: 2 })} {symbol}</span>
             </div>
             <div className="w-full bg-slate-100 dark:bg-white/5 h-2.5 rounded-full overflow-hidden">
@@ -941,7 +1026,7 @@ function EstimatesAnalytics({ estimates, symbol }: { estimates: Estimate[], symb
           {/* Expirados */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-bold">
-              <span className="text-amber-600 dark:text-amber-400 uppercase">Expirados ({getPercentage(totalExpired)}%)</span>
+              <span className="text-amber-600 dark:text-amber-400 uppercase">{T.expired} ({getPercentage(totalExpired)}%)</span>
               <span className="text-slate-700 dark:text-slate-200">{totalExpired.toLocaleString('es-ES', { minimumFractionDigits: 2 })} {symbol}</span>
             </div>
             <div className="w-full bg-slate-100 dark:bg-white/5 h-2.5 rounded-full overflow-hidden">
@@ -952,25 +1037,25 @@ function EstimatesAnalytics({ estimates, symbol }: { estimates: Estimate[], symb
       </div>
 
       <div className="card-premium card-finanzas p-6 md:p-8 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-3xl flex flex-col justify-center space-y-4">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase tracking-wider">Tasa de Conversión</h3>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase tracking-wider">{T.conversionRate}</h3>
         
         <div className="text-center py-6">
           <p className="text-5xl font-black text-[#1B4FD8] dark:text-blue-400 tabular-nums">
             {total > 0 ? Math.round((estimates.filter(e => e.status === 'accepted').length / estimates.length) * 100) : 0}%
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-2">
-            Presupuestos Aceptados del Total
+            {T.acceptedOfTotal}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 text-center border-t border-[#E2E8F0] dark:border-[#1E3A5F] pt-4">
           <div>
             <p className="text-lg font-bold text-slate-800 dark:text-slate-200">{estimates.filter(e => e.status === 'accepted').length}</p>
-            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Aceptados</p>
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">{T.acceptedLabel}</p>
           </div>
           <div>
             <p className="text-lg font-bold text-slate-800 dark:text-slate-200">{estimates.length}</p>
-            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Total Emitidos</p>
+            <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">{T.totalIssuedLabel}</p>
           </div>
         </div>
       </div>
