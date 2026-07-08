@@ -12,6 +12,7 @@ import {
   Settings,
   TrendingUp,
   FileText,
+  ClipboardList,
   LayoutDashboard,
   Briefcase,
   Bot,
@@ -45,7 +46,7 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   Home, Mail, Users, CalendarCheck, Settings,
   TrendingUp, FileText, LayoutDashboard, Briefcase, Bot,
   Folder, Package, Clock, BarChart3, Megaphone, Repeat,
-  FileSearch, UserCheck, Key, UserPlus, Globe
+  FileSearch, UserCheck, Key, UserPlus, Globe, ClipboardList
 };
 
 const NAV_SECTIONS = [
@@ -91,6 +92,7 @@ const NAV_SECTIONS = [
     titleKey: 'sections.economia',
     items: [
       { key: 'finances', path: '/dashboard/finances', labelKey: 'sidebar.finances', icon: 'TrendingUp' },
+      { key: 'estimates', path: '/dashboard/presupuestos', labelKey: 'sidebar.estimates', icon: 'ClipboardList' },
       { key: 'invoices', path: '/dashboard/invoices', labelKey: 'sidebar.invoices', icon: 'FileText' },
     ]
   },
@@ -142,6 +144,7 @@ export default function Sidebar() {
   };
 
   const getItemLabel = (item: any) => {
+    if (item.key === 'estimates') return language === 'en' ? 'Estimates' : 'Presupuestos';
     if (item.labelKey) return t(item.labelKey as any);
     if (item.key === 'agents') return language === 'en' ? 'SF AI' : 'SF IA';
     if (item.key === 'agent_reservations') return language === 'en' ? 'Schedule Agent' : 'Gestor de Agenda';
