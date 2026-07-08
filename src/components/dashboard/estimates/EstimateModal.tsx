@@ -129,34 +129,34 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
   const [status, setStatus] = useState<'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'>('draft');
 
   // Search states
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [clientResults, setClientResults] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
   // Fetch clients for autocompleting
   useEffect(() => {
-    if (!searchQuery || searchQuery.length < 1) {
-      setSearchResults([]);
+    if (!searchTerm || searchTerm.length < 1) {
+      setClientResults([]);
       return;
     }
     const delayDebounceFn = setTimeout(async () => {
+      if (!organization?.id) return;
       try {
         const { data, error } = await supabase
           .from('clients')
-          .select('id, name, email, phone, address')
-          .eq('organization_id', organization?.id)
-          .ilike('name', `%${searchQuery}%`)
-          .limit(8);
-        if (!error && data) {
-          setSearchResults(data);
-        }
+          .select('id, name, email, phone')
+          .eq('organization_id', organization.id)
+          .ilike('name', `%${searchTerm}%`)
+          .limit(10);
+
+        if (!error && data) setClientResults(data);
       } catch (err) {
         console.error("Error searching clients:", err);
       }
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, supabase, organization?.id]);
+  }, [searchTerm, supabase, organization?.id]);
 
   // Load estimate details if editing
   useEffect(() => {
@@ -164,7 +164,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
 
     if (estimateToEdit) {
       setCustomerName(estimateToEdit.customer_name || '');
-      setSearchQuery(estimateToEdit.customer_name || '');
+      setSearchTerm(estimateToEdit.customer_name || '');
       setCustomerEmail(estimateToEdit.customer_email || '');
       setCustomerPhone(estimateToEdit.customer_phone || '');
       setCustomerAddress(estimateToEdit.customer_address || '');
@@ -175,7 +175,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
       setStatus(estimateToEdit.status || 'draft');
     } else {
       setCustomerName('');
-      setSearchQuery('');
+      setSearchTerm('');
       setCustomerEmail('');
       setCustomerPhone('');
       setCustomerAddress('');
@@ -191,7 +191,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
 
   const handleSelectClient = (client: any) => {
     setCustomerName(client.name);
-    setSearchQuery(client.name);
+    setSearchTerm(client.name);
     setCustomerEmail(client.email || '');
     setCustomerPhone(client.phone || '');
     setCustomerAddress(client.address || '');
@@ -359,9 +359,9 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
                   <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
-                    value={searchQuery}
+                    value={searchTerm}
                     onChange={e => {
-                      setSearchQuery(e.target.value);
+                      setSearchTerm(e.target.value);
                       setCustomerName(e.target.value);
                       setShowDropdown(true);
                     }}
@@ -373,9 +373,9 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
                 </div>
 
                 {/* Client dropdown */}
-                {showDropdown && searchResults.length > 0 && (
+                {showDropdown && clientResults.length > 0 && (
                   <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl shadow-xl overflow-hidden divide-y divide-[#E2E8F0] dark:divide-[#1E3A5F]">
-                    {searchResults.map(client => (
+                    {clientResults.map(client => (
                       <button
                         key={client.id}
                         type="button"
@@ -388,7 +388,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
                     ))}
                   </div>
                 )}
-                {showDropdown && searchQuery.length >= 1 && searchResults.length === 0 && (
+                {showDropdown && searchTerm.length >= 1 && clientResults.length === 0 && (
                   <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl shadow-xl p-3 text-xs text-slate-400 text-center">
                     No se encontraron clientes coincidentes. Se creará de forma manual.
                   </div>
