@@ -135,7 +135,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
 
   // Fetch clients for autocompleting
   useEffect(() => {
-    if (!searchQuery || searchQuery.length < 2) {
+    if (!searchQuery || searchQuery.length < 1) {
       setSearchResults([]);
       return;
     }
@@ -144,8 +144,9 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
         const { data, error } = await supabase
           .from('clients')
           .select('id, name, email, phone, address')
+          .eq('organization_id', organization?.id)
           .ilike('name', `%${searchQuery}%`)
-          .limit(5);
+          .limit(8);
         if (!error && data) {
           setSearchResults(data);
         }
@@ -155,7 +156,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, supabase]);
+  }, [searchQuery, supabase, organization?.id]);
 
   // Load estimate details if editing
   useEffect(() => {
@@ -373,7 +374,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
 
                 {/* Client dropdown */}
                 {showDropdown && searchResults.length > 0 && (
-                  <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl shadow-xl overflow-hidden divide-y divide-[#E2E8F0] dark:divide-[#1E3A5F]">
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl shadow-xl overflow-hidden divide-y divide-[#E2E8F0] dark:divide-[#1E3A5F]">
                     {searchResults.map(client => (
                       <button
                         key={client.id}
@@ -387,8 +388,8 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
                     ))}
                   </div>
                 )}
-                {showDropdown && searchQuery.length >= 2 && searchResults.length === 0 && (
-                  <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl shadow-xl p-3 text-xs text-slate-400 text-center">
+                {showDropdown && searchQuery.length >= 1 && searchResults.length === 0 && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white dark:bg-[#111F3A] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-xl shadow-xl p-3 text-xs text-slate-400 text-center">
                     No se encontraron clientes coincidentes. Se creará de forma manual.
                   </div>
                 )}

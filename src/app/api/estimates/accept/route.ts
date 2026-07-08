@@ -75,11 +75,39 @@ export async function POST(request: NextRequest) {
     const issueDate = format(new Date(), 'yyyy-MM-dd');
     const dueDate = format(addDays(new Date(), 30), 'yyyy-MM-dd');
 
+    // Obtener user_id para la factura
+    let userId: string | null = null;
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader) {
+      try {
+        const tokenStr = authHeader.replace('Bearer ', '');
+        const { data: { user: authUser } } = await supabaseAdmin.auth.getUser(tokenStr);
+        if (authUser) {
+          userId = authUser.id;
+        }
+      } catch (e) {
+        // Silencioso
+      }
+    }
+
+    if (!userId) {
+      const { data: member } = await supabaseAdmin
+        .from('organization_members')
+        .select('user_id')
+        .eq('organization_id', est.organization_id)
+        .limit(1)
+        .single();
+      if (member) {
+        userId = member.user_id;
+      }
+    }
+
     // 2. Insertar factura
     const { data: invData, error: insertErr } = await supabaseAdmin
       .from('invoices')
       .insert({
         organization_id: est.organization_id,
+        user_id: userId,
         invoice_number: invoiceNumber,
         concept: `Presupuesto ${est.estimate_number}`,
         amount: est.subtotal,

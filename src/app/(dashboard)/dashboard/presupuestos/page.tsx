@@ -537,6 +537,8 @@ export default function EstimatesPage() {
     try {
       setActionLoading(`convert-${est.id}`);
       
+      const { data: { user } } = await supabase.auth.getUser();
+
       // Calculate next invoice number
       const invoiceNumber = await getNextInvoiceNumber(organization.id);
       const issueDate = format(new Date(), 'yyyy-MM-dd');
@@ -547,6 +549,7 @@ export default function EstimatesPage() {
         .from('invoices')
         .insert({
           organization_id: organization.id,
+          user_id: user?.id || null,
           invoice_number: invoiceNumber,
           concept: `Presupuesto ${est.estimate_number}`,
           amount: est.subtotal,
