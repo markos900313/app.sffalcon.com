@@ -8,13 +8,42 @@ import toast from "react-hot-toast";
 import { useOrganization } from "@/context/OrganizationContext";
 import { useLanguage } from "@/lib/LanguageContext";
 
-export default function AutoReplySection({ user }: { user: any }) {
-  const { organization } = useOrganization();
+export default function AutoReplySection({ user, organization: propOrganization }: { user: any, organization?: any }) {
+  const { organization: contextOrganization } = useOrganization();
+  const organization = propOrganization || contextOrganization;
   const supabase = createClient();
   const { t, language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeMode, setActiveMode] = useState<'24/7' | 'schedule' | 'off'>('off');
   
+  const localTranslations = {
+    es: {
+      modeLabel: "Modo de respuesta",
+      off: "Desactivada",
+      offDesc: "La IA no responde automáticamente.",
+      schedule: "Solo fuera de horario",
+      scheduleDesc: "La IA responde automáticamente cuando el negocio está cerrado.",
+      always: "Siempre 24/7",
+      alwaysDesc: "La IA responde en todo momento, dentro y fuera del horario.",
+      savedToast: "Modo de respuesta de IA actualizado correctamente",
+      errorToast: "Error al actualizar el modo de respuesta de la IA",
+    },
+    en: {
+      modeLabel: "Response Mode",
+      off: "Disabled",
+      offDesc: "The AI does not respond automatically.",
+      schedule: "Out of hours only",
+      scheduleDesc: "The AI responds automatically when the business is closed.",
+      always: "Always 24/7",
+      alwaysDesc: "The AI responds at all times, inside and outside of hours.",
+      savedToast: "AI response mode updated successfully",
+      errorToast: "Error updating AI response mode",
+    }
+  };
+
+  const currentT = localTranslations[language === 'es' ? 'es' : 'en'];
+
   // Estado local para los inputs antes de guardar
   const [settings, setSettings] = useState({
     auto_reply_enabled: true,
@@ -29,7 +58,7 @@ export default function AutoReplySection({ user }: { user: any }) {
       if (!orgId) return;
       const { data, error } = await supabase
         .from('organizations')
-        .select('auto_reply_enabled, working_hours_start, working_hours_end, working_days')
+        .select('auto_reply_enabled, working_hours_start, working_hours_end, working_days, ai_always_reply, ai_schedule_reply')
         .eq('id', orgId)
         .single();
 
@@ -40,11 +69,38 @@ export default function AutoReplySection({ user }: { user: any }) {
           working_hours_end: data.working_hours_end ?? 19,
           working_days: data.working_days || ["L", "M", "X", "J", "V"]
         });
+        const always = data.ai_always_reply ?? false;
+        const schedule = data.ai_schedule_reply ?? false;
+        setActiveMode(always ? '24/7' : (schedule ? 'schedule' : 'off'));
       }
       setLoading(false);
     }
     loadSettings();
-  }, [user, supabase]);
+  }, [user, supabase, organization?.id]);
+
+  const handleSave = async (mode: '24/7' | 'schedule' | 'off') => {
+    if (!organization?.id) return;
+    setSaving(true);
+    setActiveMode(mode);
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({
+          ai_always_reply: mode === '24/7',
+          ai_schedule_reply: mode === 'schedule',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', organization.id);
+
+      if (error) throw error;
+      toast.success(currentT.savedToast);
+    } catch (e) {
+      console.error("Error saving AI response mode:", e);
+      toast.error(currentT.errorToast);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleSaveToggle = async (enabled: boolean) => {
     if (!organization?.id) return;
@@ -148,6 +204,38 @@ export default function AutoReplySection({ user }: { user: any }) {
               )}
             />
           </button>
+        </div>
+
+        {/* Modo de respuesta de la IA */}
+        <div className="space-y-3">
+          <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-wider block ml-1">
+            {currentT.modeLabel}
+          </label>
+          <div className="flex gap-2 p-1 bg-slate-50 dark:bg-[#0D1B35] rounded-xl w-fit border border-slate-100 dark:border-[#1E3A5F]">
+            {(['off', 'schedule', '24/7'] as const).map(mode => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => handleSave(mode)}
+                disabled={saving}
+                className={cn(
+                  "px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all",
+                  activeMode === mode 
+                    ? "bg-[#1B4FD8] text-white shadow-sm" 
+                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                )}
+              >
+                {mode === 'off' && currentT.off}
+                {mode === 'schedule' && currentT.schedule}
+                {mode === '24/7' && currentT.always}
+              </button>
+            ))}
+          </div>
+          <p className="text-[12px] text-[#64748B] dark:text-[#94A3B8] ml-1">
+            {activeMode === 'off' && currentT.offDesc}
+            {activeMode === 'schedule' && currentT.scheduleDesc}
+            {activeMode === '24/7' && currentT.alwaysDesc}
+          </p>
         </div>
 
         {/* Bloque Horario y Días */}
