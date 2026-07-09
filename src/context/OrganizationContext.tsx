@@ -44,17 +44,32 @@ interface Organization {
 
 interface OrganizationContextType {
   organization: Organization | null
+  setOrganization: (org: Organization | null) => void
+  refreshOrganization: () => Promise<void>
   loading: boolean
 }
 
 const OrganizationContext = createContext<OrganizationContextType>({
   organization: null,
+  setOrganization: () => {},
+  refreshOrganization: async () => {},
   loading: true
 })
 
 export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   const [organization, setOrganization] = useState<Organization | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const refreshOrganization = async () => {
+    if (!organization?.id) return
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('organizations')
+      .select('*')
+      .eq('id', organization.id)
+      .single()
+    if (data) setOrganization(data)
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -106,7 +121,7 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   }, [])
 
   return (
-    <OrganizationContext.Provider value={{ organization, loading }}>
+    <OrganizationContext.Provider value={{ organization, setOrganization, refreshOrganization, loading }}>
       {children}
     </OrganizationContext.Provider>
   )

@@ -58,8 +58,19 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
     .catch(err => console.error('Error checking trial status:', err))
   }, [organization?.id, isOpen])
 
-  const country = organization?.country?.toUpperCase() || 'ES'
-  const isUSD = ['US','CA','PR','DO'].includes(country)
+  const [currentCountry, setCurrentCountry] = useState(
+    organization?.country || 'ES'
+  )
+  
+  useEffect(() => {
+    if (organization?.country) {
+      setCurrentCountry(organization.country)
+    }
+  }, [organization?.country])
+
+  const isUSD = ['US','CA','PR','DO'].includes(
+    currentCountry.toUpperCase()
+  )
   const priceDisplay = isUSD ? '$43' : '39€'
   const periodDisplay = isUSD ? '/month' : '/mes facturado'
   const stripePriceId = isUSD

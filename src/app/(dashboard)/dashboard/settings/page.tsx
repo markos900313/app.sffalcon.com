@@ -354,6 +354,7 @@ function ProfileSection({ profile, user, userId, organization, onRefresh }: { pr
 function OrganizationSection({ organization, onRefresh, userId, user }: { organization: any, onRefresh: () => void, userId: string | null, user: any }) {
   const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const { refreshOrganization } = useOrganization();
 
   const handleCountryChange = (newCountry: string) => {
     const uppercaseCountry = newCountry.toUpperCase();
@@ -439,6 +440,7 @@ function OrganizationSection({ organization, onRefresh, userId, user }: { organi
         throw error;
       }
       toast.success(t('settings.org.updated' as any));
+      await refreshOrganization();
       onRefresh();
     } catch (error) {
       console.error(error);
