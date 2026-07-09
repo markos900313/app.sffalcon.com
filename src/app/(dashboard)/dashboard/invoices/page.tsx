@@ -45,7 +45,7 @@ interface Invoice {
 export default function InvoicesPage() {
   const { language, t } = useLanguage();
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const symbol = organization?.currency_symbol || '€';
 
   const taxLabel = getTaxLabel(organization?.country);
@@ -241,7 +241,7 @@ export default function InvoicesPage() {
     }
   };
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={6} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <>

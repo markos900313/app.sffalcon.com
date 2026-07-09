@@ -54,7 +54,7 @@ export default function AnalyticsPage() {
   const { t, language } = useLanguage();
   const dateLocale = language === 'es' ? es : enUS;
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const currencySymbol = organization?.currency_symbol || '€';
   const { theme } = useTheme();
   const modules = organization?.sector_config;
@@ -164,7 +164,7 @@ export default function AnalyticsPage() {
     return stats;
   }, [stats, isDemo, modules, isSalud, language]);
 
-  if (loading && stats.length === 0) return <PageSkeleton showKPIs={true} rows={6} />;
+  if (orgLoading || (loading && organization?.id && stats.length === 0)) return <PageSkeleton />;
 
   return (
     <DashboardPageContainer animate={false}>

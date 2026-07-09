@@ -28,7 +28,7 @@ const numberToMonth: Record<number, string> = Object.fromEntries(
 );
 
 export default function FinancesBusinessPage() {
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const router = useRouter();
   const { t } = useLanguage();
   const now = new Date();
@@ -168,7 +168,7 @@ export default function FinancesBusinessPage() {
     }
   }, [entries.length, loading, selectedMonth]);
 
-  if (loading || !isMounted) return <PageSkeleton showKPIs={true} rows={6} />;
+  if (orgLoading || (loading && organization?.id) || !isMounted) return <PageSkeleton />;
 
   // Exportar JSON del negocio
   const handleExportJSON = async () => {

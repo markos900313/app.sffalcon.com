@@ -36,7 +36,7 @@ import { useLanguage } from '@/lib/LanguageContext';
 
 export default function ProjectsPage() {
   const { t, language } = useLanguage();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const symbol = organization?.currency_symbol || '€';
   const supabase = createClient();
   const [projects, setProjects] = useState<any[]>([]);
@@ -129,7 +129,7 @@ export default function ProjectsPage() {
 
   const pageTitle = organization?.sector_config?.['projects']?.label || 'Proyectos';
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <>

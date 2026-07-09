@@ -40,7 +40,7 @@ interface Item {
 
 export default function ProductsPage() {
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const { t } = useLanguage();
   const currencySymbol = organization?.currency_symbol || '€';
   const [items, setItems] = useState<Item[]>([]);
@@ -180,7 +180,7 @@ export default function ProductsPage() {
     item.categoria?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <DashboardPageContainer>

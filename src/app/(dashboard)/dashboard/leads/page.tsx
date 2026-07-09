@@ -49,7 +49,7 @@ const origenConfig: Record<string, any> = {
 
 export default function LeadsPage() {
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const { t } = useLanguage();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -195,7 +195,7 @@ export default function LeadsPage() {
     );
   }
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <>

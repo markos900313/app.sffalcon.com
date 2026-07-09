@@ -27,7 +27,7 @@ const DURATIONS = ["15 min", "30 min", "1h", "2h", "4h", "8h", "Personalizado"];
 
 export default function CatalogPage() {
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const currencySymbol = organization?.currency_symbol || '€';
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
@@ -169,7 +169,7 @@ export default function CatalogPage() {
     return matchesSearch;
   });
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <>

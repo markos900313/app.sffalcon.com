@@ -46,7 +46,7 @@ export interface SuggestedReply {
 }
 
 export default function CommunicationsPage() {
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const router = useRouter();
   const supabase = createClient();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -272,7 +272,7 @@ export default function CommunicationsPage() {
     }
   }
 
-  if (loading || !isMounted) return <PageSkeleton showKPIs={false} rows={8} />;
+  if (orgLoading || (loading && organization?.id) || !isMounted) return <PageSkeleton />;
 
   return (
     <div className="h-[calc(100vh-80px)] overflow-hidden flex flex-col md:flex-row bg-[var(--bg-page)] transition-colors animate-in fade-in duration-700">

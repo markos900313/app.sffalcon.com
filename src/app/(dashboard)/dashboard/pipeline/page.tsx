@@ -220,7 +220,7 @@ export default function PipelinePage() {
 
   const tipo = (organization as any)?.business_type;
 
-  if (loading || orgLoading) return <PageSkeleton showKPIs={true} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <>

@@ -41,7 +41,7 @@ const SHIFT_TYPES = [
 export default function ShiftsPage() {
   const { t, language } = useLanguage();
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const [loading, setLoading] = useState(true);
   const [shifts, setShifts] = useState<any[]>([]);
   const [staff, setStaff] = useState<any[]>([]);
@@ -222,7 +222,7 @@ export default function ShiftsPage() {
     return Array.from({ length: 42 }).map((_, i) => addDays(startCal, i));
   }, [selectedDate]);
 
-  if (loading) return <PageSkeleton showKPIs={false} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <div className="flex flex-col gap-6 w-full">

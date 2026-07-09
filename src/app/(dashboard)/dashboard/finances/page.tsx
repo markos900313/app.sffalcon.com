@@ -39,7 +39,7 @@ const numberToMonth: Record<number, string> = Object.fromEntries(
 export default function FinancesPage() {
   const { t, language } = useLanguage();
   const router = useRouter();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const now = new Date();
   const currentMonthName = numberToMonth[now.getMonth() + 1];
   const currentYear = now.getFullYear();
@@ -347,7 +347,7 @@ export default function FinancesPage() {
     }
   };
 
-  if (loading || !isMounted) return <PageSkeleton showKPIs={true} rows={6} />;
+  if (orgLoading || (loading && organization?.id) || !isMounted) return <PageSkeleton />;
 
   return (
     <div className="min-h-screen animate-in fade-in duration-700">

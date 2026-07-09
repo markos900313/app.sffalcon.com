@@ -50,7 +50,7 @@ function AppointmentsContent() {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const { language, t } = useLanguage();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -150,7 +150,7 @@ function AppointmentsContent() {
   const sector = organization?.sector?.toLowerCase() || 'default';
   const grupo = parseInt(String((getSectorGrupo as any)(sector))) || 1;
   
-  if (loading) return <PageSkeleton showKPIs={false} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-full text-[var(--text-primary)] pb-32">

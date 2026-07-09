@@ -32,7 +32,7 @@ import { useLanguage } from "@/lib/LanguageContext";
 export default function TeamPage() {
   const { t } = useLanguage();
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const [loading, setLoading] = useState(true);
   const [team, setTeam] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -278,7 +278,7 @@ export default function TeamPage() {
     m.role?.toLowerCase().includes(searchTerm.toLowerCase())
   ));
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   const pendingCount = vacationRequests.filter(r => r.estado === 'pendiente').length;
 

@@ -61,7 +61,7 @@ interface QuoteCalculation {
 
 export default function CalculatorPage() {
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -382,8 +382,8 @@ export default function CalculatorPage() {
     }
   };
 
-  if (loading) {
-    return <PageSkeleton showKPIs={true} rows={6} />;
+  if (orgLoading || (loading && organization?.id)) {
+    return <PageSkeleton />;
   }
 
   return (

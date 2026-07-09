@@ -266,7 +266,7 @@ export const generateEstimatePDF = (
 
 export default function EstimatesPage() {
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const { language } = useLanguage();
   const symbol = organization?.currency_symbol || '€';
 
@@ -663,7 +663,7 @@ export default function EstimatesPage() {
     }
   };
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={6} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <>

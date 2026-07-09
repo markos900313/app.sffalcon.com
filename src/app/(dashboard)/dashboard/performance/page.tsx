@@ -53,7 +53,7 @@ const COLORS = ['#1B4FD8', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE'];
 export default function PerformancePage() {
   const { t, language } = useLanguage();
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const currencySymbol = organization?.currency_symbol || '€';
   const [period, setPeriod] = useState("week"); // "today" | "week" | "month"
   const [loading, setLoading] = useState(true);
@@ -205,7 +205,7 @@ export default function PerformancePage() {
     }
   };
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <DashboardPageContainer animate={false}>

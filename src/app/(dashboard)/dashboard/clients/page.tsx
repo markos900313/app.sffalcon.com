@@ -104,7 +104,7 @@ export default function ClientsPage() {
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
   const [stats, setStats] = useState({ total: 0, newThisMonth: 0, reservationsThisMonth: 0 });
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const { t } = useLanguage();
   const supabase = createClient();
 
@@ -264,25 +264,28 @@ export default function ClientsPage() {
     try {
       if (!organization?.id) return;
 
-      const { data: clientsData, error: clientsError } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('organization_id', organization.id)
-        .order('created_at', { ascending: false });
-
-      if (clientsError) throw clientsError;
-      setClients((clientsData as any) || []);
-
-      // Fetch appointments for metrics
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      const { data: apptsData } = await supabase
-        .from('appointments')
-        .select('id')
-        .eq('organization_id', organization.id)
-        .gte('date', startOfMonth.toISOString().split('T')[0]);
+      const [clientsRes, apptsRes] = await Promise.all([
+        supabase
+          .from('clients')
+          .select('*')
+          .eq('organization_id', organization.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('appointments')
+          .select('id')
+          .eq('organization_id', organization.id)
+          .gte('date', startOfMonth.toISOString().split('T')[0])
+      ]);
+
+      if (clientsRes.error) throw clientsRes.error;
+      const clientsData = clientsRes.data;
+      const apptsData = apptsRes.data;
+
+      setClients((clientsData as any) || []);
 
       const now = new Date();
       const thisMonth = now.getMonth();
@@ -347,7 +350,7 @@ export default function ClientsPage() {
     ] : [])
   ];
 
-  if (loading) return <PageSkeleton showKPIs={true} rows={6} />;
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
 
   return (
     <>
