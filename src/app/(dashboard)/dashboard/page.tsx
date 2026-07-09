@@ -96,15 +96,14 @@ export default function DashboardPage() {
   }, [organization]);
 
   useEffect(() => {
+    if (!organization?.id) return;
     async function fetchAll() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // 1. Obtener la organización primero para usar su ID en el resto de las consultas
-        const { data: orgData } = await supabase.from('organizations').select('*').limit(1).single();
-        const orgId = orgData?.id;
-
+        const orgId = organization?.id;
+        if (!orgId) return;
         const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
 
         const [
@@ -124,17 +123,16 @@ export default function DashboardPage() {
           supabase.from('finance_entries').select('*').eq('organization_id', orgId),
           supabase.from('business_entries').select('*').eq('organization_id', orgId),
           supabase.from('clients').select('*').eq('organization_id', orgId),
-          supabase.from('appointments').select('*, clients(name)').eq('organization_id', orgId),
+          supabase.from('appointments').select('*, clients(name)').eq('organization_id', orgId).limit(50),
           supabase.from('invoices').select('*').eq('organization_id', orgId),
-          supabase.from('communications').select('*').eq('organization_id', orgId).order('updated_at', { ascending: false }),
-          supabase.from('projects').select('*, clients(name)').eq('organization_id', orgId).order('created_at', { ascending: false }),
+          supabase.from('communications').select('*').eq('organization_id', orgId).order('updated_at', { ascending: false }).limit(10),
+          supabase.from('projects').select('*, clients(name)').eq('organization_id', orgId).order('created_at', { ascending: false }).limit(10),
           supabase.from('messages').select('*, communications!inner(organization_id)').eq('communications.organization_id', orgId).gte('created_at', startOfMonth),
           supabase.from('inventory_items').select('*'),
           supabase.from('profiles').select('*').eq('id', user.id).single(),
           supabase.from('api_configs').select('*').limit(1),
           supabase.from('agent_logs').select('*').order('created_at', { ascending: false }).limit(50)
         ]);
-        console.log('INVOICES DATA:', invoices.data, 'ORG ID:', orgId)
 
         setData({
           financeHome: financeHome.data || [],
@@ -146,7 +144,7 @@ export default function DashboardPage() {
           projects: projects.data || [],
           messages: messages.data || [],
           inventory: inventory.data || [],
-          org: orgData || { auto_reply_enabled: false },
+          org: organization,
           user: user,
           profile: sessionProfile.data,
           apiConfigs: apiConfigs.data || [],
@@ -159,7 +157,7 @@ export default function DashboardPage() {
       }
     }
     fetchAll();
-  }, []);
+  }, [organization?.id]);
 
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
@@ -167,7 +165,6 @@ export default function DashboardPage() {
   const currentYear = today.getFullYear();
 
   const stats = useMemo(() => {
-    if (loading) return null;
 
     const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
     const oneWeekAgo = new Date();
@@ -286,7 +283,13 @@ export default function DashboardPage() {
   const modules = organization?.sector_config;
   const grupoNum = modules?.grupo ? parseInt(modules.grupo.split('_')[0]) : 1;
 
-  if (loading) return null;
+  if (orgLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -350,6 +353,7 @@ export default function DashboardPage() {
                   category="agenda"
                   label={t('dashboard.kpis.appointmentsLabel' as any)}
                   showGrowth={stats.showGrowth}
+                  loading={loading}
                 />
                 <CompactKPI
                   title={t('dashboard.kpis.contacts' as any)}
@@ -360,6 +364,7 @@ export default function DashboardPage() {
                   percentage={stats.clientsPerc}
                   trend={stats.clientsTrend}
                   showGrowth={stats.showGrowth}
+                  loading={loading}
                 />
                 <CompactKPI
                   title={t('dashboard.kpis.messages' as any)}
@@ -368,6 +373,7 @@ export default function DashboardPage() {
                   category="mensajes"
                   label={t('dashboard.kpis.messagesLabel' as any)}
                   showGrowth={stats.showGrowth}
+                  loading={loading}
                 />
                 <CompactKPI
                   title={t('dashboard.kpis.billing' as any)}
@@ -376,6 +382,7 @@ export default function DashboardPage() {
                   category="finanzas"
                   label={t('dashboard.kpis.billingLabel' as any)}
                   showGrowth={stats.showGrowth}
+                  loading={loading}
                 />
               </div>
               {/* Evolución Financiera (Bloqueado en gratuito) */}
@@ -399,27 +406,33 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className={cn("h-[300px] w-full")}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={stats.evolution}>
-                      <CartesianGrid strokeDasharray="0" vertical={false} stroke={theme === 'dark' ? "rgba(255,255,255,0.05)" : "#F1F5F9"} />
-                      <XAxis dataKey="name" stroke="#94A3B8" fontSize={10} fontWeight={700} tickLine={false} axisLine={false} dy={10} />
-                      <YAxis stroke="#94A3B8" fontSize={10} fontWeight={700} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                      <Tooltip
-                        cursor={{ stroke: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', strokeWidth: 2 }}
-                        contentStyle={{
-                          borderRadius: '16px',
-                          border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
-                          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                          fontSize: '11px',
-                          backgroundColor: theme === 'dark' ? '#111F3A' : '#fff',
-                          color: theme === 'dark' ? '#fff' : '#000'
-                        }}
-                      />
-                      <Line type="monotone" dataKey="ingresos" stroke="#1B4FD8" strokeWidth={4} dot={{ r: 4, fill: '#1B4FD8', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-                      <Line type="monotone" dataKey="gastos" stroke="#EF4444" strokeWidth={4} dot={{ r: 4, fill: '#EF4444', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
+                <div className={cn("h-[300px] w-full flex items-center justify-center")}>
+                  {loading ? (
+                    <div className="w-full h-full bg-slate-50 dark:bg-[#111F3A]/20 animate-pulse rounded-[24px] flex items-center justify-center">
+                      <TrendingUp className="w-8 h-8 text-[var(--text-secondary)]/20 animate-bounce" />
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={stats.evolution}>
+                        <CartesianGrid strokeDasharray="0" vertical={false} stroke={theme === 'dark' ? "rgba(255,255,255,0.05)" : "#F1F5F9"} />
+                        <XAxis dataKey="name" stroke="#94A3B8" fontSize={10} fontWeight={700} tickLine={false} axisLine={false} dy={10} />
+                        <YAxis stroke="#94A3B8" fontSize={10} fontWeight={700} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                        <Tooltip
+                          cursor={{ stroke: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', strokeWidth: 2 }}
+                          contentStyle={{
+                            borderRadius: '16px',
+                            border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                            fontSize: '11px',
+                            backgroundColor: theme === 'dark' ? '#111F3A' : '#fff',
+                            color: theme === 'dark' ? '#fff' : '#000'
+                          }}
+                        />
+                        <Line type="monotone" dataKey="ingresos" stroke="#1B4FD8" strokeWidth={4} dot={{ r: 4, fill: '#1B4FD8', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                        <Line type="monotone" dataKey="gastos" stroke="#EF4444" strokeWidth={4} dot={{ r: 4, fill: '#EF4444', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </div>
 
@@ -432,7 +445,17 @@ export default function DashboardPage() {
                   </Link>
                 </div>
                 <div className="flex-1 space-y-4">
-                  {stats.recentActivity.length > 0 ? (
+                  {loading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-card)] animate-pulse">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-[#1E3A5F] shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-slate-200 dark:bg-[#1E3A5F] rounded w-1/3" />
+                          <div className="h-3 bg-slate-200 dark:bg-[#1E3A5F] rounded w-2/3" />
+                        </div>
+                      </div>
+                    ))
+                  ) : stats.recentActivity.length > 0 ? (
                     stats.recentActivity.slice(0, 4).map((msg, i) => (
                       <div key={i} className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-card)] hover:bg-[var(--bg-page)] transition-all group">
                         <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -473,7 +496,17 @@ export default function DashboardPage() {
                   </Link>
                 </div>
                 <div className="flex-1 space-y-4">
-                  {stats.upcomingAppts.length > 0 ? (
+                  {loading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-card)] animate-pulse">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-[#1E3A5F] shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-slate-200 dark:bg-[#1E3A5F] rounded w-1/2" />
+                          <div className="h-3 bg-slate-200 dark:bg-[#1E3A5F] rounded w-1/4" />
+                        </div>
+                      </div>
+                    ))
+                  ) : stats.upcomingAppts.length > 0 ? (
                     stats.upcomingAppts.slice(0, 4).map((appt, i) => (
                       <div key={i} className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-card)] hover:bg-[var(--bg-page)] transition-all group">
                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
@@ -574,14 +607,20 @@ export default function DashboardPage() {
   );
 }
 
-function CompactKPI({ title, value, icon, variant = "default", locked, unlockTip, category, percentage, trend, label, showGrowth }: any) {
+function CompactKPI({ title, value, icon, variant = "default", locked, unlockTip, category, percentage, trend, label, showGrowth, loading }: any) {
   if (variant === "compact") {
     return (
       <div className="px-[16px] py-[16px] bg-transparent flex flex-col group transition-all hover:bg-slate-50/50 dark:hover:bg-white/5 relative">
         <p className="kpi-label mb-1">{title}</p>
         <div className="flex items-center justify-between">
           <div className="flex flex-col items-end">
-            <h3 className="kpi-numero leading-none !text-[20px] text-[var(--text-primary)]">{value}</h3>
+            <h3 className="kpi-numero leading-none !text-[20px] text-[var(--text-primary)]">
+              {loading ? (
+                <span className="inline-block w-16 h-5 bg-slate-200 dark:bg-[#1E3A5F] animate-pulse rounded-md" />
+              ) : (
+                value
+              )}
+            </h3>
             {percentage !== undefined && showGrowth && (
               <span className={cn(
                 "text-[10px] font-bold flex items-center gap-0.5",
@@ -616,7 +655,13 @@ function CompactKPI({ title, value, icon, variant = "default", locked, unlockTip
       <div className="flex items-end justify-between">
         <div>
           <p className="kpi-label mb-1 uppercase tracking-[0.2em] text-[var(--text-secondary)] font-black text-[9px]">{title}</p>
-          <h3 className="kpi-numero tracking-tighter leading-none text-[var(--text-primary)]" title={String(value)}>{value}</h3>
+          <h3 className="kpi-numero tracking-tighter leading-none text-[var(--text-primary)]" title={String(value)}>
+            {loading ? (
+              <span className="inline-block w-24 h-8 bg-slate-200 dark:bg-[#1E3A5F] animate-pulse rounded-lg" />
+            ) : (
+              value
+            )}
+          </h3>
           {label && <p className="text-[10px] font-medium text-[var(--text-secondary)]/60 mt-2 uppercase tracking-wide">{label}</p>}
         </div>
         {percentage !== undefined && showGrowth && (

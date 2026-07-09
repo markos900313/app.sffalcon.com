@@ -168,6 +168,7 @@ export default function QuoteCalculator({
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState("draft");
   const [estimateId, setEstimateId] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Db Catalog items
   const [catalogItems, setCatalogItems] = useState<any[]>([]);
@@ -302,6 +303,7 @@ export default function QuoteCalculator({
     setNotes("");
     setStatus("draft");
     setEstimateId(null);
+    setValidationError(null);
   };
 
   const handleSelectClient = (client: any) => {
@@ -317,6 +319,7 @@ export default function QuoteCalculator({
       ...items,
       { id: Math.random().toString(), category: "", catalog_item_id: null, description: "", quantity: 1, unit_price: 0 }
     ]);
+    setValidationError(null);
   };
 
   const handleRemoveRow = (id: string) => {
@@ -377,9 +380,10 @@ export default function QuoteCalculator({
 
     const validItems = items.filter((row) => row.description.trim() !== "");
     if (!title.trim() || !clientName.trim() || validItems.length === 0) {
-      toast.error(t.toastFieldsRequired);
+      setValidationError(t.toastFieldsRequired);
       return false;
     }
+    setValidationError(null);
 
     if (!organization?.id) return false;
 
@@ -635,7 +639,10 @@ export default function QuoteCalculator({
                   <input
                     type="text"
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      setValidationError(null);
+                    }}
                     required
                     placeholder={t.calcTitlePlaceholder}
                     className="w-full px-4 py-3 bg-[#162040] border border-transparent focus:border-[#1B4FD8]/30 rounded-xl text-base transition-all focus:ring-4 focus:ring-[#1B4FD8]/5 outline-none text-white font-medium"
@@ -1051,6 +1058,14 @@ export default function QuoteCalculator({
                 className="w-full p-3 bg-[#162040] border border-[#1E3A5F] rounded-xl text-xs text-white placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-[#1B4FD8]/20 transition-all resize-none"
               />
             </div>
+
+            {/* Validation Error Banner */}
+            {validationError && (
+              <div className="mx-4 mb-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center gap-2">
+                <span>⚠️</span>
+                <span>{validationError}</span>
+              </div>
+            )}
 
             {/* General Actions */}
             <div className="flex flex-col gap-3">
