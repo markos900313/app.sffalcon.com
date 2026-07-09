@@ -14,7 +14,8 @@ import {
   Hash,
   DollarSign,
   ChevronDown,
-  Power
+  Power,
+  Trash2
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
@@ -96,8 +97,10 @@ export default function CatalogManager({ isOpen, onClose }: CatalogManagerProps)
       toastSaveSuccess: "Concepto guardado con éxito",
       toastUpdateSuccess: "Concepto actualizado con éxito",
       toastToggleSuccess: "Estado del concepto actualizado",
+      toastDeleteSuccess: "Concepto eliminado con éxito",
       toastError: "Ocurrió un error inesperado",
       toastFieldsRequired: "Por favor rellena los campos requeridos (Categoría, Nombre, Precio)",
+      deleteConfirm: "¿Eliminar este item del catálogo?",
     },
     en: {
       title: "Catalog Manager",
@@ -129,8 +132,10 @@ export default function CatalogManager({ isOpen, onClose }: CatalogManagerProps)
       toastSaveSuccess: "Concept saved successfully",
       toastUpdateSuccess: "Concept updated successfully",
       toastToggleSuccess: "Concept status updated",
+      toastDeleteSuccess: "Concept deleted successfully",
       toastError: "An unexpected error occurred",
       toastFieldsRequired: "Please fill in the required fields (Category, Name, Price)",
+      deleteConfirm: "Delete this item from the catalog?",
     }
   };
 
@@ -151,6 +156,7 @@ export default function CatalogManager({ isOpen, onClose }: CatalogManagerProps)
         .from("quote_catalog")
         .select("*")
         .eq("organization_id", organization.id)
+        .eq("active", true)
         .order("category", { ascending: true })
         .order("name", { ascending: true });
 
@@ -274,6 +280,29 @@ export default function CatalogManager({ isOpen, onClose }: CatalogManagerProps)
     } catch (err) {
       console.error("Error toggling item status:", err);
       toast.error(t.toastError);
+    }
+  };
+
+  const handleDeleteItem = async (e: React.MouseEvent, item: CatalogItem) => {
+    e.stopPropagation();
+    if (window.confirm(t.deleteConfirm)) {
+      try {
+        const { error } = await supabase
+          .from("quote_catalog")
+          .update({
+            active: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", item.id);
+
+        if (error) throw error;
+
+        toast.success(t.toastDeleteSuccess);
+        fetchCatalog();
+      } catch (err) {
+        console.error("Error deleting catalog item:", err);
+        toast.error(t.toastError);
+      }
     }
   };
 
@@ -667,12 +696,22 @@ export default function CatalogManager({ isOpen, onClose }: CatalogManagerProps)
                                   </button>
                                 </>
                               ) : (
-                                <button
-                                  onClick={() => handleStartEdit(item)}
-                                  className="p-1.5 text-slate-400 hover:bg-white/5 hover:text-white border border-transparent hover:border-[#1E3A5F] rounded-lg transition-colors"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
+                                <>
+                                  <button
+                                    onClick={() => handleStartEdit(item)}
+                                    className="p-1.5 text-slate-400 hover:bg-white/5 hover:text-white border border-transparent hover:border-[#1E3A5F] rounded-lg transition-colors"
+                                    title={language === "es" ? "Editar" : "Edit"}
+                                  >
+                                    <Edit2 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={(e) => handleDeleteItem(e, item)}
+                                    className="p-1.5 text-red-500 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-lg transition-colors"
+                                    title={language === "es" ? "Eliminar" : "Delete"}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </>
                               )}
                             </div>
                           </td>
