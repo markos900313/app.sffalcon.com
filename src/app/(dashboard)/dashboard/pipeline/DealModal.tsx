@@ -18,6 +18,7 @@ interface DealModalProps {
 export default function DealModal({ isOpen, onClose, deal, onSave }: DealModalProps) {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const currencySymbol = organization?.currency_symbol || '€';
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<any[]>([]);
@@ -183,8 +184,8 @@ export default function DealModal({ isOpen, onClose, deal, onSave }: DealModalPr
                 onChange={e => setFormData({ ...formData, telefono: e.target.value })}
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.deal.valueLabel')}</label>
+             <div className="space-y-1">
+              <label className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{t('modals.deal.valueLabel' as any).replace('€', currencySymbol)}</label>
               <div className="relative">
                 <input
                   type="number"
@@ -192,7 +193,7 @@ export default function DealModal({ isOpen, onClose, deal, onSave }: DealModalPr
                   value={formData.valor_estimado}
                   onChange={e => setFormData({ ...formData, valor_estimado: Number(e.target.value) })}
                 />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs">€</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs">{currencySymbol}</span>
               </div>
             </div>
             <div className="space-y-1">

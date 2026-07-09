@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { useOrganization } from '@/context/OrganizationContext';
 
 interface Project {
   id: string;
@@ -34,6 +35,8 @@ interface ProjectsListProps {
 
 export default function ProjectsList({ projects, onEdit, onDelete }: ProjectsListProps) {
   const router = useRouter();
+  const { organization } = useOrganization();
+  const currencySymbol = organization?.currency_symbol || '€';
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
 
@@ -136,10 +139,10 @@ export default function ProjectsList({ projects, onEdit, onDelete }: ProjectsLis
                     </td>
                     <td className="px-4 md:px-6 py-5 text-right">
                        <p className="text-[12px] md:text-[14px] font-semibold text-slate-900 dark:text-slate-100 tabular-nums">
-                        {p.budget ? `${Number(p.budget).toLocaleString('es-ES')}€` : '--'}
+                        {p.budget ? `${Number(p.budget).toLocaleString('es-ES')}${currencySymbol}` : '--'}
                       </p>
                       <p className="text-[10px] md:text-[11px] font-medium text-emerald-500 tabular-nums hidden md:block">
-                        Pagado: {Number(p.paid || 0).toLocaleString('es-ES')}€
+                        Pagado: {Number(p.paid || 0).toLocaleString('es-ES')}{currencySymbol}
                       </p>
                     </td>
                     <td className="px-4 md:px-6 py-5">

@@ -41,6 +41,7 @@ export default function ProductsPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
   const { t } = useLanguage();
+  const currencySymbol = organization?.currency_symbol || '€';
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -210,7 +211,7 @@ export default function ProductsPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard title={t('products.stats.totalProducts' as any)} value={stats.total} icon={Boxes} color="blue" />
         <StatCard title={t('products.stats.criticalStock' as any)} value={stats.stockBajo} icon={AlertTriangle} color="red" />
-        <StatCard title={t('products.stats.valuation' as any)} value={`€${stats.valorTotal.toLocaleString()}`} icon={DollarSign} color="emerald" />
+        <StatCard title={t('products.stats.valuation' as any)} value={`${currencySymbol}${stats.valorTotal.toLocaleString()}`} icon={DollarSign} color="emerald" />
       </div>
 
       {/* Controls */}
@@ -253,7 +254,7 @@ export default function ProductsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm font-bold text-white text-right">
-                    €{item.precio.toFixed(2)}
+                    {currencySymbol}{item.precio.toFixed(2)}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className={cn(
@@ -328,7 +329,7 @@ export default function ProductsPage() {
               <div className="grid grid-cols-2 gap-6">
                 <DetailField label={t('products.viewModal.nameLabel' as any)} value={selectedItem.nombre} icon={Tag} />
                 <DetailField label={t('products.viewModal.categoryLabel' as any)} value={selectedItem.categoria} icon={Hash} />
-                <DetailField label={t('products.viewModal.priceLabel' as any)} value={`€${selectedItem.precio.toFixed(2)}`} icon={DollarSign} />
+                <DetailField label={t('products.viewModal.priceLabel' as any)} value={`${currencySymbol}${selectedItem.precio.toFixed(2)}`} icon={DollarSign} />
                 <DetailField label={t('products.viewModal.unitLabel' as any)} value={selectedItem.unidad} icon={Scale} />
                 <DetailField label={t('products.viewModal.stockLabel' as any)} value={selectedItem.stock} icon={Boxes} highlight={selectedItem.stock <= selectedItem.stock_minimo ? 'red' : 'green'} />
                 <DetailField label={t('products.viewModal.minStockLabel' as any)} value={selectedItem.stock_minimo} icon={AlertTriangle} />
@@ -374,8 +375,11 @@ export default function ProductsPage() {
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.addModal.priceLabel' as any)}</label>
-                    <input required type="number" step="0.01" className="form-input-premium" value={formData.precio} onChange={e => setFormData({...formData, precio: e.target.value})} />
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.addModal.priceLabel' as any).replace('€', currencySymbol)}</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-sm">{currencySymbol}</span>
+                      <input required type="number" step="0.01" className="form-input-premium pl-8" value={formData.precio} onChange={e => setFormData({...formData, precio: e.target.value})} />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.table.stock' as any)}</label>
@@ -427,8 +431,11 @@ export default function ProductsPage() {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.viewModal.priceLabel' as any)}</label>
-                  <input required type="number" step="0.01" className="form-input-premium" value={editFormData.precio} onChange={e => setEditFormData({...editFormData, precio: e.target.value})} />
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.viewModal.priceLabel' as any).replace('€', currencySymbol)}</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-sm">{currencySymbol}</span>
+                    <input required type="number" step="0.01" className="form-input-premium pl-8" value={editFormData.precio} onChange={e => setEditFormData({...editFormData, precio: e.target.value})} />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('products.table.stock' as any)}</label>

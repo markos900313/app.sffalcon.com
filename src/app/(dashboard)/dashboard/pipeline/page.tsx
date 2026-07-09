@@ -89,6 +89,7 @@ function PortalAwareItem({
 export default function PipelinePage() {
   const supabase = createClient();
   const { organization, loading: orgLoading } = useOrganization();
+  const currencySymbol = organization?.currency_symbol || '€';
   const { language, t } = useLanguage();
   const [deals, setDeals] = useState<PipelineDeal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,7 +120,7 @@ export default function PipelinePage() {
   }, [organization]);
 
   const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val);
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(val).replace('€', currencySymbol);
   };
 
   const filteredDeals = useMemo(() => {

@@ -239,9 +239,9 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
 
               {/* Importe Base */}
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.baseAmountLabel')}</label>
+                <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.baseAmountLabel').replace('€', currencySymbol)}</label>
                 <div className="relative">
-                  <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-sm">{currencySymbol}</span>
                   <input
                     type="number"
                     step="0.01"
@@ -273,9 +273,9 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.totalLabel')}</label>
+                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.totalLabel').replace('€', currencySymbol)}</label>
                   <div className="relative">
-                    <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-sm">{currencySymbol}</span>
                     <input
                       type="text"
                       value={calculatedTotal.toFixed(2)}

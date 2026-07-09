@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useOrganization } from "@/context/OrganizationContext";
 
 type FinanceEntry = {
   id: string;
@@ -23,6 +24,8 @@ const getCategoryKey = (cat: string) => {
 
 export default function DonutChart({ entries, month }: { entries: FinanceEntry[], month: string }) {
   const { t } = useLanguage();
+  const { organization } = useOrganization();
+  const currencySymbol = organization?.currency_symbol || '€';
 
   const getTypeLabel = (type: string) => {
     const lower = type.toLowerCase();
@@ -91,7 +94,7 @@ export default function DonutChart({ entries, month }: { entries: FinanceEntry[]
             <div className="absolute inset-0 flex flex-col items-center justify-center pb-1">
               <span className="text-[10px] font-bold text-[#64748B] dark:text-[#475569] uppercase tracking-[0.15em] mb-1">{translatedMonth}</span>
               <span className="text-xl md:text-2xl font-bold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight tabular-nums">
-                {`${chartData.reduce((s, d) => s + d.amount, 0).toLocaleString('es-ES', { maximumFractionDigits: 0 })}€`}
+                {`${chartData.reduce((s, d) => s + d.amount, 0).toLocaleString('es-ES', { maximumFractionDigits: 0 })}${currencySymbol}`}
               </span>
             </div>
           )}
@@ -108,7 +111,7 @@ export default function DonutChart({ entries, month }: { entries: FinanceEntry[]
               </div>
               <div className="flex items-baseline gap-2 text-right">
                 <span className="text-[13px] font-bold text-[#0F172A] dark:text-[#F1F5F9] tabular-nums">
-                  {item.amount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}€
+                  {item.amount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}{currencySymbol}
                 </span>
                 <span className="text-[11px] font-semibold text-[#64748B] dark:text-[#475569] min-w-[50px]">
                   {item.value.toFixed(1)}%

@@ -5,6 +5,7 @@ import { Wallet, ArrowDownRight, ArrowUpRight, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useOrganization } from "@/context/OrganizationContext";
 
 interface SummaryCardsProps {
   data: { ingresos: number; gastos: number; balance: number } | null;
@@ -13,14 +14,19 @@ interface SummaryCardsProps {
 
 export default function SummaryCards({ data, loading }: SummaryCardsProps) {
   const { t } = useLanguage();
+  const { organization } = useOrganization();
+  const currencySymbol = organization?.currency_symbol || '€';
+
   const ingresos = data?.ingresos ?? 0;
   const gastos = data?.gastos ?? 0;
   const balance = data?.balance ?? ingresos - gastos;
 
+  const formatVal = (val: number) => formatCurrency(val).replace('€', currencySymbol);
+
   const cards = [
     {
       label: t('summaryCards.ingresos'),
-      value: formatCurrency(ingresos),
+      value: formatVal(ingresos),
       subtext: t('summaryCards.esteMes'),
       color: "text-[#0F172A]",
       icon: <ArrowUpRight className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#64748B]/40" />,
@@ -28,7 +34,7 @@ export default function SummaryCards({ data, loading }: SummaryCardsProps) {
     },
     {
       label: t('summaryCards.gastos'),
-      value: formatCurrency(gastos),
+      value: formatVal(gastos),
       trendText: "↓",
       subtext: t('summaryCards.esteMes'),
       color: "text-[#0F172A] dark:text-[#F1F5F9]",
@@ -37,7 +43,7 @@ export default function SummaryCards({ data, loading }: SummaryCardsProps) {
     },
     {
       label: t('summaryCards.balanceTotal'),
-      value: formatCurrency(balance),
+      value: formatVal(balance),
       subtext: t('summaryCards.calculoTiempoReal'),
       color: "text-white",
       bg: "bg-[#1B4FD8]",

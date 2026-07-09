@@ -490,7 +490,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
                           required
                           className="w-full pl-6 pr-3 py-2 bg-white dark:bg-[#162040] border border-slate-200 dark:border-[#1E3A5F] rounded-lg text-sm text-right outline-none focus:ring-2 focus:ring-[#1B4FD8]/20 text-slate-900 dark:text-white"
                         />
-                        <Euro className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-xs">{currencySymbol}</span>
                       </div>
 
                       {/* Line Total */}

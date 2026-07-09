@@ -182,7 +182,7 @@ export default function ProjectsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <StatCard label={t('projects.stats.active' as any)} value={stats.activos} icon={<Briefcase className="w-5 h-5" />} color="blue" />
               <StatCard label={t('projects.stats.completed' as any)} value={stats.completados} icon={<CheckCircle2 className="w-5 h-5" />} color="emerald" />
-              <StatCard label={t('projects.stats.totalBilling' as any)} value={`${stats.facturacion}${symbol}`} icon={<Euro className="w-5 h-5" />} color="indigo" sub={t('projects.stats.totalBudget' as any)} />
+              <StatCard label={t('projects.stats.totalBilling' as any)} value={`${stats.facturacion}${symbol}`} icon={<span className="w-5 h-5 text-[15px] font-bold flex items-center justify-center select-none">{symbol}</span>} color="indigo" sub={t('projects.stats.totalBudget' as any)} />
               <StatCard label={t('projects.stats.pendingPayment' as any)} value={`${stats.pendiente}${symbol}`} icon={<Clock className="w-5 h-5" />} color="orange" sub={t('projects.stats.toCollect' as any)} />
             </div>
 
