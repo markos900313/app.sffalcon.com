@@ -35,6 +35,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
   const [loading, setLoading] = useState(false);
   
   const taxLabel = getTaxLabel(organization?.country);
+  const currencySymbol = organization?.currency_symbol || '€';
   
   const modules = organization?.sector_config;
   const hasProjects = false;

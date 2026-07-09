@@ -10,7 +10,8 @@ export const generateInvoicePDF = (
   action: 'download' | 'blob' | 'base64' = 'download', 
   orgData?: { name?: string; nif?: string; address?: string; city?: string; email?: string; phone?: string; },
   language: 'es' | 'en' = 'es',
-  taxLabel: string = 'IVA'
+  taxLabel: string = 'IVA',
+  currencySymbol: string = '€'
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     try {
@@ -138,10 +139,10 @@ export const generateInvoicePDF = (
         body: [
           [
             invoice.concept || 'Servicio',
-            `${Number(invoice.amount || 0).toFixed(2)} €`,
+            `${Number(invoice.amount || 0).toFixed(2)} ${currencySymbol}`,
             `${invoice.tax_rate || 0}%`,
-            `${Number(invoice.tax_amount || 0).toFixed(2)} €`,
-            `${Number(invoice.total || 0).toFixed(2)} €`
+            `${Number(invoice.tax_amount || 0).toFixed(2)} ${currencySymbol}`,
+            `${Number(invoice.total || 0).toFixed(2)} ${currencySymbol}`
           ]
         ],
         theme: 'striped',
@@ -161,7 +162,7 @@ export const generateInvoicePDF = (
       doc.setFont("helvetica", "bold");
       doc.text(L.grandTotal, 120, finalY + 15);
       doc.setFontSize(14);
-      doc.text(`${Number(invoice.total || 0).toFixed(2)} €`, 165, finalY + 15);
+      doc.text(`${Number(invoice.total || 0).toFixed(2)} ${currencySymbol}`, 165, finalY + 15);
 
       // Notes
       if (invoice.notes) {

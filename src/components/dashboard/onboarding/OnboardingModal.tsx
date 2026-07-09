@@ -21,6 +21,7 @@ import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useLanguage } from '@/lib/LanguageContext'
+import { COUNTRY_NAMES, REGION_CONFIG } from '@/lib/regionConfig'
 
 interface OnboardingModalProps {
   onComplete: () => void
@@ -91,6 +92,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
     isAutonomo: false,
     countryCode: organization?.country || 'ES',
     currency: 'EUR',
+    currencySymbol: '€',
     businessPhone: organization?.whatsapp_number || '',
     businessEmail: organization?.email_channel || '',
     sector: '', 
@@ -237,7 +239,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
           name: formData.businessName,
           country: formData.countryCode,
           currency: formData.currency,
-          currency_symbol: selectedCountry.symbol || '$',
+          currency_symbol: formData.currencySymbol || '$',
           phone: formData.businessPhone,
           email: formData.businessEmail,
           whatsapp_number: formData.businessPhone,
@@ -485,29 +487,56 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                         </label>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-4">
                         <div className="space-y-2">
                           <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.country')}</label>
                           <select
                             value={formData.countryCode}
-                            onChange={e => setFormData(prev => ({ ...prev, countryCode: e.target.value }))}
-                            className="w-full bg-[#0f1629] border border-white/10 rounded-xl py-4 px-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none font-medium"
+                            onChange={e => {
+                              const code = e.target.value;
+                              const cfg = REGION_CONFIG[code];
+                              setFormData(prev => ({
+                                ...prev,
+                                countryCode: code,
+                                currency: cfg?.currency ?? prev.currency,
+                                currencySymbol: cfg?.symbol ?? prev.currencySymbol
+                              }));
+                            }}
+                            className="w-full bg-[#0f1629] border border-white/10 rounded-xl py-4 px-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none font-medium cursor-pointer"
                           >
-                            {COUNTRIES.map(c => <option key={c.code} value={c.code}>{c.flag} {getCountryName(c.code)}</option>)}
+                            {Object.entries(COUNTRY_NAMES).map(([code, name]) => (
+                              <option key={code} value={code} className="bg-[#0a0f1c]">
+                                {name}
+                              </option>
+                            ))}
                           </select>
+                          {formData.countryCode && REGION_CONFIG[formData.countryCode.toUpperCase()] && (
+                            <p className="text-xs text-blue-400 mt-1 ml-1">
+                              {language === 'en' ? '✓ Applicable tax: ' : '✓ Impuesto aplicable: '}
+                              {REGION_CONFIG[formData.countryCode.toUpperCase()].tax}
+                            </p>
+                          )}
                         </div>
-                        <div className="space-y-2">
-                          <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.currency')}</label>
-                          <select
-                            value={formData.currency}
-                            onChange={e => setFormData(prev => ({ ...prev, currency: e.target.value }))}
-                            className="w-full bg-[#0f1629] border border-white/10 rounded-xl py-4 px-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none font-medium"
-                          >
-                            <option value="EUR">Euro (€)</option>
-                            <option value="USD">Dólar ($)</option>
-                            <option value="MXN">Peso MXN ($)</option>
-                            <option value="COP">Peso COP ($)</option>
-                          </select>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.currency')}</label>
+                            <input
+                              type="text"
+                              value={formData.currency}
+                              readOnly
+                              className="w-full bg-[#0f1629] border border-white/10 rounded-xl py-4 px-4 text-white/60 focus:outline-none opacity-60 cursor-not-allowed font-medium"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">Símbolo</label>
+                            <input
+                              type="text"
+                              value={formData.currencySymbol}
+                              readOnly
+                              className="w-full bg-[#0f1629] border border-white/10 rounded-xl py-4 px-4 text-white/60 focus:outline-none opacity-60 cursor-not-allowed font-medium"
+                            />
+                          </div>
                         </div>
                       </div>
 

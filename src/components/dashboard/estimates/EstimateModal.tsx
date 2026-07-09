@@ -43,6 +43,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
   const [loading, setLoading] = useState(false);
 
   const taxLabel = getTaxLabel(organization?.country);
+  const currencySymbol = organization?.currency_symbol || '€';
 
   // Local translations
   const modalTranslations = {
@@ -494,7 +495,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
 
                       {/* Line Total */}
                       <div className="w-24 text-right pr-2 text-sm font-bold text-slate-700 dark:text-slate-300 tabular-nums">
-                        {((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)} €
+                        {((item.quantity || 0) * (item.unit_price || 0)).toFixed(2)} {currencySymbol}
                       </div>
 
                       {/* Delete Button */}
@@ -571,7 +572,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
                 {/* Subtotal */}
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-500 dark:text-slate-400 font-medium">{currentT.subtotalLabel}:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 tabular-nums">{subtotal.toFixed(2)} €</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 tabular-nums">{subtotal.toFixed(2)} {currencySymbol}</span>
                 </div>
 
                 {/* IVA Rate input */}
@@ -593,13 +594,13 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
                 {/* IVA Amount */}
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-slate-500 dark:text-slate-400 font-medium">Cuota {taxLabel}:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 tabular-nums">{taxAmount.toFixed(2)} €</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 tabular-nums">{taxAmount.toFixed(2)} {currencySymbol}</span>
                 </div>
 
                 {/* Total */}
                 <div className="flex justify-between items-center pt-3 border-t border-slate-200 dark:border-[#1E3A5F] text-base">
                   <span className="text-slate-900 dark:text-white font-bold">{currentT.totalLabel}:</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-black tabular-nums">{total.toFixed(2)} €</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-black tabular-nums">{total.toFixed(2)} {currencySymbol}</span>
                 </div>
               </div>
             </div>

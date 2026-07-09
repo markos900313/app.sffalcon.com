@@ -57,7 +57,8 @@ export const generateEstimatePDF = (
   action: 'download' | 'blob' | 'base64' = 'download', 
   orgData?: { name?: string; nif?: string; address?: string; city?: string; email?: string; phone?: string; country?: string; },
   language: 'es' | 'en' = 'es',
-  taxLabel: string = 'IVA'
+  taxLabel: string = 'IVA',
+  currencySymbol: string = '€'
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     try {
@@ -192,14 +193,14 @@ export const generateEstimatePDF = (
       const tableData = (estimate.items || []).map((item: any) => [
         sanitizeForPDF(item.description || 'Servicio'),
         item.quantity || 1,
-        `${Number(item.unit_price || 0).toFixed(2)} EUR`,
-        `${Number((item.quantity || 1) * (item.unit_price || 0)).toFixed(2)} EUR`
+        `${Number(item.unit_price || 0).toFixed(2)} ${currencySymbol}`,
+        `${Number((item.quantity || 1) * (item.unit_price || 0)).toFixed(2)} ${currencySymbol}`
       ]);
 
       autoTable(doc, {
         startY: 95,
         head: headers,
-        body: tableData.length > 0 ? tableData : [[L.conceptGeneral, '1', `${Number(estimate.subtotal || 0).toFixed(2)} EUR`, `${Number(estimate.subtotal || 0).toFixed(2)} EUR`]],
+        body: tableData.length > 0 ? tableData : [[L.conceptGeneral, '1', `${Number(estimate.subtotal || 0).toFixed(2)} ${currencySymbol}`, `${Number(estimate.subtotal || 0).toFixed(2)} ${currencySymbol}`]],
         theme: 'striped',
         headStyles: { fillColor: [27, 79, 216], textColor: [255, 255, 255] },
         styles: { fontSize: 10, cellPadding: 6 },
@@ -217,14 +218,14 @@ export const generateEstimatePDF = (
       
       doc.setFontSize(10);
       doc.text(`${L.subtotal}:`, 120, finalY + 10);
-      doc.text(`${Number(estimate.subtotal || 0).toFixed(2)} EUR`, 165, finalY + 10);
+      doc.text(`${Number(estimate.subtotal || 0).toFixed(2)} ${currencySymbol}`, 165, finalY + 10);
       
       doc.text(`${L.tax} (${estimate.tax_rate || 21}%):`, 120, finalY + 17);
-      doc.text(`${Number(estimate.tax_amount || 0).toFixed(2)} EUR`, 165, finalY + 17);
+      doc.text(`${Number(estimate.tax_amount || 0).toFixed(2)} ${currencySymbol}`, 165, finalY + 17);
 
       doc.setFontSize(12);
       doc.text(L.grandTotal, 120, finalY + 25);
-      doc.text(`${Number(estimate.total || 0).toFixed(2)} EUR`, 165, finalY + 25);
+      doc.text(`${Number(estimate.total || 0).toFixed(2)} ${currencySymbol}`, 165, finalY + 25);
 
       // Notes
       if (estimate.notes) {
@@ -513,7 +514,7 @@ export default function EstimatesPage() {
         email: organization?.email || undefined,
         phone: organization?.phone || undefined,
         country: organization?.country || undefined
-      }, language, taxLabel);
+      }, language, taxLabel, symbol);
       toast.success(currentT.toastPdfSuccess);
     } catch (e) {
       toast.error(currentT.toastPdfError);
@@ -538,7 +539,7 @@ export default function EstimatesPage() {
         email: organization?.email || undefined,
         phone: organization?.phone || undefined,
         country: organization?.country || undefined
-      }, language, taxLabel);
+      }, language, taxLabel, symbol);
 
       const res = await fetch('/api/estimates/send', {
         method: 'POST',

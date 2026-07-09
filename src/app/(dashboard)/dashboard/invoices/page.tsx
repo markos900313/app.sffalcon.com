@@ -191,7 +191,7 @@ export default function InvoicesPage() {
         city: organization?.city || undefined,
         email: organization?.email || undefined,
         phone: organization?.phone || undefined
-      }, language, taxLabel);
+      }, language, taxLabel, symbol);
       toast.success(t('invoices.toast.pdfGenerated' as any));
     } catch (e) {
       toast.error(t('invoices.toast.pdfError' as any));
@@ -215,7 +215,7 @@ export default function InvoicesPage() {
         city: organization?.city || undefined,
         email: organization?.email || undefined,
         phone: organization?.phone || undefined
-      }, language, taxLabel);
+      }, language, taxLabel, symbol);
 
       const res = await fetch('/api/invoices/send', {
         method: 'POST',

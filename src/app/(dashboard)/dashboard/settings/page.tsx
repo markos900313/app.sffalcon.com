@@ -514,20 +514,6 @@ function OrganizationSection({ organization, onRefresh, userId, user }: { organi
         <Field label={t('settings.org.phone' as any)} value={formData.phone} placeholder="+34..." onChange={(v) => setFormData({ ...formData, phone: v })} />
       </div>
 
-      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-[#1E3A5F]">
-        <div className="flex items-center gap-3 mb-4">
-          <CreditCard className="w-5 h-5 text-[#1B4FD8]" />
-          <div>
-            <h4 className="text-[14px] font-semibold text-[#0F172A] dark:text-[#F1F5F9]">{t('settings.org.paymentMethods' as any)}</h4>
-            <p className="text-[11px] text-[#64748B] dark:text-[#94A3B8]">{t('settings.org.paymentMethodsDesc' as any)}</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label={t('settings.org.bizumNumber' as any)} value={formData.bizum_number} placeholder="+34 6XX XXX XXX" onChange={(v) => setFormData({ ...formData, bizum_number: v })} />
-          <Field label={t('settings.org.iban' as any)} value={formData.iban} placeholder="ES00 0000..." onChange={(v) => setFormData({ ...formData, iban: v })} />
-        </div>
-      </div>
-
       <div className="flex justify-end pt-4 mt-4 border-t border-slate-100 dark:border-[#1E3A5F]">
         <button onClick={handleSave} disabled={loading} className="w-full sm:w-auto px-6 py-2.5 bg-[#1B4FD8] hover:bg-blue-700 text-white font-semibold text-[14px] rounded-xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-70 flex items-center justify-center gap-2 uppercase tracking-tight">
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
