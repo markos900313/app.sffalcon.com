@@ -54,8 +54,9 @@ export function sanitizeForPDF(text: string): string {
 export const generateEstimatePDF = (
   estimate: any, 
   action: 'download' | 'blob' | 'base64' = 'download', 
-  orgData?: { name?: string; nif?: string; address?: string; city?: string; email?: string; phone?: string; },
-  language: 'es' | 'en' = 'es'
+  orgData?: { name?: string; nif?: string; address?: string; city?: string; email?: string; phone?: string; country?: string; },
+  language: 'es' | 'en' = 'es',
+  taxLabel: string = 'IVA'
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     try {
@@ -73,7 +74,7 @@ export const generateEstimatePDF = (
         unitPrice: 'Unit Price',
         total: 'Total',
         subtotal: 'Subtotal',
-        tax: 'VAT',
+        tax: taxLabel,
         grandTotal: 'ESTIMATE TOTAL:',
         notes: 'Notes / Conditions:',
         validUntil: 'Estimate valid until',
@@ -94,7 +95,7 @@ export const generateEstimatePDF = (
         unitPrice: 'Precio Unit.',
         total: 'Total',
         subtotal: 'Subtotal',
-        tax: 'IVA',
+        tax: taxLabel,
         grandTotal: 'TOTAL PRESUPUESTO:',
         notes: 'Notas / Condiciones:',
         validUntil: 'Presupuesto válido hasta',
@@ -261,6 +262,15 @@ export default function EstimatesPage() {
   const { organization } = useOrganization();
   const { language } = useLanguage();
   const symbol = organization?.currency_symbol || '€';
+
+  function getTaxLabel(country?: string): string {
+    const c = (country || 'ES').toUpperCase();
+    if (c === 'GB') return 'VAT';
+    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
+    return 'IVA';
+  }
+
+  const taxLabel = getTaxLabel(organization?.country);
 
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -507,8 +517,9 @@ export default function EstimatesPage() {
         address: organization?.address || undefined,
         city: organization?.city || undefined,
         email: organization?.email || undefined,
-        phone: organization?.phone || undefined
-      }, language);
+        phone: organization?.phone || undefined,
+        country: organization?.country || undefined
+      }, language, taxLabel);
       toast.success(currentT.toastPdfSuccess);
     } catch (e) {
       toast.error(currentT.toastPdfError);
@@ -531,8 +542,9 @@ export default function EstimatesPage() {
         address: organization?.address || undefined,
         city: organization?.city || undefined,
         email: organization?.email || undefined,
-        phone: organization?.phone || undefined
-      }, language);
+        phone: organization?.phone || undefined,
+        country: organization?.country || undefined
+      }, language, taxLabel);
 
       const res = await fetch('/api/estimates/send', {
         method: 'POST',

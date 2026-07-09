@@ -41,6 +41,15 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
   const { language } = useLanguage();
   const [loading, setLoading] = useState(false);
 
+  function getTaxLabel(country?: string): string {
+    const c = (country || 'ES').toUpperCase();
+    if (c === 'GB') return 'VAT';
+    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
+    return 'IVA';
+  }
+
+  const taxLabel = getTaxLabel(organization?.country);
+
   // Local translations
   const modalTranslations = {
     es: {
@@ -59,7 +68,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
       itemTotal: "Total",
       addItem: "+ Añadir Item",
       subtotalLabel: "Subtotal",
-      taxRateLabel: "IVA (%)",
+      taxRateLabel: `${taxLabel} (%)`,
       totalLabel: "Total Presupuesto",
       notesLabel: "Notas adicionales",
       notesPlaceholder: "Términos, condiciones de pago, validez, etc...",
@@ -94,7 +103,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
       itemTotal: "Total",
       addItem: "+ Add Item",
       subtotalLabel: "Subtotal",
-      taxRateLabel: "VAT / Tax (%)",
+      taxRateLabel: `${taxLabel} (%)`,
       totalLabel: "Estimate Total",
       notesLabel: "Additional Notes",
       notesPlaceholder: "Terms, payment conditions, validity, etc...",
@@ -589,7 +598,7 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
 
                 {/* IVA Amount */}
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-500 dark:text-slate-400 font-medium">Cuota IVA:</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Cuota {taxLabel}:</span>
                   <span className="font-bold text-slate-800 dark:text-slate-200 tabular-nums">{taxAmount.toFixed(2)} €</span>
                 </div>
 

@@ -19,6 +19,15 @@ export default function AcceptEstimatePage({ params }: { params: { token: string
   const [errorState, setErrorState] = useState<string | null>(null);
   const [successAction, setSuccessAction] = useState<'accepted' | 'rejected' | null>(null);
 
+  function getTaxLabel(country?: string): string {
+    const c = (country || 'ES').toUpperCase();
+    if (c === 'GB') return 'VAT';
+    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
+    return 'IVA';
+  }
+
+  const taxLabel = getTaxLabel(organization?.country);
+
   useEffect(() => {
     if (!token) return;
     loadEstimate();
@@ -64,7 +73,7 @@ export default function AcceptEstimatePage({ params }: { params: { token: string
       // 2. Fetch organization info (public query)
       const { data: org, error: orgErr } = await supabase
         .from('organizations')
-        .select('name, logo_url')
+        .select('name, logo_url, country')
         .eq('id', est.organization_id)
         .single();
 
@@ -268,7 +277,7 @@ export default function AcceptEstimatePage({ params }: { params: { token: string
                 <span className="font-semibold text-slate-200">{Number(estimate.subtotal || 0).toFixed(2)} €</span>
               </div>
               <div className="flex justify-between items-center text-slate-400">
-                <span>IVA ({estimate.tax_rate || 21}%):</span>
+                <span>{taxLabel} ({estimate.tax_rate || 21}%):</span>
                 <span className="font-semibold text-slate-200">{Number(estimate.tax_amount || 0).toFixed(2)} €</span>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-[#1E3A5F]/60 text-base">

@@ -2,11 +2,19 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format, parseISO } from "date-fns";
 
+function getTaxLabel(country?: string): string {
+  const c = (country || 'ES').toUpperCase();
+  if (c === 'GB') return 'VAT';
+  if (['US','CA','MX','AU'].includes(c)) return 'Tax';
+  return 'IVA';
+}
+
 export const generateInvoicePDF = (
   invoice: any, 
   action: 'download' | 'blob' | 'base64' = 'download', 
   orgData?: { name?: string; nif?: string; address?: string; city?: string; email?: string; phone?: string; },
-  language: 'es' | 'en' = 'es'
+  language: 'es' | 'en' = 'es',
+  taxLabel: string = 'IVA'
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     try {
@@ -27,8 +35,8 @@ export const generateInvoicePDF = (
         project: 'Project:',
         concept: 'Concept',
         base: 'Base Amount',
-        taxRate: 'Tax (%)',
-        taxAmount: 'Tax Amount',
+        taxRate: `${taxLabel} (%)`,
+        taxAmount: `${taxLabel} Amount`,
         total: 'Total',
         grandTotal: 'INVOICE TOTAL:',
         notes: 'Notes:',
@@ -46,8 +54,8 @@ export const generateInvoicePDF = (
         project: 'Proyecto:',
         concept: 'Concepto',
         base: 'Base Imponible',
-        taxRate: 'IVA (%)',
-        taxAmount: 'Importe IVA',
+        taxRate: `${taxLabel} (%)`,
+        taxAmount: `Importe ${taxLabel}`,
         total: 'Total',
         grandTotal: 'TOTAL FACTURA:',
         notes: 'Notas:',

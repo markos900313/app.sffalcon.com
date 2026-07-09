@@ -33,6 +33,15 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   
+  function getTaxLabel(country?: string): string {
+    const c = (country || 'ES').toUpperCase();
+    if (c === 'GB') return 'VAT';
+    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
+    return 'IVA';
+  }
+
+  const taxLabel = getTaxLabel(organization?.country);
+  
   const modules = organization?.sector_config;
   const hasProjects = false;
   
@@ -254,7 +263,7 @@ export default function InvoiceModal({ isOpen, onClose, onSaved, invoiceToEdit }
               {/* IVA y Total */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{t('modals.invoice.taxRateLabel')}</label>
+                  <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.1em] ml-1">{taxLabel} (%)</label>
                   <div className="relative">
                     <Percent className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input

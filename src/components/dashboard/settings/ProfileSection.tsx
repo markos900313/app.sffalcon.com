@@ -1,4 +1,5 @@
 "use client";
+// Métodos de cobro removidos de la sección de perfil de organización
 
 import React, { useState, useEffect } from "react";
 import { User, Camera, ChevronDown, Loader2 } from "lucide-react";

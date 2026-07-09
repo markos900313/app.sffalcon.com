@@ -46,7 +46,7 @@ export default function ClientsPage() {
 
       const { data: clientsData, error: clientsError } = await supabase
         .from('clients')
-        .select('*, appointments(count)')
+        .select('*')
         .eq('organization_id', organization.id)
         .order('created_at', { ascending: false });
 

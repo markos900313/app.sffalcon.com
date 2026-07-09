@@ -91,7 +91,7 @@ export default function SystemSection({ user }: { user: any }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-        <SystemInfo label={t('version')} value="v1.0.0 Beta" />
+        <SystemInfo label={t('version')} value="v1.0.1" />
         <SystemInfo label={t('idOrganizacion')} value={orgId} />
         <SystemInfo label={t('entorno')} value={environment} />
       </div>

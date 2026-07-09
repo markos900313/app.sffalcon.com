@@ -44,6 +44,15 @@ export default function InvoicesPage() {
   const { organization } = useOrganization();
   const symbol = organization?.currency_symbol || '€';
 
+  function getTaxLabel(country?: string): string {
+    const c = (country || 'ES').toUpperCase();
+    if (c === 'GB') return 'VAT';
+    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
+    return 'IVA';
+  }
+
+  const taxLabel = getTaxLabel(organization?.country);
+
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -188,7 +197,7 @@ export default function InvoicesPage() {
         city: organization?.city || undefined,
         email: organization?.email || undefined,
         phone: organization?.phone || undefined
-      }, language);
+      }, language, taxLabel);
       toast.success(t('invoices.toast.pdfGenerated' as any));
     } catch (e) {
       toast.error(t('invoices.toast.pdfError' as any));
@@ -212,7 +221,7 @@ export default function InvoicesPage() {
         city: organization?.city || undefined,
         email: organization?.email || undefined,
         phone: organization?.phone || undefined
-      }, language);
+      }, language, taxLabel);
 
       const res = await fetch('/api/invoices/send', {
         method: 'POST',
