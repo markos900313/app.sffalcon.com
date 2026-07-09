@@ -169,9 +169,9 @@ export const generateEstimatePDF = (
       const issueDate = estimate.created_at ? format(parseISO(estimate.created_at), 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd');
       const validUntil = estimate.valid_until || format(new Date(), 'yyyy-MM-dd');
 
-      doc.text(`${L.estimateNum}: ${estimateNum}`, 145, 34);
-      doc.text(`${L.issueDate}: ${format(parseISO(issueDate), 'dd/MM/yyyy')}`, 145, 39);
-      doc.text(`${L.validUntil}: ${format(parseISO(validUntil), 'dd/MM/yyyy')}`, 145, 44);
+      doc.text(`${L.estimateNum}: ${estimateNum}`, 196, 34, { align: 'right' });
+      doc.text(`${L.issueDate}: ${format(parseISO(issueDate), 'dd/MM/yyyy')}`, 196, 40, { align: 'right' });
+      doc.text(`${L.validUntil}: ${format(parseISO(validUntil), 'dd/MM/yyyy')}`, 196, 46, { align: 'right' });
 
       // Separator line
       doc.setDrawColor(226, 232, 240); // Slate 200
@@ -215,31 +215,34 @@ export const generateEstimatePDF = (
           3: { halign: 'right', fontStyle: 'bold' }
         }
       });
-
       // Totals
       // @ts-ignore
       const finalY = doc.lastAutoTable.finalY || 130;
-      doc.setFont("helvetica", "bold");
-      
       doc.setFontSize(10);
-      doc.text(`${L.subtotal}:`, 120, finalY + 10);
-      doc.text(`${Number(estimate.subtotal || 0).toFixed(2)} ${currencySymbol}`, 165, finalY + 10);
-      
-      doc.text(`${L.tax} (${estimate.tax_rate || 21}%):`, 120, finalY + 17);
-      doc.text(`${Number(estimate.tax_amount || 0).toFixed(2)} ${currencySymbol}`, 165, finalY + 17);
+      const labelX = 118;
+      const valueX = 196;
 
-      doc.setFontSize(12);
-      doc.text(L.grandTotal, 120, finalY + 25);
-      doc.text(`${Number(estimate.total || 0).toFixed(2)} ${currencySymbol}`, 165, finalY + 25);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${L.subtotal}:`, labelX, finalY + 12);
+      doc.text(`${Number(estimate.subtotal || 0).toFixed(2)} ${currencySymbol}`, valueX, finalY + 12, { align: 'right' });
+      
+      doc.text(`${L.tax} (${estimate.tax_rate || 21}%):`, labelX, finalY + 20);
+      doc.text(`${Number(estimate.tax_amount || 0).toFixed(2)} ${currencySymbol}`, valueX, finalY + 20, { align: 'right' });
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text(`${L.grandTotal}`, labelX, finalY + 30);
+      doc.text(`${Number(estimate.total || 0).toFixed(2)} ${currencySymbol}`, valueX, finalY + 30, { align: 'right' });
 
       // Notes
       if (estimate.notes) {
+        const notesY = finalY + 44;
         doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
-        doc.text(L.notes, 14, finalY + 40);
+        doc.text(L.notes, 14, notesY);
         doc.setFont("helvetica", "normal");
         const splitNotes = doc.splitTextToSize(sanitizeForPDF(estimate.notes), 180);
-        doc.text(splitNotes, 14, finalY + 45);
+        doc.text(splitNotes, 14, notesY + 6);
       }
 
       // Footer

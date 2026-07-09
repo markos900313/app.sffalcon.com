@@ -113,9 +113,9 @@ export const generateInvoicePDF = (
       const issueDate = invoice.issue_date || format(new Date(), 'yyyy-MM-dd');
       const dueDate = invoice.due_date || format(new Date(), 'yyyy-MM-dd');
 
-      doc.text(`${L.invoiceNum}: ${invoiceNum}`, 145, 34);
-      doc.text(`${L.issueDate}: ${format(parseISO(issueDate), 'dd/MM/yyyy')}`, 145, 39);
-      doc.text(`${L.dueDate}: ${format(parseISO(dueDate), 'dd/MM/yyyy')}`, 145, 44);
+      doc.text(`${L.invoiceNum}: ${invoiceNum}`, 196, 34, { align: 'right' });
+      doc.text(`${L.issueDate}: ${format(parseISO(issueDate), 'dd/MM/yyyy')}`, 196, 40, { align: 'right' });
+      doc.text(`${L.dueDate}: ${format(parseISO(dueDate), 'dd/MM/yyyy')}`, 196, 46, { align: 'right' });
 
       // Separator line
       doc.setDrawColor(226, 232, 240); // Slate 200
@@ -156,22 +156,34 @@ export const generateInvoicePDF = (
         }
       });
 
-      // Totals logic (summary)
+      // Totals
       // @ts-ignore
       const finalY = doc.lastAutoTable.finalY || 120;
+      const lX = 118;
+      const vX = 196;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text(`${L.base}:`, lX, finalY + 12);
+      doc.text(`${Number(invoice.amount || 0).toFixed(2)} ${currencySymbol}`, vX, finalY + 12, { align: 'right' });
+
+      doc.text(`${L.taxRate} (${invoice.tax_rate || 0}%):`, lX, finalY + 20);
+      doc.text(`${Number(invoice.tax_amount || 0).toFixed(2)} ${currencySymbol}`, vX, finalY + 20, { align: 'right' });
+
       doc.setFont("helvetica", "bold");
-      doc.text(L.grandTotal, 120, finalY + 15);
-      doc.setFontSize(14);
-      doc.text(`${Number(invoice.total || 0).toFixed(2)} ${currencySymbol}`, 165, finalY + 15);
+      doc.setFontSize(11);
+      doc.text(L.grandTotal, lX, finalY + 30);
+      doc.text(`${Number(invoice.total || 0).toFixed(2)} ${currencySymbol}`, vX, finalY + 30, { align: 'right' });
 
       // Notes
       if (invoice.notes) {
+        const notesY = finalY + 44;
         doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
-        doc.text(L.notes, 14, finalY + 30);
+        doc.text(L.notes, 14, notesY);
         doc.setFont("helvetica", "normal");
         const splitNotes = doc.splitTextToSize(invoice.notes, 180);
-        doc.text(splitNotes, 14, finalY + 35);
+        doc.text(splitNotes, 14, notesY + 6);
       }
 
       // Footer
