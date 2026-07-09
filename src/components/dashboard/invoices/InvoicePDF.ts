@@ -1,13 +1,9 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format, parseISO } from "date-fns";
+import { getTaxLabel } from "@/lib/regionConfig";
 
-function getTaxLabel(country?: string): string {
-  const c = (country || 'ES').toUpperCase();
-  if (c === 'GB') return 'VAT';
-  if (['US','CA','MX','AU'].includes(c)) return 'Tax';
-  return 'IVA';
-}
+
 
 export const generateInvoicePDF = (
   invoice: any, 

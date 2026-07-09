@@ -22,6 +22,7 @@ const InvoicesAnalytics = dynamic(() => import("@/components/dashboard/invoices/
   loading: () => <div className="h-[400px] w-full bg-slate-50 dark:bg-[#111F3A] animate-pulse rounded-[24px]" />
 });
 import { generateInvoicePDF } from "@/components/dashboard/invoices/InvoicePDF";
+import { getTaxLabel } from "@/lib/regionConfig";
 
 interface Invoice {
   id: string;
@@ -43,13 +44,6 @@ export default function InvoicesPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
   const symbol = organization?.currency_symbol || '€';
-
-  function getTaxLabel(country?: string): string {
-    const c = (country || 'ES').toUpperCase();
-    if (c === 'GB') return 'VAT';
-    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
-    return 'IVA';
-  }
 
   const taxLabel = getTaxLabel(organization?.country);
 

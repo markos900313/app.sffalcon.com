@@ -8,6 +8,7 @@ import {
   Building, User, Phone, Mail, MapPin, Euro, Loader2 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getTaxLabel } from '@/lib/regionConfig';
 
 export default function AcceptEstimatePage({ params }: { params: { token: string } }) {
   const token = params.token;
@@ -18,13 +19,6 @@ export default function AcceptEstimatePage({ params }: { params: { token: string
   const [organization, setOrganization] = useState<any>(null);
   const [errorState, setErrorState] = useState<string | null>(null);
   const [successAction, setSuccessAction] = useState<'accepted' | 'rejected' | null>(null);
-
-  function getTaxLabel(country?: string): string {
-    const c = (country || 'ES').toUpperCase();
-    if (c === 'GB') return 'VAT';
-    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
-    return 'IVA';
-  }
 
   const taxLabel = getTaxLabel(organization?.country);
 

@@ -21,6 +21,7 @@ import { useOrganization } from '@/context/OrganizationContext';
 import { format, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/lib/LanguageContext';
+import { getTaxLabel } from '@/lib/regionConfig';
 
 interface EstimateModalProps {
   isOpen: boolean;
@@ -40,13 +41,6 @@ export default function EstimateModal({ isOpen, onClose, onSaved, estimateToEdit
   const { organization } = useOrganization();
   const { language } = useLanguage();
   const [loading, setLoading] = useState(false);
-
-  function getTaxLabel(country?: string): string {
-    const c = (country || 'ES').toUpperCase();
-    if (c === 'GB') return 'VAT';
-    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
-    return 'IVA';
-  }
 
   const taxLabel = getTaxLabel(organization?.country);
 

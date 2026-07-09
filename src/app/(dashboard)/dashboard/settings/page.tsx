@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import { SubscriptionModal } from "@/components/dashboard/settings/SubscriptionModal";
 import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "qrcode";
+import { REGION_CONFIG } from "@/lib/regionConfig";
 
 export default function SettingsPage() {
   const { t, language } = useLanguage();
@@ -351,8 +352,22 @@ function ProfileSection({ profile, user, userId, organization, onRefresh }: { pr
 }
 
 function OrganizationSection({ organization, onRefresh, userId, user }: { organization: any, onRefresh: () => void, userId: string | null, user: any }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
+
+  const handleCountryChange = (newCountry: string) => {
+    const uppercaseCountry = newCountry.toUpperCase();
+    setFormData(prev => {
+      const cfg = REGION_CONFIG[uppercaseCountry];
+      return {
+        ...prev,
+        country: uppercaseCountry,
+        currency: cfg?.currency ?? prev.currency,
+        currency_symbol: cfg?.symbol ?? prev.currency_symbol,
+      };
+    });
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     sector: "",
@@ -446,7 +461,15 @@ function OrganizationSection({ organization, onRefresh, userId, user }: { organi
         <Field label={t('settings.org.nif' as any)} value={formData.nif} placeholder="B-12345678" onChange={(v) => setFormData({ ...formData, nif: v })} />
         <Field label={t('settings.org.billingAddress' as any)} value={formData.address} placeholder="Calle..." onChange={(v) => setFormData({ ...formData, address: v })} />
         <Field label={t('settings.org.city' as any)} value={formData.city} placeholder="Madrid" onChange={(v) => setFormData({ ...formData, city: v })} />
-        <Field label={t('settings.org.country' as any)} value={formData.country} placeholder="ES" onChange={(v) => setFormData({ ...formData, country: v })} />
+        <div>
+          <Field label={t('settings.org.country' as any)} value={formData.country} placeholder="ES" onChange={handleCountryChange} />
+          {formData.country && REGION_CONFIG[formData.country.toUpperCase()] && (
+            <p className="text-xs text-blue-400 mt-1 ml-1">
+              {language === 'en' ? '✓ Applicable tax: ' : '✓ Impuesto aplicable: '}
+              {REGION_CONFIG[formData.country.toUpperCase()].tax}
+            </p>
+          )}
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label={t('settings.org.currency' as any)} value={formData.currency} placeholder="EUR" onChange={(v) => setFormData({ ...formData, currency: v })} />
           <Field label={t('settings.org.symbol' as any)} value={formData.currency_symbol} placeholder="€" onChange={(v) => setFormData({ ...formData, currency_symbol: v })} />

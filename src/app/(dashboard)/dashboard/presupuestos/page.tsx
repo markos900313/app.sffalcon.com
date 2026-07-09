@@ -18,6 +18,7 @@ import autoTable from "jspdf-autotable";
 import { format, parseISO, addDays } from "date-fns";
 
 import EstimateModal from "@/components/dashboard/estimates/EstimateModal";
+import { getTaxLabel } from "@/lib/regionConfig";
 
 interface Estimate {
   id: string;
@@ -262,13 +263,6 @@ export default function EstimatesPage() {
   const { organization } = useOrganization();
   const { language } = useLanguage();
   const symbol = organization?.currency_symbol || '€';
-
-  function getTaxLabel(country?: string): string {
-    const c = (country || 'ES').toUpperCase();
-    if (c === 'GB') return 'VAT';
-    if (['US','CA','MX','AU'].includes(c)) return 'Tax';
-    return 'IVA';
-  }
 
   const taxLabel = getTaxLabel(organization?.country);
 
