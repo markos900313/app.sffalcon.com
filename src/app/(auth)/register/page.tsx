@@ -263,7 +263,7 @@ export default function RegisterPage() {
                   }}>
                     <PlanCard
                       title={t("common.sections.principal" as any) === "Principal" ? "Gestor Empresarial" : "Enterprise Manager"} // plan name
-                      price="29€/mes"
+                      price="39€/mes"
                       subtitle={t("auth.planCardSubtitle" as any)}
                       badge={t("auth.allIncluded" as any)}
                       features={[
@@ -337,7 +337,7 @@ export default function RegisterPage() {
 
                         {/* Nombre del Negocio */}
                         <div className="reg-field" style={{ marginBottom: '16px' }}>
-                           <label className="reg-label">{t("auth.businessNameLabel" as any)}</label>
+                          <label className="reg-label">{t("auth.businessNameLabel" as any)}</label>
                           <input
                             type="text"
                             value={businessName}

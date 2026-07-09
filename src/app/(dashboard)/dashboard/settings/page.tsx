@@ -898,11 +898,10 @@ function EmailCorporativoSection({ organization }: { organization: any }) {
             onChange={(e) => setFormData({ ...formData, alert_email: e.target.value })}
             placeholder="alertas@tunegocio.com"
             required
-            className={`w-full bg-white dark:bg-[#111F3A] border rounded-lg py-3 px-4 text-[14px] text-[#0F172A] dark:text-[#F1F5F9] font-normal outline-none transition-all ${
-              !formData.alert_email.trim()
+            className={`w-full bg-white dark:bg-[#111F3A] border rounded-lg py-3 px-4 text-[14px] text-[#0F172A] dark:text-[#F1F5F9] font-normal outline-none transition-all ${!formData.alert_email.trim()
                 ? 'border-amber-400 dark:border-amber-500 focus:border-amber-500 ring-1 ring-amber-300/40'
                 : 'border-[#E2E8F0] dark:border-[#1E3A5F] focus:border-[#1B4FD8]'
-            }`}
+              }`}
           />
           <p className="text-[11px] text-[#64748B] dark:text-[#475569] ml-1 leading-relaxed">
             {t('settings.email.alertEmailDesc' as any)}
@@ -1263,7 +1262,7 @@ function UpgradeModalInternal({ isOpen, onClose }: { isOpen: boolean, onClose: (
               <div className="bg-slate-50 dark:bg-[#111F3A] border border-slate-200 dark:border-[#1E3A5F] rounded-xl p-4 mb-4">
                 <div className="flex items-center justify-center mb-4 pb-4 border-b border-slate-100 dark:border-[#1E3A5F]/50">
                   <div className="text-center">
-                    <p className="text-2xl font-black text-[#0F172A] dark:text-[#F1F5F9]">29€</p>
+                    <p className="text-2xl font-black text-[#0F172A] dark:text-[#F1F5F9]">39€</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">{t('settings.upgrade.perMonth' as any)}</p>
                   </div>
                 </div>

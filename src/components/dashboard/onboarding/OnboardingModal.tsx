@@ -95,7 +95,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
     currencySymbol: '€',
     businessPhone: organization?.whatsapp_number || '',
     businessEmail: organization?.email_channel || '',
-    sector: '', 
+    sector: '',
     logoFile: null as File | null,
     logoUrl: organization?.logo_url || '',
 
@@ -122,7 +122,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
     {
       id: 'pro',
       name: language === 'es' ? 'SF Gestor Empresarial' : 'SF Business Manager',
-      price: isUS ? '$29' : '29€',
+      price: isUS ? '$39' : '39€',
       features: [
         language === 'es' ? 'Clientes y agenda ilimitados' : 'Unlimited clients and schedule',
         language === 'es' ? 'Comunicaciones WhatsApp + Email' : 'WhatsApp + Email communications',
@@ -820,7 +820,7 @@ export default function OnboardingModal({ onComplete, onCancel }: OnboardingModa
                             {t('modals.onboarding.emailGuideDesc')}
                           </div>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <label className="block text-xs font-bold text-white/30 uppercase tracking-widest">{t('modals.onboarding.emailUsernameLabel')}</label>
                           <div className="relative flex items-center">

@@ -9,23 +9,32 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { organizationId, priceId, userId } = await request.json()
+    const { organizationId, userId } = await request.json()
 
-    if (!organizationId || !priceId) {
-      return NextResponse.json({ error: 'Faltan parámetros: organizationId o priceId' }, { status: 400 })
+    if (!organizationId) {
+      return NextResponse.json({ error: 'Faltan parámetros: organizationId' }, { status: 400 })
     }
 
-    if (!process.env.NEXT_PUBLIC_APP_URL) {
-      console.error('ERROR CRÍTICO: NEXT_PUBLIC_APP_URL no está definida en las variables de entorno.')
-      return NextResponse.json({ error: 'Configuración del servidor incompleta (URL)' }, { status: 500 })
-    }
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+      || 'https://app.sffalcon.com'
 
     // Buscar o crear customer en Stripe
     const { data: org } = await supabase
       .from('organizations')
-      .select('stripe_customer_id, name, email')
+      .select('stripe_customer_id, name, email, country')
       .eq('id', organizationId)
       .single()
+
+    const country = org?.country?.toUpperCase() || 'ES'
+    const isUSD = ['US','CA','PR','DO'].includes(country)
+    const priceId = isUSD
+      ? process.env.STRIPE_PRICE_PRO_USD
+      : process.env.STRIPE_PRICE_PRO
+
+    if (!priceId) {
+      console.error('ERROR: priceId no está definido en las variables de entorno para el país:', country)
+      return NextResponse.json({ error: 'Configuración del servidor incompleta (Stripe Price ID)' }, { status: 500 })
+    }
 
     let customerId = org?.stripe_customer_id
 
@@ -49,8 +58,8 @@ export async function POST(request: NextRequest) {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?cancelled=true`,
+      success_url: `${baseUrl}/dashboard?success=true`,
+      cancel_url: `${baseUrl}/dashboard?cancelled=true`,
       metadata: { organizationId, userId }
     })
 

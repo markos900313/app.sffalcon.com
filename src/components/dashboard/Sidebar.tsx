@@ -154,7 +154,7 @@ export default function Sidebar() {
     if (item.key === 'api_settings') return 'API';
     return item.label;
   };
-  
+
   // Estado para las secciones colapsables
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     principal: true,
@@ -252,10 +252,10 @@ export default function Sidebar() {
         <nav className="flex-1 min-h-0 px-2 lg:px-4 flex flex-col gap-6 py-6 overflow-y-auto scrollbar-hide">
           {NAV_SECTIONS.filter(s => !s.hidden).map((section) => {
             const isExpanded = expandedSections[section.id];
-            
+
             return (
               <div key={section.id} className="flex flex-col gap-1">
-                <div 
+                <div
                   className="px-4 flex items-center justify-between mb-1 cursor-pointer group/title"
                   onClick={() => toggleSection(section.id)}
                 >
@@ -473,7 +473,7 @@ function SubscriptionModal({ isOpen, onClose }: { isOpen: boolean, onClose: () =
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[16px] md:text-[18px] font-black text-[#0F172A] dark:text-[#F1F5F9]">29€</p>
+                    <p className="text-[16px] md:text-[18px] font-black text-[#0F172A] dark:text-[#F1F5F9]">39€</p>
                     <p className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
                       {language === 'en' ? '/ Month' : '/ Mes'}
                     </p>
