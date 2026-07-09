@@ -852,13 +852,13 @@ export default function EstimatesPage() {
                             {/* Valid until */}
                             <td className="px-6 py-4 hidden md:table-cell">
                               <span className="text-[13px] md:text-[14px] text-[#475569] dark:text-[#CBD5E1]">
-                                {format(parseISO(est.valid_until), 'dd/MM/yyyy')}
+                                {est.valid_until ? format(parseISO(est.valid_until), 'dd/MM/yyyy') : '—'}
                               </span>
                             </td>
                             {/* Created at / Issue date */}
                             <td className="px-6 py-4 hidden md:table-cell">
                               <span className="text-[13px] md:text-[14px] text-[#475569] dark:text-[#CBD5E1]">
-                                {format(parseISO(est.created_at), 'dd/MM/yyyy')}
+                                {est.created_at ? format(parseISO(est.created_at), 'dd/MM/yyyy') : '—'}
                               </span>
                             </td>
                             {/* Actions */}
