@@ -17,6 +17,7 @@ const DashboardSidebar = dynamic(() => import("@/components/dashboard/home/Dashb
 const OnboardingModal = dynamic(() => import("@/components/dashboard/onboarding/OnboardingModal"), { ssr: false });
 
 const SubscriptionModal = dynamic(() => import("@/components/dashboard/settings/SubscriptionModal"), { ssr: false });
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import Link from "next/link";
 import { useOrganization } from "@/context/OrganizationContext";
 import { usePlan, useTrialStats } from "@/hooks/usePlan";
@@ -283,12 +284,8 @@ export default function DashboardPage() {
   const modules = organization?.sector_config;
   const grupoNum = modules?.grupo ? parseInt(modules.grupo.split('_')[0]) : 1;
 
-  if (orgLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-      </div>
-    );
+  if (loading || orgLoading || !stats) {
+    return <PageSkeleton />;
   }
 
   return (
@@ -407,11 +404,6 @@ export default function DashboardPage() {
                 </div>
 
                 <div className={cn("h-[300px] w-full flex items-center justify-center")}>
-                  {loading ? (
-                    <div className="w-full h-full bg-slate-50 dark:bg-[#111F3A]/20 animate-pulse rounded-[24px] flex items-center justify-center">
-                      <TrendingUp className="w-8 h-8 text-[var(--text-secondary)]/20 animate-bounce" />
-                    </div>
-                  ) : (
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={stats.evolution}>
                         <CartesianGrid strokeDasharray="0" vertical={false} stroke={theme === 'dark' ? "rgba(255,255,255,0.05)" : "#F1F5F9"} />
@@ -432,7 +424,6 @@ export default function DashboardPage() {
                         <Line type="monotone" dataKey="gastos" stroke="#EF4444" strokeWidth={4} dot={{ r: 4, fill: '#EF4444', strokeWidth: 0 }} activeDot={{ r: 6 }} />
                       </LineChart>
                     </ResponsiveContainer>
-                  )}
                 </div>
               </div>
 
@@ -445,17 +436,7 @@ export default function DashboardPage() {
                   </Link>
                 </div>
                 <div className="flex-1 space-y-4">
-                  {loading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-card)] animate-pulse">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-[#1E3A5F] shrink-0" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 bg-slate-200 dark:bg-[#1E3A5F] rounded w-1/3" />
-                          <div className="h-3 bg-slate-200 dark:bg-[#1E3A5F] rounded w-2/3" />
-                        </div>
-                      </div>
-                    ))
-                  ) : stats.recentActivity.length > 0 ? (
+                  {stats.recentActivity.length > 0 ? (
                     stats.recentActivity.slice(0, 4).map((msg, i) => (
                       <div key={i} className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-card)] hover:bg-[var(--bg-page)] transition-all group">
                         <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0">
@@ -496,17 +477,7 @@ export default function DashboardPage() {
                   </Link>
                 </div>
                 <div className="flex-1 space-y-4">
-                  {loading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-card)] animate-pulse">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-[#1E3A5F] shrink-0" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 bg-slate-200 dark:bg-[#1E3A5F] rounded w-1/2" />
-                          <div className="h-3 bg-slate-200 dark:bg-[#1E3A5F] rounded w-1/4" />
-                        </div>
-                      </div>
-                    ))
-                  ) : stats.upcomingAppts.length > 0 ? (
+                  {stats.upcomingAppts.length > 0 ? (
                     stats.upcomingAppts.slice(0, 4).map((appt, i) => (
                       <div key={i} className="flex items-center gap-5 p-4 rounded-2xl border border-[var(--border-card)] hover:bg-[var(--bg-page)] transition-all group">
                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
