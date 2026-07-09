@@ -54,6 +54,7 @@ export default function AnalyticsPage() {
   const dateLocale = language === 'es' ? es : enUS;
   const supabase = createClient();
   const { organization } = useOrganization();
+  const currencySymbol = organization?.currency_symbol || '€';
   const { theme } = useTheme();
   const modules = organization?.sector_config;
   const grupoText = modules?.grupo || '';
@@ -101,7 +102,7 @@ export default function AnalyticsPage() {
       const kpis = [
         { label: t('analytics.kpis.totalActivity' as any), value: apptsMonth || 0, icon: Calendar, color: 'text-blue-500', cat: 'agenda' },
         { label: t('analytics.kpis.occupancyRate' as any), value: '78%', icon: Zap, color: 'text-amber-500', cat: 'stats' },
-        { label: t('analytics.kpis.avgRevenueItem' as any), value: `${avgRevenue}€`, icon: BarChart2, color: 'text-indigo-500', cat: 'finanzas' },
+        { label: t('analytics.kpis.avgRevenueItem' as any), value: `${avgRevenue}${currencySymbol}`, icon: BarChart2, color: 'text-indigo-500', cat: 'finanzas' },
         { label: t('analytics.kpis.newContactsRate' as any), value: `${newClientsRate}%`, icon: TrendingUp, color: 'text-emerald-500', cat: 'clientes' },
       ];
       setStats(kpis);
@@ -156,7 +157,7 @@ export default function AnalyticsPage() {
         { label: t('analytics.kpis.registeredContacts' as any), value: 124, icon: Users, color: 'text-blue-500', cat: 'clientes' },
         { label: t('analytics.kpis.newContactsMonth' as any), value: 12, icon: TrendingUp, color: 'text-emerald-500', cat: 'stats' },
         { label: t('analytics.kpis.activityAppointments' as any), value: 48, icon: Calendar, color: 'text-amber-500', cat: 'agenda' },
-        { label: t('analytics.kpis.totalRevenue' as any), value: '3.420€', icon: BarChart2, color: 'text-indigo-500', cat: 'finanzas' },
+        { label: t('analytics.kpis.totalRevenue' as any), value: `3.420${currencySymbol}`, icon: BarChart2, color: 'text-indigo-500', cat: 'finanzas' },
       ];
     }
     return stats;

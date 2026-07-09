@@ -27,6 +27,7 @@ const DURATIONS = ["15 min", "30 min", "1h", "2h", "4h", "8h", "Personalizado"];
 export default function CatalogPage() {
   const supabase = createClient();
   const { organization } = useOrganization();
+  const currencySymbol = organization?.currency_symbol || '€';
   const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<any[]>([]);
@@ -247,7 +248,7 @@ export default function CatalogPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="text-sm font-black text-slate-900 dark:text-white">{item.precio} €</span>
+                        <span className="text-sm font-black text-slate-900 dark:text-white">{item.precio} {currencySymbol}</span>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={cn(
@@ -310,7 +311,7 @@ export default function CatalogPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('inventory.table.price' as any)}</p>
-                  <p className="text-sm font-black text-[#1B4FD8]">{viewItem.precio} €</p>
+                  <p className="text-sm font-black text-[#1B4FD8]">{viewItem.precio} {currencySymbol}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t('inventory.table.status' as any)}</p>
@@ -382,9 +383,9 @@ export default function CatalogPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('inventory.editModal.priceLabel' as any)}</label>
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">{t('inventory.editModal.priceLabel' as any).replace('€', currencySymbol)}</label>
                     <div className="relative">
-                      <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm select-none">{currencySymbol}</span>
                       <input 
                         type="number" 
                         required

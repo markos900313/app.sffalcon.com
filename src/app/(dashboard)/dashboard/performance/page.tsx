@@ -53,6 +53,7 @@ export default function PerformancePage() {
   const { t, language } = useLanguage();
   const supabase = createClient();
   const { organization } = useOrganization();
+  const currencySymbol = organization?.currency_symbol || '€';
   const [period, setPeriod] = useState("week"); // "today" | "week" | "month"
   const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState({
@@ -181,8 +182,8 @@ export default function PerformancePage() {
       // Table Data
       const tableData = [
         [t('performance.pdf.mainMetric' as any), t('performance.pdf.value' as any)],
-        [t('performance.pdf.totalRevenue' as any), `${metrics.totalRevenue.toLocaleString('es-ES')} €`],
-        [t('performance.pdf.avgTicket' as any), `${metrics.averageTicket.toLocaleString('es-ES', { maximumFractionDigits: 2 })} €`],
+        [t('performance.pdf.totalRevenue' as any), `${metrics.totalRevenue.toLocaleString('es-ES')} ${currencySymbol}`],
+        [t('performance.pdf.avgTicket' as any), `${metrics.averageTicket.toLocaleString('es-ES', { maximumFractionDigits: 2 })} ${currencySymbol}`],
         [t('performance.pdf.totalRecords' as any), metrics.totalAppointments.toString()],
         [t('performance.pdf.serviceCapacity' as any), `${metrics.occupancy}%`]
       ];
@@ -262,7 +263,7 @@ export default function PerformancePage() {
                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('performance.kpis.revenue' as any)}</span>
                 <div className="flex items-center gap-1.5 mt-1">
                   <span className="text-lg font-black text-slate-900 dark:text-white leading-none">
-                    {loading ? "..." : `${metrics.totalRevenue.toLocaleString('es-ES')}€`}
+                    {loading ? "..." : `${metrics.totalRevenue.toLocaleString('es-ES')}${currencySymbol}`}
                   </span>
                   <ArrowUpRight size={10} className="text-emerald-500 font-black" />
                 </div>
@@ -271,7 +272,7 @@ export default function PerformancePage() {
               <div className="flex flex-col items-center">
                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t('performance.kpis.avgTicket' as any)}</span>
                 <span className="text-lg font-black text-slate-900 dark:text-white leading-none mt-1">
-                  {loading ? "..." : `${metrics.averageTicket.toLocaleString('es-ES', { maximumFractionDigits: 0 })}€`}
+                  {loading ? "..." : `${metrics.averageTicket.toLocaleString('es-ES', { maximumFractionDigits: 0 })}${currencySymbol}`}
                 </span>
               </div>
               <div className="h-6 w-px bg-slate-200 dark:bg-white/10" />
