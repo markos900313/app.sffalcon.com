@@ -24,9 +24,14 @@ const nextConfig = {
       ],
     }]
   },
-  // Experimental — reducir bundle
   experimental: {
-    optimizePackageImports: ['lucide-react', '@supabase/supabase-js'],
+    optimizePackageImports: [
+      'lucide-react',
+      '@supabase/supabase-js',
+      'recharts',
+      'jspdf',
+      'date-fns'
+    ]
   },
 };
 

@@ -13,7 +13,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
-import ClientModal from "@/components/dashboard/clients/ClientModal";
+import dynamic from "next/dynamic";
+const ClientModal = dynamic(() => import("@/components/dashboard/clients/ClientModal"), {
+  ssr: false,
+  loading: () => null
+});
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
@@ -24,7 +28,10 @@ import { useLanguage } from "@/lib/LanguageContext";
 // Componentes tipo pestaña
 import ClientsList from "@/components/dashboard/clients/ClientsList";
 import ClientsPipeline from "@/components/dashboard/clients/ClientsPipeline";
-import ClientsAnalytics from "@/components/dashboard/clients/ClientsAnalytics";
+const ClientsAnalytics = dynamic(() => import("@/components/dashboard/clients/ClientsAnalytics"), {
+  ssr: false,
+  loading: () => <div className="h-[400px] bg-[#162040]/30 animate-pulse rounded-2xl border border-[#1E3A5F]/40" />
+});
 import { Client } from "./types";
 
 type TabType = 'list' | 'pipeline' | 'analytics';

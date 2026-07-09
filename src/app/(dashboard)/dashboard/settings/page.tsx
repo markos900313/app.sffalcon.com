@@ -24,7 +24,7 @@ import { REGION_CONFIG, COUNTRY_NAMES } from "@/lib/regionConfig";
 
 export default function SettingsPage() {
   const { t, language } = useLanguage();
-  const { organization, loading: orgLoading } = useOrganization();
+  const { organization, loading: orgLoading, refreshOrganization } = useOrganization();
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null)
   const [user, setUser] = useState<any>(null);
@@ -34,7 +34,7 @@ export default function SettingsPage() {
 
 
   const fetchOrganization = () => {
-    window.location.reload();
+    refreshOrganization();
   };
 
   useEffect(() => {
@@ -529,6 +529,7 @@ function OrganizationSection({ organization, onRefresh, userId, user }: { organi
 function WorkingHoursSection({ organization, onRefresh, userId, user }: { organization: any, onRefresh: () => void, userId: string | null, user: any }) {
   const { t, language } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const { refreshOrganization } = useOrganization();
 
   const [formData, setFormData] = useState({
     working_hours_start: 540,
@@ -569,6 +570,7 @@ function WorkingHoursSection({ organization, onRefresh, userId, user }: { organi
       // 4. Actualización consolidada en organization
 
       toast.success(t('settings.hours.updated' as any));
+      await refreshOrganization();
       onRefresh();
     } catch (error) {
       console.error(error);
@@ -669,6 +671,7 @@ function WorkingHoursSection({ organization, onRefresh, userId, user }: { organi
 function PaymentMethodsSection({ organization, onRefresh, userId, user }: { organization: any, onRefresh: () => void, userId: string | null, user: any }) {
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const { refreshOrganization } = useOrganization();
   const [bizumEnabled, setBizumEnabled] = useState(false);
   const [ibanEnabled, setIbanEnabled] = useState(false);
   const [bizumNumber, setBizumNumber] = useState("");
@@ -699,6 +702,7 @@ function PaymentMethodsSection({ organization, onRefresh, userId, user }: { orga
 
       if (error) throw error;
       toast.success(t('settings.org.updated' as any));
+      await refreshOrganization();
       onRefresh();
     } catch (error) {
       console.error(error);
@@ -924,6 +928,7 @@ function EmailCorporativoSection({ organization }: { organization: any }) {
 function AutonomousAISection({ organization, userId, user, onRefresh }: { organization: any, userId: string | null, user: any, onRefresh: () => void }) {
   const { t } = useLanguage();
   const [saving, setSaving] = useState(false);
+  const { refreshOrganization } = useOrganization();
   const { plan: currentPlan, loading: planLoading } = usePlan();
   const isPro = planLoading ? true : currentPlan !== 'free';
 
@@ -987,6 +992,7 @@ function AutonomousAISection({ organization, userId, user, onRefresh }: { organi
       if (orgErr) throw orgErr;
 
       toast.success(t('settings.ai.updated' as any));
+      await refreshOrganization();
       onRefresh();
     } catch (error) {
       console.error(error);

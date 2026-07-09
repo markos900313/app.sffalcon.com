@@ -17,7 +17,11 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format, parseISO, addDays } from "date-fns";
 
-import EstimateModal from "@/components/dashboard/estimates/EstimateModal";
+import dynamic from "next/dynamic";
+const EstimateModal = dynamic(() => import("@/components/dashboard/estimates/EstimateModal"), {
+  ssr: false,
+  loading: () => null
+});
 import { getTaxLabel } from "@/lib/regionConfig";
 
 interface Estimate {

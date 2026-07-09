@@ -6,8 +6,15 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "react-hot-toast";
-import AppointmentModal from "@/components/dashboard/appointments/AppointmentModal";
-import AppointmentsAnalytics from "@/components/dashboard/appointments/AppointmentsAnalytics";
+import dynamic from "next/dynamic";
+const AppointmentModal = dynamic(() => import("@/components/dashboard/appointments/AppointmentModal"), {
+  ssr: false,
+  loading: () => null
+});
+const AppointmentsAnalytics = dynamic(() => import("@/components/dashboard/appointments/AppointmentsAnalytics"), {
+  ssr: false,
+  loading: () => <div className="h-[400px] bg-slate-50 dark:bg-[#111F3A]/40 animate-pulse rounded-[24px]" />
+});
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrganization } from "@/context/OrganizationContext";
 import { getModuleLabel, getSectorGrupo } from "@/lib/sectorConfig";
