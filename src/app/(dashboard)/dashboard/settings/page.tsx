@@ -20,7 +20,7 @@ import toast from "react-hot-toast";
 import { SubscriptionModal } from "@/components/dashboard/settings/SubscriptionModal";
 import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "qrcode";
-import { REGION_CONFIG } from "@/lib/regionConfig";
+import { REGION_CONFIG, COUNTRY_NAMES } from "@/lib/regionConfig";
 
 export default function SettingsPage() {
   const { t, language } = useLanguage();
@@ -462,7 +462,22 @@ function OrganizationSection({ organization, onRefresh, userId, user }: { organi
         <Field label={t('settings.org.billingAddress' as any)} value={formData.address} placeholder="Calle..." onChange={(v) => setFormData({ ...formData, address: v })} />
         <Field label={t('settings.org.city' as any)} value={formData.city} placeholder="Madrid" onChange={(v) => setFormData({ ...formData, city: v })} />
         <div>
-          <Field label={t('settings.org.country' as any)} value={formData.country} placeholder="ES" onChange={handleCountryChange} />
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.08em] ml-1">
+              {t('settings.org.country' as any)}
+            </label>
+            <select
+              value={formData.country || 'ES'}
+              onChange={e => handleCountryChange(e.target.value)}
+              className="w-full bg-[#F1F5F9] dark:bg-[#0D1B35] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-lg py-2.5 px-4 text-base text-[#0F172A] dark:text-[#F1F5F9] font-normal outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm cursor-pointer"
+            >
+              {Object.entries(COUNTRY_NAMES).map(([code, name]) => (
+                <option key={code} value={code} className="dark:bg-[#111F3A]">
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
           {formData.country && REGION_CONFIG[formData.country.toUpperCase()] && (
             <p className="text-xs text-blue-400 mt-1 ml-1">
               {language === 'en' ? '✓ Applicable tax: ' : '✓ Impuesto aplicable: '}
@@ -471,8 +486,30 @@ function OrganizationSection({ organization, onRefresh, userId, user }: { organi
           )}
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label={t('settings.org.currency' as any)} value={formData.currency} placeholder="EUR" onChange={(v) => setFormData({ ...formData, currency: v })} />
-          <Field label={t('settings.org.symbol' as any)} value={formData.currency_symbol} placeholder="€" onChange={(v) => setFormData({ ...formData, currency_symbol: v })} />
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.08em] ml-1">
+              {t('settings.org.currency' as any)}
+            </label>
+            <input
+              type="text"
+              value={formData.currency}
+              placeholder="EUR"
+              readOnly
+              className="w-full bg-[#F1F5F9] dark:bg-[#0D1B35] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-lg py-2.5 px-4 text-base text-[#0F172A] dark:text-[#F1F5F9] placeholder:text-[#64748B] dark:placeholder:text-[#475569] font-normal outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm opacity-60 cursor-not-allowed"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-[#64748B] dark:text-[#94A3B8] uppercase tracking-[0.08em] ml-1">
+              {t('settings.org.symbol' as any)}
+            </label>
+            <input
+              type="text"
+              value={formData.currency_symbol}
+              placeholder="€"
+              readOnly
+              className="w-full bg-[#F1F5F9] dark:bg-[#0D1B35] border border-[#E2E8F0] dark:border-[#1E3A5F] rounded-lg py-2.5 px-4 text-base text-[#0F172A] dark:text-[#F1F5F9] placeholder:text-[#64748B] dark:placeholder:text-[#475569] font-normal outline-none focus:ring-4 focus:ring-blue-500/10 transition-all shadow-sm opacity-60 cursor-not-allowed"
+            />
+          </div>
         </div>
         <Field label={t('settings.org.phone' as any)} value={formData.phone} placeholder="+34..." onChange={(v) => setFormData({ ...formData, phone: v })} />
       </div>
