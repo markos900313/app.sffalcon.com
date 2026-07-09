@@ -7,13 +7,16 @@ import { useSidebar } from '@/contexts/SidebarContext';
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import TrialBanner from '@/components/dashboard/trial/TrialBanner';
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
+import { es, enUS } from "date-fns/locale";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useRouter } from "next/navigation";
 
 export default function Topbar() {
   const { isOpen, setIsOpen } = useSidebar();
   const { organization } = useOrganization();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -31,15 +34,15 @@ export default function Topbar() {
       fetchNotifications();
 
       // Subscribe to changes
-      const channel = supabase
-        .channel('notifications-changes')
+      const channel = supabase.channel('notifications')
         .on('postgres_changes', {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'notifications',
           filter: `organization_id=eq.${organization.id}`
-        }, () => {
-          fetchNotifications();
+        }, (payload: any) => {
+          setNotifications(prev => [payload.new, ...prev].slice(0, 20));
+          setUnreadCount(prev => prev + 1);
         })
         .subscribe();
 
@@ -53,10 +56,10 @@ export default function Topbar() {
     if (!organization?.id) return;
     const { data } = await supabase
       .from('notifications')
-      .select('*')
+      .select('id, title, message, type, read, link, created_at, metadata')
       .eq('organization_id', organization.id)
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(20);
 
     if (data) {
       setNotifications(data);
@@ -64,12 +67,63 @@ export default function Topbar() {
     }
   };
 
-  const markAsRead = async (id: string) => {
+  const getTypeDetails = (type: string) => {
+    switch (type) {
+      case 'success':
+        return { emoji: '✅', color: '#22c55e', bg: 'rgba(34, 197, 94, 0.1)', border: 'rgba(34, 197, 94, 0.2)' };
+      case 'warning':
+        return { emoji: '⚠️', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.2)' };
+      case 'message':
+        return { emoji: '💬', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.2)' };
+      case 'appointment':
+        return { emoji: '📅', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)', border: 'rgba(139, 92, 246, 0.2)' };
+      case 'info':
+      default:
+        return { emoji: 'ℹ️', color: '#64748b', bg: 'rgba(100, 116, 139, 0.1)', border: 'rgba(100, 116, 139, 0.2)' };
+    }
+  };
+
+  const getRelativeTime = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), {
+        addSuffix: true,
+        locale: language === 'en' ? enUS : es
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
+
+  const handleNotificationClick = async (n: any) => {
+    if (!n.read) {
+      setNotifications(prev =>
+        prev.map(item => (item.id === n.id ? { ...item, read: true } : item))
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', n.id);
+    }
+
+    if (n.link) {
+      router.push(n.link);
+      setShowNotifications(false);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (!organization?.id) return;
+    
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+
     await supabase
       .from('notifications')
       .update({ read: true })
-      .eq('id', id);
-    fetchNotifications();
+      .eq('organization_id', organization.id)
+      .eq('read', false);
   };
 
   const handleClearNotifications = async () => {
@@ -147,7 +201,7 @@ export default function Topbar() {
                 <span className="text-white text-sm font-bold">{t('notificaciones')}</span>
                 {unreadCount > 0 && (
                   <span className="bg-red-500/20 text-red-400 text-[10px] px-2 py-0.5 rounded-full border border-red-500/30">
-                    {t('nuevasNotificaciones', { count: unreadCount })}
+                    {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </div>
@@ -159,35 +213,56 @@ export default function Topbar() {
                   </div>
                 ) : (
                   <div className="divide-y divide-[#1E3A5F]/50">
-                    {notifications.map((n) => (
-                      <div
-                        key={n.id}
-                        onClick={() => markAsRead(n.id)}
-                        className={`p-4 hover:bg-white/5 cursor-pointer transition-colors relative ${!n.read ? 'bg-white/[0.02]' : ''}`}
-                      >
-                        <div className="flex gap-3">
-                          <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${n.type === 'error' ? 'bg-red-500' :
-                            n.type === 'warning' ? 'bg-yellow-500' :
-                              n.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
-                            }`}></div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white text-xs font-bold truncate">{n.title}</p>
-                            <p className="text-slate-400 text-[11px] mt-0.5 line-clamp-2 leading-relaxed">{n.message}</p>
-                            <p className="text-slate-500 text-[9px] mt-1.5 uppercase tracking-wider font-medium">
-                              {format(new Date(n.created_at), 'dd/MM/yyyy HH:mm')}
-                            </p>
+                    {notifications.map((n) => {
+                      const details = getTypeDetails(n.type);
+                      return (
+                        <div
+                          key={n.id}
+                          onClick={() => handleNotificationClick(n)}
+                          className={`p-4 hover:bg-white/5 cursor-pointer transition-all duration-200 relative border-l-2 ${
+                            !n.read 
+                              ? 'bg-white/[0.04]' 
+                              : 'bg-transparent'
+                          }`}
+                          style={{
+                            borderLeftColor: !n.read ? details.color : 'transparent'
+                          }}
+                        >
+                          <div className="flex gap-3 items-start">
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-base shadow-sm"
+                              style={{
+                                backgroundColor: details.bg,
+                                border: `1px solid ${details.border}`,
+                              }}
+                            >
+                              {details.emoji}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white text-xs font-bold leading-normal break-words">{n.title}</p>
+                              <p className="text-slate-400 text-[11px] mt-1 line-clamp-2 leading-relaxed break-words">{n.message}</p>
+                              <p className="text-slate-500 text-[9px] mt-1.5 font-medium">
+                                {getRelativeTime(n.created_at)}
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
               {notifications.length > 0 && (
-                <div className="pt-3 border-t border-[#1E3A5F] mb-4 px-4">
+                <div className="pt-3 border-t border-[#1E3A5F] mb-4 px-4 flex flex-col gap-2">
+                  <button
+                    onClick={handleMarkAllAsRead}
+                    className="w-full text-[#3b82f6] text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-opacity py-1.5 text-center"
+                  >
+                    {language === 'es' ? 'Marcar todas como leídas' : 'Mark all as read'}
+                  </button>
                   <button
                     onClick={handleClearNotifications}
-                    className="w-full text-red-500 text-[10px] font-bold uppercase tracking-widest hover:opacity-80 transition-opacity"
+                    className="w-full text-red-500/80 text-[10px] font-bold uppercase tracking-widest hover:text-red-500 transition-colors py-1 text-center"
                   >
                     {t('limpiarNotificaciones')}
                   </button>
