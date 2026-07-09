@@ -18,11 +18,11 @@ import dynamic from 'next/dynamic';
 import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 const InvoiceModal = dynamic(() => import("@/components/dashboard/invoices/InvoiceModal"), {
   ssr: false,
-  loading: () => <div className="animate-pulse" />
+  loading: () => null
 });
 const InvoicesAnalytics = dynamic(() => import("@/components/dashboard/invoices/InvoicesAnalytics"), {
   ssr: false,
-  loading: () => <div className="h-[400px] w-full bg-slate-50 dark:bg-[#111F3A] animate-pulse rounded-[24px]" />
+  loading: () => null
 });
 import { generateInvoicePDF } from "@/components/dashboard/invoices/InvoicePDF";
 import { getTaxLabel } from "@/lib/regionConfig";

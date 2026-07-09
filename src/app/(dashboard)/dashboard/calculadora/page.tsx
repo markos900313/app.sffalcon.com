@@ -30,11 +30,11 @@ import dynamic from "next/dynamic";
 // Components
 const QuoteCalculator = dynamic(() => import("@/components/dashboard/calculator/QuoteCalculator"), {
   ssr: false,
-  loading: () => <div className="animate-pulse" />
+  loading: () => null
 });
 const CatalogManager = dynamic(() => import("@/components/dashboard/calculator/CatalogManager"), {
   ssr: false,
-  loading: () => <div className="animate-pulse" />
+  loading: () => null
 });
 
 interface QuoteCalculation {

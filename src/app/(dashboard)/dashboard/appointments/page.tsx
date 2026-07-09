@@ -10,11 +10,11 @@ import dynamic from "next/dynamic";
 import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 const AppointmentModal = dynamic(() => import("@/components/dashboard/appointments/AppointmentModal"), {
   ssr: false,
-  loading: () => <div className="animate-pulse" />
+  loading: () => null
 });
 const AppointmentsAnalytics = dynamic(() => import("@/components/dashboard/appointments/AppointmentsAnalytics"), {
   ssr: false,
-  loading: () => <div className="h-[400px] bg-slate-50 dark:bg-[#111F3A]/40 animate-pulse rounded-[24px]" />
+  loading: () => null
 });
 import { useSearchParams, useRouter } from "next/navigation";
 import { useOrganization } from "@/context/OrganizationContext";

@@ -21,7 +21,7 @@ import dynamic from "next/dynamic";
 import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 const EstimateModal = dynamic(() => import("@/components/dashboard/estimates/EstimateModal"), {
   ssr: false,
-  loading: () => <div className="animate-pulse" />
+  loading: () => null
 });
 import { getTaxLabel } from "@/lib/regionConfig";
 

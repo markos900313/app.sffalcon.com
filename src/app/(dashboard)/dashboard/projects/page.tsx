@@ -18,7 +18,7 @@ import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import dynamic from 'next/dynamic';
 const ProjectModal = dynamic(() => import('@/components/dashboard/projects/ProjectModal'), {
   ssr: false,
-  loading: () => <div className="animate-pulse" />
+  loading: () => null
 });
 import { LayoutGrid, List, BarChart2 } from 'lucide-react';
 import { useOrganization } from '@/context/OrganizationContext';

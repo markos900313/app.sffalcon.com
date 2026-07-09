@@ -10,7 +10,7 @@ import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import dynamic from "next/dynamic";
 const BusinessDonutChart = dynamic(() => import("@/components/dashboard/finances-business/BusinessDonutChart"), {
   ssr: false,
-  loading: () => <div className="h-[250px] w-full bg-slate-50 dark:bg-[#111F3A] animate-pulse rounded-[24px]" />
+  loading: () => null
 });
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";

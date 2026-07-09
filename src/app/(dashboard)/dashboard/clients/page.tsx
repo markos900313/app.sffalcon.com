@@ -19,7 +19,7 @@ import dynamic from "next/dynamic";
 import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 const ClientModal = dynamic(() => import("@/components/dashboard/clients/ClientModal"), {
   ssr: false,
-  loading: () => <div className="animate-pulse" />
+  loading: () => null
 });
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
@@ -34,7 +34,7 @@ import ClientsList from "@/components/dashboard/clients/ClientsList";
 import ClientsPipeline from "@/components/dashboard/clients/ClientsPipeline";
 const ClientsAnalytics = dynamic(() => import("@/components/dashboard/clients/ClientsAnalytics"), {
   ssr: false,
-  loading: () => <div className="h-[400px] bg-[#162040]/30 animate-pulse rounded-2xl border border-[#1E3A5F]/40" />
+  loading: () => null
 });
 import { Client } from "./types";
 
