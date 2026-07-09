@@ -18,6 +18,7 @@ import {
   MessageSquare
 } from "lucide-react";
 import jsPDF from "jspdf";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import autoTable from "jspdf-autotable";
 import { cn } from "@/lib/utils";
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
@@ -204,7 +205,7 @@ export default function PerformancePage() {
     }
   };
 
-  if (loading) return null;
+  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
 
   return (
     <DashboardPageContainer animate={false}>

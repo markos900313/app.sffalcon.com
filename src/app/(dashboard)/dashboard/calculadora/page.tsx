@@ -25,15 +25,16 @@ import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { format, parseISO, addDays } from "date-fns";
 
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import dynamic from "next/dynamic";
 // Components
 const QuoteCalculator = dynamic(() => import("@/components/dashboard/calculator/QuoteCalculator"), {
   ssr: false,
-  loading: () => null
+  loading: () => <div className="animate-pulse" />
 });
 const CatalogManager = dynamic(() => import("@/components/dashboard/calculator/CatalogManager"), {
   ssr: false,
-  loading: () => null
+  loading: () => <div className="animate-pulse" />
 });
 
 interface QuoteCalculation {
@@ -380,6 +381,10 @@ export default function CalculatorPage() {
       );
     }
   };
+
+  if (loading) {
+    return <PageSkeleton showKPIs={true} rows={6} />;
+  }
 
   return (
     <>

@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic'
 const DonutChart = dynamic(() => import('@/components/dashboard/finances/DonutChart'), { ssr: false })
 const FinanceTrendChart = dynamic(() => import('@/components/dashboard/finances/FinanceTrendChart'), { ssr: false })
 import FinancialAlerts from "@/components/dashboard/finances/FinancialAlerts";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import DashboardSidebar from "@/components/dashboard/home/DashboardSidebar";
 import AddIncomeModal from "@/components/dashboard/finances/AddIncomeModal";
 import AddExpenseModal from "@/components/dashboard/finances/AddExpenseModal";
@@ -346,11 +347,7 @@ export default function FinancesPage() {
     }
   };
 
-  if (loading || !isMounted) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading || !isMounted) return <PageSkeleton showKPIs={true} rows={6} />;
 
   return (
     <div className="min-h-screen animate-in fade-in duration-700">

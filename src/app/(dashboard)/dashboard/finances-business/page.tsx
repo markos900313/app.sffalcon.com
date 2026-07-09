@@ -6,6 +6,7 @@ import BusinessSummaryCards from "@/components/dashboard/finances-business/Busin
 import BusinessTable, { BusinessEntry } from "@/components/dashboard/finances-business/BusinessTable";
 import FinancialAlerts from "@/components/dashboard/finances/FinancialAlerts";
 import DashboardSidebar from "@/components/dashboard/home/DashboardSidebar";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import dynamic from "next/dynamic";
 const BusinessDonutChart = dynamic(() => import("@/components/dashboard/finances-business/BusinessDonutChart"), {
   ssr: false,
@@ -167,11 +168,7 @@ export default function FinancesBusinessPage() {
     }
   }, [entries.length, loading, selectedMonth]);
 
-  if (loading || !isMounted) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading || !isMounted) return <PageSkeleton showKPIs={true} rows={6} />;
 
   // Exportar JSON del negocio
   const handleExportJSON = async () => {

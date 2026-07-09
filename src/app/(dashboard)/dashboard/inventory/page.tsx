@@ -17,6 +17,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import { useOrganization } from "@/context/OrganizationContext";
 import { toast } from "react-hot-toast";
 import { DashboardPageContainer } from "@/components/dashboard/DashboardPageContainer";
@@ -168,11 +169,7 @@ export default function CatalogPage() {
     return matchesSearch;
   });
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
 
   return (
     <>

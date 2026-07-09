@@ -15,10 +15,10 @@ import toast from 'react-hot-toast';
 import { useLanguage } from '@/lib/LanguageContext';
 
 import dynamic from 'next/dynamic';
-
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 const InvoiceModal = dynamic(() => import("@/components/dashboard/invoices/InvoiceModal"), {
   ssr: false,
-  loading: () => null
+  loading: () => <div className="animate-pulse" />
 });
 const InvoicesAnalytics = dynamic(() => import("@/components/dashboard/invoices/InvoicesAnalytics"), {
   ssr: false,
@@ -241,11 +241,7 @@ export default function InvoicesPage() {
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <PageSkeleton showKPIs={true} rows={6} />;
 
   return (
     <>

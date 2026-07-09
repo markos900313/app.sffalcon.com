@@ -23,6 +23,7 @@ import {
   XCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import toast from "react-hot-toast";
@@ -277,7 +278,7 @@ export default function TeamPage() {
     m.role?.toLowerCase().includes(searchTerm.toLowerCase())
   ));
 
-  if (loading) return null;
+  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
 
   const pendingCount = vacationRequests.filter(r => r.estado === 'pendiente').length;
 

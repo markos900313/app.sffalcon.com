@@ -22,6 +22,7 @@ import {
   Star
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -221,7 +222,7 @@ export default function ShiftsPage() {
     return Array.from({ length: 42 }).map((_, i) => addDays(startCal, i));
   }, [selectedDate]);
 
-  if (loading) return null;
+  if (loading) return <PageSkeleton showKPIs={false} rows={5} />;
 
   return (
     <div className="flex flex-col gap-6 w-full">

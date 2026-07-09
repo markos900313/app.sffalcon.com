@@ -16,9 +16,10 @@ import {
 import { cn } from "@/lib/utils";
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
 import dynamic from "next/dynamic";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 const ClientModal = dynamic(() => import("@/components/dashboard/clients/ClientModal"), {
   ssr: false,
-  loading: () => null
+  loading: () => <div className="animate-pulse" />
 });
 import { createClient } from "@/lib/supabase/client";
 import { useOrganization } from "@/context/OrganizationContext";
@@ -346,11 +347,7 @@ export default function ClientsPage() {
     ] : [])
   ];
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <PageSkeleton showKPIs={true} rows={6} />;
 
   return (
     <>

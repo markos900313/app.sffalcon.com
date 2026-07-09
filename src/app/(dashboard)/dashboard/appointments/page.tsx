@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "react-hot-toast";
 import dynamic from "next/dynamic";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 const AppointmentModal = dynamic(() => import("@/components/dashboard/appointments/AppointmentModal"), {
   ssr: false,
-  loading: () => null
+  loading: () => <div className="animate-pulse" />
 });
 const AppointmentsAnalytics = dynamic(() => import("@/components/dashboard/appointments/AppointmentsAnalytics"), {
   ssr: false,
@@ -149,11 +150,7 @@ function AppointmentsContent() {
   const sector = organization?.sector?.toLowerCase() || 'default';
   const grupo = parseInt(String((getSectorGrupo as any)(sector))) || 1;
   
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full" />
-    </div>
-  )
+  if (loading) return <PageSkeleton showKPIs={false} rows={5} />;
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-full text-[var(--text-primary)] pb-32">

@@ -9,6 +9,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import { createClient } from '@/lib/supabase/client';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useTheme } from '@/lib/ThemeContext';
@@ -163,7 +164,7 @@ export default function AnalyticsPage() {
     return stats;
   }, [stats, isDemo, modules, isSalud, language]);
 
-  if (loading && stats.length === 0) return null;
+  if (loading && stats.length === 0) return <PageSkeleton showKPIs={true} rows={6} />;
 
   return (
     <DashboardPageContainer animate={false}>

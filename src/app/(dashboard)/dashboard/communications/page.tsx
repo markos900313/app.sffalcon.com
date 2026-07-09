@@ -9,6 +9,7 @@ import { useOrganization } from "@/context/OrganizationContext";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 
 
 export type Message = {
@@ -271,11 +272,7 @@ export default function CommunicationsPage() {
     }
   }
 
-  if (loading || !isMounted) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading || !isMounted) return <PageSkeleton showKPIs={false} rows={8} />;
 
   return (
     <div className="h-[calc(100vh-80px)] overflow-hidden flex flex-col md:flex-row bg-[var(--bg-page)] transition-colors animate-in fade-in duration-700">

@@ -16,6 +16,7 @@ import { DashboardPageContainer, DashboardSection } from "@/components/dashboard
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import LoadingOverlay from '@/components/ui/LoadingOverlay';
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import LeadModal from './LeadModal';
 import ConvertModal from './ConvertModal';
 import DiscardModal from './DiscardModal';
@@ -194,11 +195,7 @@ export default function LeadsPage() {
     );
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
 
   return (
     <>

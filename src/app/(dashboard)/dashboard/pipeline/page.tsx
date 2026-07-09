@@ -18,6 +18,7 @@ import Link from "next/link";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import { formatDistanceToNow, isSameMonth, parseISO } from "date-fns";
 import { es, enUS } from "date-fns/locale";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import Dynamic from "next/dynamic";
 import { DashboardPageContainer, DashboardSection } from "@/components/dashboard/DashboardPageContainer";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -219,11 +220,7 @@ export default function PipelinePage() {
 
   const tipo = (organization as any)?.business_type;
 
-  if (loading || orgLoading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading || orgLoading) return <PageSkeleton showKPIs={true} rows={5} />;
 
   return (
     <>

@@ -14,10 +14,11 @@ import {
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import ProjectsList from '@/components/dashboard/projects/ProjectsList';
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import dynamic from 'next/dynamic';
 const ProjectModal = dynamic(() => import('@/components/dashboard/projects/ProjectModal'), {
   ssr: false,
-  loading: () => null
+  loading: () => <div className="animate-pulse" />
 });
 import { LayoutGrid, List, BarChart2 } from 'lucide-react';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -128,11 +129,7 @@ export default function ProjectsPage() {
 
   const pageTitle = organization?.sector_config?.['projects']?.label || 'Proyectos';
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
 
   return (
     <>

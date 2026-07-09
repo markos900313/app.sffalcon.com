@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { DashboardPageContainer } from "@/components/dashboard/DashboardPageContainer";
 import { createClient } from '@/lib/supabase/client';
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 import { useOrganization } from '@/context/OrganizationContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -179,11 +180,7 @@ export default function ProductsPage() {
     item.categoria?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-[#080F1E]">
-      <div className="w-8 h-8 border-2 border-white/20 border-t-blue-500 rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <PageSkeleton showKPIs={true} rows={5} />;
 
   return (
     <DashboardPageContainer>
