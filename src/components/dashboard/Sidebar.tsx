@@ -57,14 +57,13 @@ const NAV_SECTIONS = [
     titleKey: 'sections.principal',
     items: [
       { key: 'dashboard', path: '/dashboard', labelKey: 'sidebar.home', icon: 'Home' },
-      { key: 'communications', path: '/dashboard/communications', labelKey: 'sidebar.communications', icon: 'Mail' },
-      { key: 'web', path: '/dashboard/web', labelKey: 'sidebar.web', icon: 'Globe' },
     ]
   },
   {
     id: 'crm',
     titleKey: 'sections.crm',
     items: [
+      { key: 'communications', path: '/dashboard/communications', labelKey: 'sidebar.communications', icon: 'Mail' },
       { key: 'appointments', path: '/dashboard/appointments', labelKey: 'sidebar.appointments', icon: 'CalendarCheck' },
       { key: 'clients', path: '/dashboard/clients', labelKey: 'sidebar.clients', icon: 'Users' },
       { key: 'leads', path: '/dashboard/leads', labelKey: 'sidebar.leads', icon: 'UserPlus' },
@@ -75,6 +74,7 @@ const NAV_SECTIONS = [
     id: 'negocio',
     titleKey: 'sections.negocio',
     items: [
+      { key: 'web', path: '/dashboard/web', labelKey: 'sidebar.web', icon: 'Globe' },
       { key: 'inventory', path: '/dashboard/inventory', labelKey: 'sidebar.inventory', icon: 'Package' },
       { key: 'products', path: '/dashboard/products', labelKey: 'sidebar.products', icon: 'Package' },
       { key: 'projects', path: '/dashboard/projects', labelKey: 'sidebar.projects', icon: 'Briefcase' },
@@ -93,10 +93,10 @@ const NAV_SECTIONS = [
     id: 'economia',
     titleKey: 'sections.economia',
     items: [
-      { key: 'finances', path: '/dashboard/finances', labelKey: 'sidebar.finances', icon: 'TrendingUp' },
-      { key: 'estimates', path: '/dashboard/presupuestos', labelKey: 'sidebar.estimates', icon: 'ClipboardList' },
       { key: 'calculator', path: '/dashboard/calculadora', labelKey: 'sidebar.calculator', icon: 'Calculator' },
+      { key: 'estimates', path: '/dashboard/presupuestos', labelKey: 'sidebar.estimates', icon: 'ClipboardList' },
       { key: 'invoices', path: '/dashboard/invoices', labelKey: 'sidebar.invoices', icon: 'FileText' },
+      { key: 'finances', path: '/dashboard/finances', labelKey: 'sidebar.finances', icon: 'TrendingUp' },
     ]
   },
   {
@@ -105,6 +105,12 @@ const NAV_SECTIONS = [
     items: [
       { key: 'analytics', path: '/dashboard/analytics', labelKey: 'sidebar.analytics', icon: 'LayoutDashboard' },
       { key: 'performance', path: '/dashboard/performance', labelKey: 'sidebar.performance', icon: 'BarChart3' },
+    ]
+  },
+  {
+    id: 'configuracion',
+    items: [
+      { key: 'settings', path: '/dashboard/settings', labelKey: 'sidebar.settings', icon: 'Settings' }
     ]
   },
   {
@@ -143,6 +149,7 @@ export default function Sidebar() {
     if (section.titleKey) return t(section.titleKey as any);
     if (section.id === 'agentes') return language === 'en' ? 'AI Agents' : 'Agentes IA';
     if (section.id === 'sistema') return language === 'en' ? 'System' : 'Sistema';
+    if (section.id === 'configuracion') return language === 'en' ? 'Configuration' : 'Configuración';
     return section.title;
   };
 
@@ -168,7 +175,8 @@ export default function Sidebar() {
     economia: true,
     analisis: true,
     agentes: true,
-    sistema: true
+    sistema: true,
+    configuracion: true
   });
 
   const toggleSection = (id: string) => {
@@ -324,7 +332,7 @@ export default function Sidebar() {
           <button
             onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
             className={cn(
-              "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11 w-full mb-1",
+              "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11 w-full",
               "md:justify-center md:px-2",
               "lg:justify-start lg:px-4",
               "text-[#64748B] dark:text-[#94A3B8] hover:text-[#0F172A] dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5"
@@ -336,29 +344,6 @@ export default function Sidebar() {
               {language === 'es' ? 'EN' : 'ES'}
             </span>
           </button>
-          <Link
-            href="/dashboard/settings"
-            onClick={closeSidebar}
-            prefetch={true}
-            className={cn(
-              "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11",
-              "md:justify-center md:px-2",
-              "lg:justify-start lg:px-4",
-              pathname === '/dashboard/settings' ? activeItemClass : inactiveItemClass
-            )}
-            title={t('sidebar.settings' as any)}
-          >
-            <Settings className={cn(
-              "w-5 h-5 transition-transform group-hover:scale-110 shrink-0",
-              pathname === '/dashboard/settings' ? "text-[#1B4FD8]" : "text-[#64748B] dark:text-[#94A3B8]"
-            )} />
-            <span className={cn(
-              "block md:hidden lg:block text-[13px] font-medium tracking-tight truncate",
-              pathname === '/dashboard/settings' ? "text-blue-600 dark:text-blue-400" : "text-[#64748B] dark:text-[#94A3B8]"
-            )}>
-              {t('sidebar.settings' as any)}
-            </span>
-          </Link>
         </div>
       </aside>
 

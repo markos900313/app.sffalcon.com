@@ -245,16 +245,16 @@ export default function PipelinePage() {
 
         <div className="flex flex-col gap-6 mt-6">
           {/* KPI CARDS */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: t('pipeline.kpis.activeLeads' as any), value: stats.activeCount, icon: Users, color: 'text-blue-500', cat: 'clientes' },
               { label: t('pipeline.kpis.pipelineValue' as any), value: formatCurrency(stats.pipelineValue), icon: BarChart, color: 'text-indigo-500', cat: 'finanzas' },
               { label: t('pipeline.kpis.closureRate' as any), value: `${stats.closureRate}%`, icon: Target, color: 'text-emerald-500', cat: 'ia' },
               { label: t('pipeline.kpis.wonThisMonth' as any), value: formatCurrency(stats.wonValueMonth), icon: DollarSign, color: 'text-amber-500', cat: 'stats' },
             ].map((stat, i) => (
-              <div key={i} className={cn("card-premium p-5 shadow-sm", stat.cat && `card-${stat.cat}`)}>
-                <p className="kpi-label mb-1">{stat.label}</p>
-                <h3 className="kpi-numero !text-xl">{stat.value}</h3>
+              <div key={i} className={cn("card-premium p-5 shadow-sm min-w-0 xl:max-w-[280px] w-full flex flex-col justify-between", stat.cat && `card-${stat.cat}`)}>
+                <p className="kpi-label mb-1 truncate uppercase tracking-[0.2em] text-[9px] font-black">{stat.label}</p>
+                <h3 className="kpi-numero text-xl md:text-2xl lg:text-3xl truncate text-ellipsis overflow-hidden whitespace-nowrap" title={String(stat.value)}>{stat.value}</h3>
               </div>
             ))}
           </div>

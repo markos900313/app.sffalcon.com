@@ -58,22 +58,22 @@ export default function SummaryCards({ data, loading }: SummaryCardsProps) {
         <div 
           key={idx}
           className={cn(
-            "card-premium p-6 shadow-sm transition-all hover:scale-[1.02] flex flex-col gap-4",
+            "card-premium p-6 shadow-sm transition-all hover:scale-[1.02] flex flex-col gap-4 min-w-0 xl:max-w-[320px] w-full",
             idx < 2 && "card-finanzas",
             card.bg ? `${card.bg} border-transparent shadow-blue-500/10` : "bg-[var(--bg-card)] border-[var(--border-card)]"
           )}
         >
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 min-w-0">
             <p className={cn(
-              "card-titulo",
+              "card-titulo truncate",
               card.bg && "text-blue-100/90"
             )}>
               {card.label}
             </p>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between min-w-0">
               <h2
                 className={cn(
-                  "text-3xl font-bold tracking-tight tabular-nums",
+                  "text-xl md:text-2xl lg:text-3xl font-bold tracking-tight tabular-nums truncate text-ellipsis overflow-hidden whitespace-nowrap",
                   card.bg ? "text-white" : "text-[var(--text-primary)]"
                 )}
               >
@@ -83,12 +83,12 @@ export default function SummaryCards({ data, loading }: SummaryCardsProps) {
           </div>
           <div className="flex items-center gap-1.5 h-5">
             <span className={cn(
-              "text-[12px] font-medium",
+              "text-[12px] font-medium truncate",
               card.bg ? "text-blue-50/80" : 
               card.trend === "down" ? "text-[#EF4444]" : "text-[#64748B] dark:text-[#475569]"
             )}>
               {loading ? <span className="inline-block h-4 w-28 bg-slate-200/60 rounded animate-pulse" /> : (
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 truncate">
                   {card.trendText} {card.subtext}
                 </span>
               )}

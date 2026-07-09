@@ -56,22 +56,22 @@ export default function BusinessSummaryCards({ ingresos, gastos, beneficio, load
       {cards.map((card, idx) => (
         <div
           key={idx}
-          className={cn("p-5 rounded-xl shadow-sm transition-all hover:scale-[1.02]", card.bg)}
+          className={cn("p-5 rounded-xl shadow-sm transition-all hover:scale-[1.02] min-w-0 xl:max-w-[320px] w-full", card.bg)}
         >
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2.5 min-w-0">
+            <div className="flex items-center justify-between gap-4 min-w-0">
               <p className={cn(
-                "text-[11px] font-medium uppercase tracking-wider",
+                "text-[11px] font-medium uppercase tracking-wider truncate",
                 idx === 2 ? "text-blue-100/70" : "text-[#64748B] dark:text-[#94A3B8]"
               )}>
                 {card.label}
               </p>
-              {card.icon}
+              <div className="shrink-0">{card.icon}</div>
             </div>
-            <h2 className={cn("text-2xl font-bold tracking-tight tabular-nums", card.valueColor)}>
+            <h2 className={cn("text-xl md:text-2xl lg:text-3xl font-bold tracking-tight tabular-nums truncate text-ellipsis overflow-hidden whitespace-nowrap", card.valueColor)}>
               {loading ? <span className="inline-block h-8 w-24 bg-white/20 rounded animate-pulse" /> : card.value}
             </h2>
-            <p className={cn("text-[12px] font-medium", card.subColor)}>
+            <p className={cn("text-[12px] font-medium truncate", card.subColor)}>
               {loading ? <span className="inline-block h-4 w-28 bg-white/10 rounded animate-pulse" /> : card.subtext}
             </p>
           </div>

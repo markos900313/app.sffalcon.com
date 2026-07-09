@@ -40,12 +40,13 @@ const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr
 const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
 
 const formatCurrency = (value: number, currencyCode: string = 'EUR') => {
-  return new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: currencyCode,
+  const formattedNumber = new Intl.NumberFormat('es-ES', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  }).format(value).replace(/\s/g, '');
+  }).format(value);
+  
+  const symbol = currencyCode === 'EUR' ? '€' : currencyCode === 'USD' ? 'US$' : currencyCode;
+  return `${formattedNumber} ${symbol}`;
 };
 
 export default function DashboardPage() {
@@ -342,7 +343,7 @@ export default function DashboardPage() {
             {/* COLUMNA IZQUIERDA (70%) */}
             <div className="flex flex-col gap-6">
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <CompactKPI
                   title={t('dashboard.kpis.appointments' as any)}
                   value={stats.apptsThisMonth}
@@ -581,11 +582,11 @@ export default function DashboardPage() {
 function CompactKPI({ title, value, icon, variant = "default", locked, unlockTip, category, percentage, trend, label, showGrowth, loading }: any) {
   if (variant === "compact") {
     return (
-      <div className="px-[16px] py-[16px] bg-transparent flex flex-col group transition-all hover:bg-slate-50/50 dark:hover:bg-white/5 relative">
-        <p className="kpi-label mb-1">{title}</p>
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col items-end">
-            <h3 className="kpi-numero leading-none !text-[20px] text-[var(--text-primary)]">
+      <div className="px-[16px] py-[16px] bg-transparent flex flex-col group transition-all hover:bg-slate-50/50 dark:hover:bg-white/5 relative min-w-0 xl:max-w-[280px] w-full">
+        <p className="kpi-label mb-1 truncate">{title}</p>
+        <div className="flex items-center justify-between gap-4 min-w-0">
+          <div className="flex flex-col items-end min-w-0 flex-1">
+            <h3 className="kpi-numero leading-none text-xl md:text-2xl lg:text-3xl text-[var(--text-primary)] truncate text-ellipsis overflow-hidden whitespace-nowrap" title={String(value)}>
               {loading ? (
                 <span className="inline-block w-16 h-5 bg-slate-200 dark:bg-[#1E3A5F] animate-pulse rounded-md" />
               ) : (
@@ -594,7 +595,7 @@ function CompactKPI({ title, value, icon, variant = "default", locked, unlockTip
             </h3>
             {percentage !== undefined && showGrowth && (
               <span className={cn(
-                "text-[10px] font-bold flex items-center gap-0.5",
+                "text-[10px] font-bold flex items-center gap-0.5 shrink-0",
                 trend === 'up' ? "text-emerald-500" : trend === 'down' ? "text-rose-500" : "text-[var(--text-secondary)]"
               )}>
                 {trend === 'up' ? '+' : trend === 'down' ? '-' : ''}{Math.abs(percentage)}%
@@ -602,11 +603,11 @@ function CompactKPI({ title, value, icon, variant = "default", locked, unlockTip
             )}
           </div>
           {locked ? (
-            <span className="text-[8px] font-black bg-[var(--bg-page)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded shadow-sm border border-[var(--border-card)]">
+            <span className="text-[8px] font-black bg-[var(--bg-page)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded shadow-sm border border-[var(--border-card)] shrink-0">
               {unlockTip}
             </span>
           ) : (
-            <div className="text-[var(--text-secondary)]/30 group-hover:scale-110 transition-transform">
+            <div className="text-[var(--text-secondary)]/30 group-hover:scale-110 transition-transform shrink-0">
               {icon}
             </div>
           )}
@@ -617,27 +618,27 @@ function CompactKPI({ title, value, icon, variant = "default", locked, unlockTip
 
   return (
     <div className={cn(
-      "card-premium p-6 flex flex-col justify-between group transition-all hover:bg-[var(--bg-page)] bg-[var(--bg-card)] border-[var(--border-card)]",
+      "card-premium p-6 flex flex-col justify-between group transition-all hover:bg-[var(--bg-page)] bg-[var(--bg-card)] border-[var(--border-card)] xl:max-w-[280px] w-full min-w-0",
       category && `card-${category}`
     )}>
       <div className="flex items-center justify-between mb-4">
         <div className="text-[var(--text-secondary)]/50 group-hover:scale-110 transition-transform">{icon}</div>
       </div>
-      <div className="flex items-end justify-between">
-        <div>
-          <p className="kpi-label mb-1 uppercase tracking-[0.2em] text-[var(--text-secondary)] font-black text-[9px]">{title}</p>
-          <h3 className="kpi-numero tracking-tighter leading-none text-[var(--text-primary)]" title={String(value)}>
+      <div className="flex items-end justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="kpi-label mb-1 uppercase tracking-[0.2em] text-[var(--text-secondary)] font-black text-[9px] truncate">{title}</p>
+          <h3 className="kpi-numero tracking-tighter leading-none text-[var(--text-primary)] text-xl md:text-2xl lg:text-3xl truncate text-ellipsis overflow-hidden whitespace-nowrap" title={String(value)}>
             {loading ? (
               <span className="inline-block w-24 h-8 bg-slate-200 dark:bg-[#1E3A5F] animate-pulse rounded-lg" />
             ) : (
               value
             )}
           </h3>
-          {label && <p className="text-[10px] font-medium text-[var(--text-secondary)]/60 mt-2 uppercase tracking-wide">{label}</p>}
+          {label && <p className="text-[10px] font-medium text-[var(--text-secondary)]/60 mt-2 uppercase tracking-wide truncate">{label}</p>}
         </div>
         {percentage !== undefined && showGrowth && (
           <div className={cn(
-            "px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1",
+            "px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 shrink-0",
             trend === 'up' ? "bg-emerald-500/10 text-emerald-500" : trend === 'down' ? "bg-rose-500/10 text-rose-500" : "bg-[var(--bg-page)] text-[var(--text-secondary)]"
           )}>
             {trend === 'up' ? <TrendingUp size={10} /> : trend === 'down' ? <TrendingDown size={10} /> : null}
