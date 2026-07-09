@@ -36,7 +36,7 @@ export default function PanelEmpleadoPage() {
       .from('staff')
       .select('*, organizations(name)')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       // Si no es staff, no debería estar aquí (el middleware ya lo maneja pero por seguridad)

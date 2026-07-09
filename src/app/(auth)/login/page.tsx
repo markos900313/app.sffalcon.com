@@ -47,7 +47,7 @@ export default function LoginPage() {
         .from('staff')
         .select('id')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (staffRecord) {
         router.replace('/panel-empleado');

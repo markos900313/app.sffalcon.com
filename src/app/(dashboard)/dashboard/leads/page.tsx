@@ -330,9 +330,9 @@ export default function LeadsPage() {
                       </thead>
                       <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                         {paginatedLeads.map(lead => {
-                          const temp = temperaturaStyles[lead.temperatura];
-                          const est = estadoStyles[lead.estado];
-                          const org = origenConfig[lead.origen];
+                          const temp = temperaturaStyles[lead.temperatura] || temperaturaStyles.frio;
+                          const est = estadoStyles[lead.estado] || estadoStyles.nuevo;
+                          const org = origenConfig[lead.origen] || origenConfig.manual;
                           
                           return (
                             <tr key={lead.id} className={`group hover:bg-slate-50/50 dark:hover:bg-white/[0.01] transition-colors ${lead.estado === 'descartado' ? 'opacity-50 grayscale' : ''}`}>
@@ -452,9 +452,9 @@ export default function LeadsPage() {
                   {/* Mobile Cards View */}
                   <div className="md:hidden flex flex-col gap-4 p-4">
                     {paginatedLeads.map(lead => {
-                      const temp = temperaturaStyles[lead.temperatura];
-                      const est = estadoStyles[lead.estado];
-                      const org = origenConfig[lead.origen];
+                      const temp = temperaturaStyles[lead.temperatura] || temperaturaStyles.frio;
+                      const est = estadoStyles[lead.estado] || estadoStyles.nuevo;
+                      const org = origenConfig[lead.origen] || origenConfig.manual;
                       
                       return (
                         <div key={lead.id} className={`card-premium p-6 space-y-4 relative overflow-hidden transition-all active:scale-[0.98] ${lead.estado === 'descartado' ? 'opacity-60 grayscale' : ''}`}>

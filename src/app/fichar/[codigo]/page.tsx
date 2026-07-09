@@ -42,7 +42,7 @@ export default function FicharPage() {
         .from('staff')
         .select('*')
         .eq('fichar_code', codigo)
-        .single();
+        .maybeSingle();
         
       if (error || !data) {
         setError(t('ficharCodigo.invalidCode'));

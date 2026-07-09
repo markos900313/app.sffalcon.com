@@ -133,7 +133,7 @@ export async function middleware(request: NextRequest) {
       .from('staff')
       .select('id')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     if (staffRecord) {
       return NextResponse.redirect(new URL('/panel-empleado', request.url))
