@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useOrganization } from '@/context/OrganizationContext'
 import { useLanguage } from '@/lib/LanguageContext'
 import { cn } from '@/lib/utils'
+import { getTaxLabel } from '@/lib/regionConfig'
 
 interface SubscriptionModalProps {
   isOpen: boolean
@@ -15,19 +16,27 @@ interface SubscriptionModalProps {
 }
 
 const BENEFITS_ES = [
-  'Gestión ilimitada de contactos',
-  'Reservas y citas sin límites',
-  'Control financiero inteligente',
-  'IA 24/7 (WhatsApp + Email)',
-  'Estadísticas y métricas pro'
+  'Clientes y agenda ilimitados',
+  'Comunicaciones WhatsApp + Email',
+  'IA responde por ti 24/7',
+  'Finanzas y facturas',
+  'Presupuestos y estimados',
+  'Productos e inventario',
+  'Estadísticas y métricas',
+  'Equipo y control horario',
+  'SF IA en el panel'
 ]
 
 const BENEFITS_EN = [
-  'Unlimited contact management',
-  'Unlimited bookings and appointments',
-  'Smart financial control',
-  '24/7 AI (WhatsApp + Email)',
-  'Pro statistics and metrics'
+  'Unlimited clients & agenda',
+  'WhatsApp + Email communications',
+  'AI responds for you 24/7',
+  'Finances & invoices',
+  'Estimates & quotes',
+  'Products & inventory',
+  'Statistics & metrics',
+  'Team & time tracking',
+  'SF AI in the panel'
 ]
 
 export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModalProps) {
@@ -49,8 +58,14 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
     .catch(err => console.error('Error checking trial status:', err))
   }, [organization?.id, isOpen])
 
-  const isUS = organization?.country === 'US' || organization?.currency === 'USD'
-  const priceStr = isUS ? '$29' : '29€'
+  const isUSD = ['US','CA','PR','DO'].includes(
+    organization?.country?.toUpperCase() || ''
+  )
+  const priceDisplay = isUSD ? '$43' : '39€'
+  const periodDisplay = isUSD ? '/month' : '/mes facturado'
+  const stripePriceId = isUSD
+    ? process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_USD
+    : process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO
   const benefits = language === 'es' ? BENEFITS_ES : BENEFITS_EN
 
   const handleUpgrade = async () => {
@@ -63,7 +78,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           organizationId: organization?.id,
-          priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO,
+          priceId: stripePriceId,
           userId: user?.id
         }),
       })
@@ -106,7 +121,7 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
             {/* Header */}
             <div className="px-6 py-5 border-b border-slate-100 dark:border-[#1E3A5F] flex items-center justify-between">
               <h2 className="text-[17px] font-semibold text-[#0F172A] dark:text-[#F1F5F9] tracking-tight">
-                {t('actualizarPlan')}
+                {language === 'es' ? 'Actualiza a SF Gestor Empresarial' : 'Upgrade to SF Gestor'}
               </h2>
               <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-[#1E3A5F] rounded-full transition-colors text-slate-400">
                 <X className="w-5 h-5" />
@@ -115,6 +130,15 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
 
             {/* Content */}
             <div className="p-6 space-y-6">
+              <div className="text-center space-y-2 bg-blue-50/30 dark:bg-blue-500/5 border border-blue-500/10 p-4 rounded-2xl">
+                <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[#1B4FD8] dark:text-blue-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                  {language === 'es' ? '90 DÍAS GRATIS' : '90 DAYS FREE'}
+                </span>
+                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest pt-1">
+                  {language === 'es' ? 'TODO LO QUE NECESITAS PARA CRECER' : 'EVERYTHING YOU NEED TO GROW'}
+                </p>
+              </div>
+
               {trialStatus && trialStatus.status !== 'active' && (
                 <div className={cn(
                   "p-3.5 rounded-xl border text-xs font-semibold text-center leading-relaxed",
@@ -143,10 +167,10 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
                   </div>
                   <div className="text-right">
                     <p className="text-[18px] font-black text-[#0F172A] dark:text-[#F1F5F9]">
-                      {priceStr}
+                      {priceDisplay}
                     </p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                      {t('modals.subscription.perMonth')}
+                      {periodDisplay}
                     </p>
                   </div>
                 </div>
@@ -172,25 +196,30 @@ export default function SubscriptionModal({ isOpen, onClose }: SubscriptionModal
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-100 dark:border-[#1E3A5F] flex flex-col sm:flex-row items-center justify-between gap-4">
-              <button
-                onClick={onClose}
-                className="w-full sm:w-auto order-2 sm:order-1 text-[14px] font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors px-4 py-2 uppercase tracking-tight"
-              >
-                {t('cancelarSuscripcion')}
-              </button>
+            <div className="p-6 border-t border-slate-100 dark:border-[#1E3A5F] flex flex-col items-center gap-4 bg-slate-50/50 dark:bg-[#0D1B35]/25">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+                <button
+                  onClick={onClose}
+                  className="w-full sm:w-auto order-2 sm:order-1 text-[13px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors px-4 py-2 uppercase tracking-wider"
+                >
+                  {language === 'es' ? 'Volver' : 'Back'}
+                </button>
 
-              <button
-                onClick={handleUpgrade}
-                disabled={loading}
-                className="w-full sm:w-auto order-1 sm:order-2 relative overflow-hidden bg-[#1B4FD8] hover:bg-blue-700 text-white px-8 py-3 rounded-xl text-[14px] font-bold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase tracking-tight"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  t(organization?.plan === 'pro' ? 'gestionarPlan' : 'continuarConPro')
-                )}
-              </button>
+                <button
+                  onClick={handleUpgrade}
+                  disabled={loading}
+                  className="w-full sm:w-auto order-1 sm:order-2 relative overflow-hidden bg-[#1B4FD8] hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl text-[13px] font-bold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase tracking-wider"
+                >
+                  {loading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    language === 'es' ? 'ACTIVAR PLAN SF GESTOR EMPRESARIAL →' : 'ACTIVATE SF GESTOR PLAN →'
+                  )}
+                </button>
+              </div>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">
+                {language === 'es' ? 'CANCELA EN CUALQUIER MOMENTO' : 'CANCEL ANYTIME'}
+              </p>
             </div>
           </motion.div>
         </div>
