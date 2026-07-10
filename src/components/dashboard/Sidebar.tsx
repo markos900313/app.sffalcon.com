@@ -33,7 +33,8 @@ import {
   Plus,
   Minus,
   Languages,
-  Calculator
+  Calculator,
+  CheckSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -48,7 +49,7 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   TrendingUp, FileText, LayoutDashboard, Briefcase, Bot,
   Folder, Package, Clock, BarChart3, Megaphone, Repeat,
   FileSearch, UserCheck, Key, UserPlus, Globe, ClipboardList,
-  Calculator
+  Calculator, CheckSquare
 };
 
 const NAV_SECTIONS = [
@@ -57,6 +58,7 @@ const NAV_SECTIONS = [
     titleKey: 'sections.principal',
     items: [
       { key: 'dashboard', path: '/dashboard', labelKey: 'sidebar.home', icon: 'Home' },
+      { key: 'tasks', path: '/dashboard/tareas', labelKey: 'sidebar.tasks', icon: 'CheckSquare' },
     ]
   },
   {
@@ -144,6 +146,45 @@ export default function Sidebar() {
   const { plan } = usePlan();
   const { language, setLanguage, t } = useLanguage();
   const [profile, setProfile] = useState<any>(null);
+  const { organization } = useOrganization();
+  const [pendingTasksCount, setPendingTasksCount] = useState(0);
+
+  useEffect(() => {
+    const orgId = organization?.id;
+    if (!orgId) return;
+
+    async function fetchPendingTasks() {
+      try {
+        const { count, error } = await supabase
+          .from('tasks')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', orgId)
+          .eq('status', 'pending');
+        
+        if (!error && count !== null) {
+          setPendingTasksCount(count);
+        }
+      } catch (err) {
+        // Silencio
+      }
+    }
+    fetchPendingTasks();
+
+    const channel = supabase.channel('sidebar-tasks-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'tasks',
+        filter: `organization_id=eq.${orgId}`
+      }, () => {
+        fetchPendingTasks();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [organization?.id, supabase]);
 
   const getSectionTitle = (section: any) => {
     if (section.titleKey) return t(section.titleKey as any);
@@ -154,6 +195,7 @@ export default function Sidebar() {
   };
 
   const getItemLabel = (item: any) => {
+    if (item.key === 'tasks') return language === 'en' ? 'Tasks' : 'Tareas';
     if (item.key === 'estimates') return language === 'en' ? 'Estimates' : 'Presupuestos';
     if (item.key === 'calculator') return language === 'en' ? 'Calculator' : 'Calculadora';
     if (item.labelKey) return t(item.labelKey as any);
@@ -299,7 +341,7 @@ export default function Sidebar() {
                             prefetch={true}
                             onClick={closeSidebar}
                             className={cn(
-                              "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11",
+                              "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11 relative",
                               "md:justify-center md:px-2",
                               "lg:justify-start lg:px-4",
                               isActive ? activeItemClass : inactiveItemClass
@@ -316,6 +358,11 @@ export default function Sidebar() {
                             )}>
                               {getItemLabel(item)}
                             </span>
+                            {item.key === 'tasks' && pendingTasksCount > 0 && (
+                              <span className="absolute top-1 right-1 lg:right-3 min-w-[16px] h-[16px] bg-red-500 rounded-full text-white text-[9px] font-black flex items-center justify-center px-1 border border-[#0D1B2E]">
+                                {pendingTasksCount}
+                              </span>
+                            )}
                           </Link>
                         );
                       })}

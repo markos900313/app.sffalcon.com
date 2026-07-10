@@ -28,6 +28,38 @@ export default function Topbar() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!organization?.id || !mounted) return;
+
+    const generateSystemTasks = async () => {
+      try {
+        const sessionKey = `tasks_gen_${organization.id}`;
+        if (sessionStorage.getItem(sessionKey)) return;
+        sessionStorage.setItem(sessionKey, 'true');
+
+        const { data, error } = await supabase.rpc('create_followup_tasks', {
+          p_org_id: organization.id
+        });
+
+        if (!error && data && Number(data) > 0) {
+          const count = Number(data);
+          await supabase.from('notifications').insert({
+            organization_id: organization.id,
+            title: 'Nuevas tareas generadas por el sistema',
+            message: `${count} tareas de seguimiento creadas automáticamente`,
+            type: 'info',
+            link: '/dashboard/tareas',
+            read: false
+          });
+        }
+      } catch (err) {
+        console.error("Error generating system tasks on mount:", err);
+      }
+    };
+
+    generateSystemTasks();
+  }, [organization?.id, mounted, supabase]);
+
   // Fetch notifications
   useEffect(() => {
     if (organization?.id && mounted) {

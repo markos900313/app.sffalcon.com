@@ -57,6 +57,15 @@ export default function DashboardPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [briefingData, setBriefingData] = useState<{
+    appointments: any[];
+    unreadMessagesCount: number;
+    overdueInvoicesCount: number;
+    overdueInvoicesSum: number;
+    unansweredEstimatesCount: number;
+    urgentTasks: any[];
+    projectsDueSoon: any[];
+  } | null>(null);
   const [data, setData] = useState<{
     financeHome: any[];
     financeBiz: any[];
@@ -108,6 +117,18 @@ export default function DashboardPage() {
         if (!orgId) return;
         const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
 
+        const todayStr = format(new Date(), 'yyyy-MM-dd');
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = format(tomorrow, 'yyyy-MM-dd');
+
+        const fiveDaysAgo = new Date();
+        fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+
+        const sevenDaysLater = new Date();
+        sevenDaysLater.setDate(sevenDaysLater.getDate() + 7);
+        const sevenDaysLaterStr = format(sevenDaysLater, 'yyyy-MM-dd');
+
         const [
           financeHome,
           financeBiz,
@@ -120,7 +141,13 @@ export default function DashboardPage() {
           inventory,
           sessionProfile,
           apiConfigs,
-          agentLogs
+          agentLogs,
+          bAppts,
+          bComms,
+          bInvoices,
+          bEstimates,
+          bTasks,
+          bProjects
         ] = await Promise.all([
           supabase.from('finance_entries').select('*').eq('organization_id', orgId),
           supabase.from('business_entries').select('*').eq('organization_id', orgId),
@@ -133,7 +160,13 @@ export default function DashboardPage() {
           supabase.from('inventory_items').select('*'),
           supabase.from('profiles').select('*').eq('id', user.id).single(),
           supabase.from('api_configs').select('*').limit(1),
-          supabase.from('agent_logs').select('*').order('created_at', { ascending: false }).limit(50)
+          supabase.from('agent_logs').select('*').order('created_at', { ascending: false }).limit(50),
+          supabase.from('appointments').select('title, date, time, customer_name, status').eq('organization_id', orgId).in('date', [todayStr, tomorrowStr]).neq('status', 'cancelada').order('date', { ascending: true }).order('time', { ascending: true }).limit(5).then((res: any) => res, (err: any) => ({data: [], error: err})),
+          supabase.from('communications').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'pending').then((res: any) => res, (err: any) => ({count: 0, error: err})),
+          supabase.from('invoices').select('total').eq('organization_id', orgId).eq('status', 'pendiente').lt('due_date', todayStr).then((res: any) => res, (err: any) => ({data: [], error: err})),
+          supabase.from('estimates').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'sent').lt('updated_at', fiveDaysAgo.toISOString()).then((res: any) => res, (err: any) => ({count: 0, error: err})),
+          supabase.from('tasks').select('id, title, priority, due_date, related_type').eq('organization_id', orgId).eq('status', 'pending').in('priority', ['urgent', 'high']).order('due_date', { ascending: true }).limit(3).then((res: any) => res, (err: any) => ({data: [], error: err})),
+          supabase.from('projects').select('name, end_date').eq('organization_id', orgId).in('status', ['activo', 'active']).gte('end_date', todayStr).lte('end_date', sevenDaysLaterStr).then((res: any) => res, (err: any) => ({data: [], error: err}))
         ]);
 
         setData({
@@ -152,6 +185,18 @@ export default function DashboardPage() {
           apiConfigs: apiConfigs.data || [],
           agentLogs: agentLogs.data || []
         } as any);
+
+        const overdueSum = (bInvoices.data || []).reduce((acc: number, curr: any) => acc + Number(curr.total || 0), 0);
+
+        setBriefingData({
+          appointments: bAppts.data || [],
+          unreadMessagesCount: bComms.count || 0,
+          overdueInvoicesCount: (bInvoices.data || []).length,
+          overdueInvoicesSum: overdueSum,
+          unansweredEstimatesCount: bEstimates.count || 0,
+          urgentTasks: bTasks.data || [],
+          projectsDueSoon: bProjects.data || []
+        });
       } catch (err) {
         // Los logs se mantienen en silencio para producción
       } finally {
@@ -165,6 +210,19 @@ export default function DashboardPage() {
   const todayStr = format(today, 'yyyy-MM-dd');
   const currentMonth = today.getMonth() + 1;
   const currentYear = today.getFullYear();
+
+  const showBriefing = useMemo(() => {
+    if (!briefingData) return false;
+    const appointmentsToday = briefingData.appointments.filter(a => a.date === todayStr);
+    const hasCounts = 
+      briefingData.unreadMessagesCount > 0 || 
+      briefingData.overdueInvoicesCount > 0 || 
+      briefingData.unansweredEstimatesCount > 0 || 
+      briefingData.urgentTasks.length > 0 || 
+      briefingData.projectsDueSoon.length > 0;
+    const hasApptsToday = appointmentsToday.length > 0;
+    return hasCounts || hasApptsToday;
+  }, [briefingData, todayStr]);
 
   const stats = useMemo(() => {
 
@@ -306,6 +364,165 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+
+          {/* Morning Briefing Block */}
+          {showBriefing && briefingData && (
+            <div className="px-4 md:px-8">
+              <div className="bg-[#0D1B2E] border-l-4 border-[#D4AF37] rounded-r-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.3)] text-slate-100 flex flex-col gap-4 transition-all hover:shadow-[0_4px_25px_rgba(212,175,55,0.2)]">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">📋</span>
+                    <h2 className="text-lg font-bold text-white tracking-tight">
+                      {language === 'en' ? 'Daily Briefing' : 'Resumen del día'}
+                    </h2>
+                  </div>
+                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wider bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+                    {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Citas de hoy y mañana */}
+                  {briefingData.appointments.length > 0 && (
+                    <Link
+                      href="/dashboard/appointments"
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer group border border-transparent hover:border-slate-800"
+                    >
+                      <span className="text-xl shrink-0">📅</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          {language === 'en' ? "Today & Tomorrow's Appointments" : "Citas de hoy y mañana"}
+                        </span>
+                        <div className="mt-1 space-y-1">
+                          {briefingData.appointments.map((appt, idx) => {
+                            const isToday = appt.date === todayStr;
+                            return (
+                              <div key={idx} className="text-xs text-slate-200 truncate group-hover:text-amber-300 transition-colors">
+                                <span className={cn(
+                                  "inline-block text-[9px] px-1.5 py-0.2 rounded font-bold mr-1.5 uppercase",
+                                  isToday ? "bg-emerald-500/20 text-emerald-400" : "bg-blue-500/20 text-blue-400"
+                                )}>
+                                  {isToday ? (language === 'en' ? 'Today' : 'Hoy') : (language === 'en' ? 'Tomorrow' : 'Mañana')}
+                                </span>
+                                <span className="font-semibold">{appt.time}</span> - {appt.customer_name || appt.title}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 self-center transition-colors shrink-0" />
+                    </Link>
+                  )}
+
+                  {/* Mensajes sin responder */}
+                  {briefingData.unreadMessagesCount > 0 && (
+                    <Link
+                      href="/dashboard/communications"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer group border border-transparent hover:border-slate-800"
+                    >
+                      <span className="text-xl shrink-0">💬</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          {language === 'en' ? 'Unread Messages' : 'Mensajes sin leer'}
+                        </span>
+                        <p className="text-xs font-semibold text-slate-200 mt-0.5 group-hover:text-amber-300 transition-colors">
+                          {briefingData.unreadMessagesCount} {language === 'en' ? 'pending replies' : 'mensajes pendientes de respuesta'}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors shrink-0" />
+                    </Link>
+                  )}
+
+                  {/* Facturas vencidas */}
+                  {briefingData.overdueInvoicesCount > 0 && (
+                    <Link
+                      href="/dashboard/invoices"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer group border border-transparent hover:border-slate-800"
+                    >
+                      <span className="text-xl shrink-0">💰</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          {language === 'en' ? 'Overdue Invoices' : 'Facturas vencidas'}
+                        </span>
+                        <p className="text-xs font-semibold text-slate-200 mt-0.5 group-hover:text-amber-300 transition-colors">
+                          {briefingData.overdueInvoicesCount} {language === 'en' ? 'overdue' : 'vencidas'} ({formatCurrency(briefingData.overdueInvoicesSum, data.org?.currency)})
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors shrink-0" />
+                    </Link>
+                  )}
+
+                  {/* Presupuestos sin respuesta */}
+                  {briefingData.unansweredEstimatesCount > 0 && (
+                    <Link
+                      href="/dashboard/presupuestos"
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer group border border-transparent hover:border-slate-800"
+                    >
+                      <span className="text-xl shrink-0">📋</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          {language === 'en' ? 'Unanswered Estimates' : 'Presupuestos sin respuesta'}
+                        </span>
+                        <p className="text-xs font-semibold text-slate-200 mt-0.5 group-hover:text-amber-300 transition-colors">
+                          {briefingData.unansweredEstimatesCount} {language === 'en' ? 'sent > 5 days ago' : 'enviados hace más de 5 días'}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors shrink-0" />
+                    </Link>
+                  )}
+
+                  {/* Tareas urgentes */}
+                  {briefingData.urgentTasks.length > 0 && (
+                    <Link
+                      href="/dashboard/tareas"
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer group border border-transparent hover:border-slate-800"
+                    >
+                      <span className="text-xl shrink-0">⚠️</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          {language === 'en' ? 'Urgent Tasks' : 'Tareas urgentes'}
+                        </span>
+                        <div className="mt-1 space-y-1">
+                          {briefingData.urgentTasks.map((t, idx) => (
+                            <div key={idx} className="text-xs text-slate-200 truncate group-hover:text-amber-300 transition-colors">
+                              <span className="inline-block text-[9px] px-1.5 py-0.2 rounded font-bold mr-1.5 uppercase bg-red-500/20 text-red-400 border border-red-500/30">
+                                {t.priority === 'urgent' ? (language === 'en' ? 'Urgent' : 'Urgente') : (language === 'en' ? 'High' : 'Alta')}
+                              </span>
+                              {t.title}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 self-center transition-colors shrink-0" />
+                    </Link>
+                  )}
+
+                  {/* Proyectos próximos a vencer */}
+                  {briefingData.projectsDueSoon.length > 0 && (
+                    <Link
+                      href="/dashboard/projects"
+                      className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-800/50 transition-colors cursor-pointer group border border-transparent hover:border-slate-800"
+                    >
+                      <span className="text-xl shrink-0">🚀</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          {language === 'en' ? 'Projects Due Soon' : 'Proyectos próximos a vencer'}
+                        </span>
+                        <div className="mt-1 space-y-1">
+                          {briefingData.projectsDueSoon.map((p, idx) => (
+                            <div key={idx} className="text-xs text-slate-200 truncate group-hover:text-amber-300 transition-colors">
+                              <span className="font-semibold text-amber-400">{new Date(p.end_date).toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'short' })}</span> - {p.name}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 self-center transition-colors shrink-0" />
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-6 relative w-full">
             {/* Bloqueo por Expiración */}
