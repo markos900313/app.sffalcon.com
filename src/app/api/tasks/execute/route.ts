@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@/lib/supabase/server';
+import { sendWhatsApp } from '@/lib/sendWhatsApp';
 
 export const dynamic = 'force-dynamic';
 
@@ -169,6 +170,7 @@ export async function POST(request: NextRequest) {
     // 4. Execute auto action
     let notesActionDesc = '';
     const payload: any = {};
+    let actionResult = task.auto_action;
 
     if (task.auto_action === 'send_email') {
       if (!contactEmail) {
@@ -193,11 +195,32 @@ export async function POST(request: NextRequest) {
       payload.message_id = emailData?.id;
 
     } else if (task.auto_action === 'send_whatsapp') {
-      // WhatsApp does not send automatically (no verified number webhook integration on sandbox/Resend)
-      // We save the text, phone and return it so client displays copy-dialog
-      notesActionDesc = 'Generación de plantilla de WhatsApp';
-      payload.message_text = messageText;
-      payload.phone = contactPhone;
+      if (!contactPhone) {
+        return NextResponse.json({ error: 'No se encontró número de teléfono para enviar el mensaje.' }, { status: 400 });
+      }
+
+      console.log(`[WhatsApp Auto Task] Attempting auto send to: ${contactPhone}`);
+      const waResult = await sendWhatsApp({
+        to: contactPhone,
+        message: messageText,
+        orgId: organization_id
+      });
+
+      if (waResult.success) {
+        notesActionDesc = 'Envío automático de WhatsApp';
+        payload.whatsapp_sent = true;
+        payload.message_text = messageText;
+        payload.phone = contactPhone;
+        actionResult = 'send_whatsapp_auto'; // Bypass manual popup
+      } else {
+        console.warn('Auto WhatsApp failed, falling back to manual copy dialog:', waResult.error);
+        notesActionDesc = 'Generación de plantilla de WhatsApp (Fallo de envío automático)';
+        payload.whatsapp_sent = false;
+        payload.message_text = messageText;
+        payload.phone = contactPhone;
+        payload.error = waResult.error;
+        // Keep actionResult = 'send_whatsapp' to display copy modal
+      }
     }
 
     // 5. Update task: status='completed', auto_executed_at=now(), notes updated
@@ -231,9 +254,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      action: task.auto_action,
+      action: actionResult,
       message_text: messageText,
-      phone: contactPhone
+      phone: contactPhone,
+      whatsapp_auto_sent: payload.whatsapp_sent
     });
 
   } catch (error: any) {

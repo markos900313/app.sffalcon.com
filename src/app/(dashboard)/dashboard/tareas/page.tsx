@@ -280,12 +280,21 @@ export default function TasksPage() {
         return;
       }
       
-      toast.success(
-        language === 'en' ? 'Task executed successfully' : 'Tarea ejecutada correctamente'
-      );
+      if (result.whatsapp_auto_sent) {
+        toast.success(
+          language === 'en' ? 'WhatsApp sent automatically!' : '¡WhatsApp enviado automáticamente!'
+        );
+      } else {
+        toast.success(
+          language === 'en' ? 'Task executed successfully' : 'Tarea ejecutada correctamente'
+        );
+      }
       
       // If WhatsApp action returned message payload, display manual copy modal
       if (result.action === 'send_whatsapp') {
+        toast.error(
+          language === 'en' ? 'WhatsApp device disconnected. Please send manually.' : 'Dispositivo de WhatsApp desconectado. Por favor, envía manualmente.'
+        );
         setWhatsappDialog({
           isOpen: true,
           text: result.message_text || '',
