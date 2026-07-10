@@ -199,19 +199,61 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No se encontró número de teléfono para enviar el mensaje.' }, { status: 400 });
       }
 
-      console.log(`[WhatsApp Auto Task] Attempting auto send to: ${contactPhone}`);
-      const waResult = await sendWhatsApp({
-        to: contactPhone,
-        message: messageText,
-        orgId: organization_id
-      });
+      // 1. Get WhatsApp config for the organization
+      let { data: cfg, error: cfgErr } = await supabase
+        .from('whatsapp_configs')
+        .select('phone_number_id, access_token')
+        .eq('organization_id', organization_id)
+        .eq('active', true)
+        .maybeSingle();
 
-      if (!waResult.success) {
-        console.error('Error sending WhatsApp message:', waResult.error);
-        return NextResponse.json({ error: `Error al enviar WhatsApp: ${waResult.error}` }, { status: 500 });
+      // 2. Fallback to centralita if not present
+      if (cfgErr || !cfg?.phone_number_id) {
+        const { data: centralita } = await supabase
+          .from('whatsapp_configs')
+          .select('phone_number_id, access_token')
+          .eq('is_centralita', true)
+          .eq('active', true)
+          .maybeSingle();
+        cfg = centralita;
       }
 
-      notesActionDesc = 'Envío automático de WhatsApp';
+      if (!cfg?.phone_number_id || !cfg?.access_token) {
+        return NextResponse.json({ error: 'No hay configuración activa de API de WhatsApp' }, { status: 404 });
+      }
+
+      console.log(`[WhatsApp Meta API] Attempting direct send to: ${contactPhone} via ID: ${cfg.phone_number_id}`);
+
+      // Normalize phone number (digits only, e.g., +34 600... -> 34600...)
+      const cleanedPhone = contactPhone.replace(/\D/g, '');
+
+      // 3. Post to Meta API
+      const metaRes = await fetch(
+        `https://graph.facebook.com/v18.0/${cfg.phone_number_id}/messages`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cfg.access_token}`
+          },
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: cleanedPhone,
+            type: 'text',
+            text: { body: messageText }
+          })
+        }
+      );
+
+      if (!metaRes.ok) {
+        const errDetails = await metaRes.json().catch(() => ({}));
+        console.error('Meta Graph API error:', errDetails);
+        const errMsg = errDetails?.error?.message || `Error status ${metaRes.status}`;
+        return NextResponse.json({ error: `Error de API de Meta: ${errMsg}` }, { status: 500 });
+      }
+
+      notesActionDesc = 'Envío automático de WhatsApp (Meta API)';
       payload.whatsapp_sent = true;
       payload.message_text = messageText;
       payload.phone = contactPhone;
