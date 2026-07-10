@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@/lib/supabase/server';
 import { sendWhatsApp } from '@/lib/sendWhatsApp';
+import { createClient as createAdminClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -199,8 +200,14 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No se encontró número de teléfono para enviar el mensaje.' }, { status: 400 });
       }
 
+      // Create admin client to bypass RLS on whatsapp_configs
+      const supabaseAdmin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+
       // 1. Get WhatsApp config for the organization
-      let { data: cfg, error: cfgErr } = await supabase
+      let { data: cfg, error: cfgErr } = await supabaseAdmin
         .from('whatsapp_configs')
         .select('phone_number_id, access_token')
         .eq('organization_id', organization_id)
@@ -209,7 +216,7 @@ export async function POST(request: NextRequest) {
 
       // 2. Fallback to centralita if not present
       if (cfgErr || !cfg?.phone_number_id) {
-        const { data: centralita } = await supabase
+        const { data: centralita } = await supabaseAdmin
           .from('whatsapp_configs')
           .select('phone_number_id, access_token')
           .eq('is_centralita', true)
