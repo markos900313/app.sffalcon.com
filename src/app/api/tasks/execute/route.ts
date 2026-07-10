@@ -206,21 +206,16 @@ export async function POST(request: NextRequest) {
         orgId: organization_id
       });
 
-      if (waResult.success) {
-        notesActionDesc = 'Envío automático de WhatsApp';
-        payload.whatsapp_sent = true;
-        payload.message_text = messageText;
-        payload.phone = contactPhone;
-        actionResult = 'send_whatsapp_auto'; // Bypass manual popup
-      } else {
-        console.warn('Auto WhatsApp failed, falling back to manual copy dialog:', waResult.error);
-        notesActionDesc = 'Generación de plantilla de WhatsApp (Fallo de envío automático)';
-        payload.whatsapp_sent = false;
-        payload.message_text = messageText;
-        payload.phone = contactPhone;
-        payload.error = waResult.error;
-        // Keep actionResult = 'send_whatsapp' to display copy modal
+      if (!waResult.success) {
+        console.error('Error sending WhatsApp message:', waResult.error);
+        return NextResponse.json({ error: `Error al enviar WhatsApp: ${waResult.error}` }, { status: 500 });
       }
+
+      notesActionDesc = 'Envío automático de WhatsApp';
+      payload.whatsapp_sent = true;
+      payload.message_text = messageText;
+      payload.phone = contactPhone;
+      actionResult = 'send_whatsapp_auto';
     }
 
     // 5. Update task: status='completed', auto_executed_at=now(), notes updated

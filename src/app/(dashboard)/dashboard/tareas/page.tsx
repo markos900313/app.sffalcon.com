@@ -31,12 +31,7 @@ export default function TasksPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
 
-  // Auto Action Execution Modal (for WhatsApp copy dialog)
-  const [whatsappDialog, setWhatsappDialog] = useState<{
-    isOpen: boolean;
-    text: string;
-    phone: string;
-  } | null>(null);
+
 
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -288,18 +283,6 @@ export default function TasksPage() {
         toast.success(
           language === 'en' ? 'Task executed successfully' : 'Tarea ejecutada correctamente'
         );
-      }
-      
-      // If WhatsApp action returned message payload, display manual copy modal
-      if (result.action === 'send_whatsapp') {
-        toast.error(
-          language === 'en' ? 'WhatsApp device disconnected. Please send manually.' : 'Dispositivo de WhatsApp desconectado. Por favor, envía manualmente.'
-        );
-        setWhatsappDialog({
-          isOpen: true,
-          text: result.message_text || '',
-          phone: result.phone || ''
-        });
       }
       
       fetchTasks();
@@ -654,79 +637,7 @@ export default function TasksPage() {
         editTask={selectedTask}
       />
 
-      {/* WhatsApp Message Copy Dialogue Modal */}
-      {whatsappDialog?.isOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#111F3A] w-full max-w-md rounded-2xl shadow-2xl border border-[#1E3A5F] overflow-hidden flex flex-col">
-            <div className="px-5 py-4 border-b border-[#1E3A5F] flex items-center justify-between">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-emerald-500" />
-                {localT.whatsappModalTitle}
-              </h3>
-              <button 
-                onClick={() => setWhatsappDialog(null)}
-                className="p-1 hover:bg-slate-800 rounded-full transition-colors"
-              >
-                <X className="w-4 h-4 text-slate-400" />
-              </button>
-            </div>
-            
-            <div className="p-5 space-y-4">
-              <p className="text-xs text-slate-400 leading-relaxed">
-                {localT.whatsappModalDesc}
-              </p>
 
-              {/* Teléfono */}
-              {whatsappDialog.phone ? (
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{localT.phoneLabel}</span>
-                  <div className="flex items-center justify-between p-3 bg-[#0D1B2E] border border-[#1E3A5F] rounded-xl">
-                    <span className="text-sm font-semibold text-white">{whatsappDialog.phone}</span>
-                    <button
-                      onClick={() => handleCopyText(whatsappDialog.phone)}
-                      className="p-1.5 hover:bg-slate-800 text-[#1B4FD8] hover:text-blue-400 rounded transition-colors"
-                      title={localT.copyPhone}
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0" />
-                  <span>{language === 'en' ? 'No phone number associated with this contact.' : 'No hay número de teléfono asociado a este contacto.'}</span>
-                </div>
-              )}
-
-              {/* Mensaje */}
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{localT.messageLabel}</span>
-                <div className="relative p-3 bg-[#0D1B2E] border border-[#1E3A5F] rounded-xl flex flex-col justify-between gap-3">
-                  <p className="text-xs text-slate-200 whitespace-pre-line leading-relaxed max-h-[150px] overflow-y-auto custom-scrollbar">
-                    {whatsappDialog.text}
-                  </p>
-                  <button
-                    onClick={() => handleCopyText(whatsappDialog.text)}
-                    className="self-end px-3 py-1.5 bg-[#1B4FD8] hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    {localT.copyMessage}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-5 py-4 border-t border-[#1E3A5F] bg-slate-900/30 flex justify-end">
-              <button
-                onClick={() => setWhatsappDialog(null)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-colors"
-              >
-                {localT.close}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
     </DashboardPageContainer>
   );
