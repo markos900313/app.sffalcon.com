@@ -198,19 +198,21 @@ export default function TasksPage() {
     }
   };
 
-  // Cancelling a task
-  const handleCancelTask = async (id: string) => {
+  // Deleting a task
+  const handleDeleteTask = async (id: string) => {
+    const confirmDelete = window.confirm(
+      language === 'en' ? 'Are you sure you want to delete this task?' : '¿Estás seguro de que deseas eliminar esta tarea?'
+    );
+    if (!confirmDelete) return;
+
     try {
       const { error } = await supabase
         .from('tasks')
-        .update({
-          status: 'cancelled',
-          updated_at: new Date().toISOString()
-        })
+        .delete()
         .eq('id', id);
 
       if (error) throw error;
-      toast.success(localT.toastCancelled);
+      toast.success(language === 'en' ? 'Task deleted successfully' : 'Tarea eliminada correctamente');
       fetchTasks();
     } catch (err) {
       console.error(err);
@@ -606,16 +608,14 @@ export default function TasksPage() {
                     </button>
                   )}
 
-                  {/* Cancelar / Borrar */}
-                  {task.status === 'pending' && (
-                    <button
-                      onClick={() => handleCancelTask(task.id)}
-                      className="p-2 hover:bg-red-500/10 text-slate-400 hover:text-red-400 rounded-xl transition-all border border-transparent hover:border-red-500/10"
-                      title={localT.cancelBtn}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
+                  {/* Borrar */}
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="p-2 hover:bg-red-500/10 text-slate-400 hover:text-red-400 rounded-xl transition-all border border-transparent hover:border-red-500/10"
+                    title={language === 'en' ? 'Delete' : 'Eliminar'}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             );
