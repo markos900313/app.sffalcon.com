@@ -147,44 +147,7 @@ export default function Sidebar() {
   const { language, setLanguage, t } = useLanguage();
   const [profile, setProfile] = useState<any>(null);
   const { organization } = useOrganization();
-  const [pendingTasksCount, setPendingTasksCount] = useState(0);
 
-  useEffect(() => {
-    const orgId = organization?.id;
-    if (!orgId) return;
-
-    async function fetchPendingTasks() {
-      try {
-        const { count, error } = await supabase
-          .from('tasks')
-          .select('*', { count: 'exact', head: true })
-          .eq('organization_id', orgId)
-          .eq('status', 'pending');
-        
-        if (!error && count !== null) {
-          setPendingTasksCount(count);
-        }
-      } catch (err) {
-        // Silencio
-      }
-    }
-    fetchPendingTasks();
-
-    const channel = supabase.channel('sidebar-tasks-changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'tasks',
-        filter: `organization_id=eq.${orgId}`
-      }, () => {
-        fetchPendingTasks();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [organization?.id, supabase]);
 
   const getSectionTitle = (section: any) => {
     if (section.titleKey) return t(section.titleKey as any);
@@ -341,7 +304,7 @@ export default function Sidebar() {
                             prefetch={true}
                             onClick={closeSidebar}
                             className={cn(
-                              "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11 relative",
+                              "flex items-center gap-3 px-3 py-3 transition-all rounded-xl group h-11",
                               "md:justify-center md:px-2",
                               "lg:justify-start lg:px-4",
                               isActive ? activeItemClass : inactiveItemClass
@@ -358,11 +321,6 @@ export default function Sidebar() {
                             )}>
                               {getItemLabel(item)}
                             </span>
-                            {item.key === 'tasks' && pendingTasksCount > 0 && (
-                              <span className="absolute top-1 right-1 lg:right-3 min-w-[16px] h-[16px] bg-red-500 rounded-full text-white text-[9px] font-black flex items-center justify-center px-1 border border-[#0D1B2E]">
-                                {pendingTasksCount}
-                              </span>
-                            )}
                           </Link>
                         );
                       })}

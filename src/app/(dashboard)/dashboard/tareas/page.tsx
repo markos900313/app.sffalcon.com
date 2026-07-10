@@ -205,13 +205,19 @@ export default function TasksPage() {
     );
     if (!confirmDelete) return;
 
+    // Optimistic UI update
+    setTasks(prev => prev.filter(t => t.id !== id));
+
     try {
       const { error } = await supabase
         .from('tasks')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        fetchTasks(); // Restore on DB failure
+        throw error;
+      }
       toast.success(language === 'en' ? 'Task deleted successfully' : 'Tarea eliminada correctamente');
       fetchTasks();
     } catch (err) {
