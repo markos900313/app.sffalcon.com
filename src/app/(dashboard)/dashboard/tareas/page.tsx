@@ -12,12 +12,14 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
+import { DashboardPageContainer } from "@/components/dashboard/DashboardPageContainer";
+import PageSkeleton from "@/components/dashboard/ui/PageSkeleton";
 
 const TaskModal = dynamic(() => import('@/components/dashboard/tasks/TaskModal'), { ssr: false });
 
 export default function TasksPage() {
   const supabase = createClient();
-  const { organization } = useOrganization();
+  const { organization, loading: orgLoading } = useOrganization();
   const { language } = useLanguage();
 
   const [loading, setLoading] = useState(true);
@@ -377,8 +379,11 @@ export default function TasksPage() {
     }
   };
 
+  if (orgLoading || (loading && organization?.id)) return <PageSkeleton />;
+
   return (
-    <div className="flex flex-col gap-6 w-full max-w-full text-slate-100 px-4 md:px-8 py-6">
+    <DashboardPageContainer>
+      <div className="flex flex-col gap-6 w-full max-w-full text-slate-100 py-2">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -708,5 +713,6 @@ export default function TasksPage() {
         </div>
       )}
     </div>
+    </DashboardPageContainer>
   );
 }
